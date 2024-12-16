@@ -1,4 +1,4 @@
-package com.example.ptyxiakh
+package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,11 +23,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import com.example.ptyxiakh.BakingViewModel
+import com.example.ptyxiakh.R
+import com.example.ptyxiakh.UiState
 
 
 @Composable
-fun BakingScreen(
+fun MainScreen(
     bakingViewModel: BakingViewModel = viewModel()
 ) {
     val placeholderPrompt = stringResource(R.string.prompt_placeholder)
