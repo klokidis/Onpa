@@ -23,20 +23,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ptyxiakh.BakingViewModel
+import com.example.ptyxiakh.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.UiState
 
 
 @Composable
 fun MainScreen(
-    bakingViewModel: BakingViewModel = viewModel()
+    geminiViewModel: GeminiViewModel = viewModel()
 ) {
     val placeholderPrompt = stringResource(R.string.prompt_placeholder)
     val placeholderResult = stringResource(R.string.results_placeholder)
     var prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
-    val uiState by bakingViewModel.uiState.collectAsState()
+    val uiState by geminiViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -62,7 +62,7 @@ fun MainScreen(
 
             Button(
                 onClick = {
-                    bakingViewModel.sendPrompt(prompt)
+                    geminiViewModel.sendPrompt(prompt)
                 },
                 enabled = prompt.isNotEmpty(),
                 modifier = Modifier

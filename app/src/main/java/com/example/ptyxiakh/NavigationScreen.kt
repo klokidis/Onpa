@@ -36,5 +36,4 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
             }
         }
     }
-
 }
