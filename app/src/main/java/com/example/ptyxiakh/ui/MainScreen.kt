@@ -170,7 +170,7 @@ fun MainScreen(
                     onValueChange = { prompt = it },
                     modifier = Modifier
                         .weight(0.8f)
-                        .padding(end = 16.dp)
+                        .padding(end = 5.dp)
                         .align(Alignment.CenterVertically),
                     shape = RoundedCornerShape(20.dp),
                     colors = OutlinedTextFieldDefaults.colors(
