@@ -60,7 +60,7 @@ fun MainScreen(
             enabled = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(250.dp)
                 .padding(10.dp),
             onValueChange = {},
             label = { Text("") },
@@ -91,42 +91,7 @@ fun MainScreen(
             }
             val scrollState = rememberScrollState()
             Text(
-                text = "Button(\n" +
-                        "    onClick = {\n" +
-                        "        geminiViewModel.sendPrompt(prompt)\n" +
-                        "    },\n" +
-                        "    enabled = prompt.isNotEmpty(),\n" +
-                        "    modifier = Modifier\n" +
-                        "        .size(56.dp) // Set the size of the button (adjust as needed)\n" +
-                        "        .clip(CircleShape), // Make it circular\n" +
-                        "    shape = CircleShape, // Ensure the button's shape is circular\n" +
-                        "    contentPadding = PaddingValues(0.dp) // Optional: remove extra padding\n" +
-                        ") {\n" +
-                        "    Text(\n" +
-                        "        text = stringResource(R.string.action_go),\n" +
-                        "        textAlign = TextAlign.Center, // Center the text\n" +
-                        "        modifier = Modifier.fillMaxSize(), // Ensure the text takes up the button's space\n" +
-                        "        style = MaterialTheme.typography.button // Optional: use the button style\n" +
-                        "    )\n" +
-                        "}\n" +
-                        "Button(\\n\" +\n" +
-                        "                        \"    onClick = {\\n\" +\n" +
-                        "                        \"        geminiViewModel.sendPrompt(prompt)\\n\" +\n" +
-                        "                        \"    },\\n\" +\n" +
-                        "                        \"    enabled = prompt.isNotEmpty(),\\n\" +\n" +
-                        "                        \"    modifier = Modifier\\n\" +\n" +
-                        "                        \"        .size(56.dp) // Set the size of the button (adjust as needed)\\n\" +\n" +
-                        "                        \"        .clip(CircleShape), // Make it circular\\n\" +\n" +
-                        "                        \"    shape = CircleShape, // Ensure the button's shape is circular\\n\" +\n" +
-                        "                        \"    contentPadding = PaddingValues(0.dp) // Optional: remove extra padding\\n\" +\n" +
-                        "                        \") {\\n\" +\n" +
-                        "                        \"    Text(\\n\" +\n" +
-                        "                        \"        text = stringResource(R.string.action_go),\\n\" +\n" +
-                        "                        \"        textAlign = TextAlign.Center, // Center the text\\n\" +\n" +
-                        "                        \"        modifier = Modifier.fillMaxSize(), // Ensure the text takes up the button's space\\n\" +\n" +
-                        "                        \"        style = MaterialTheme.typography.button // Optional: use the button style\\n\" +\n" +
-                        "                        \"    )\\n\" +\n" +
-                        "                        \"}\\n",
+                text = result,
                 textAlign = TextAlign.Start,
                 color = textColor,
                 modifier = Modifier
@@ -170,9 +135,13 @@ fun MainScreen(
                     onValueChange = { prompt = it },
                     modifier = Modifier
                         .weight(0.8f)
-                        .padding(end = 5.dp)
                         .align(Alignment.CenterVertically),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(
+                        topStart = 50.dp, // Circular on the top-left
+                        bottomStart = 50.dp, // Circular on the bottom-left
+                        topEnd = 0.dp, // Sharp on the top-right
+                        bottomEnd = 0.dp // Sharp on the bottom-right
+                    ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -184,6 +153,13 @@ fun MainScreen(
                     onClick = {
 
                     },
+                    modifier = Modifier.padding(top = 3.5.dp),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        bottomStart = 0.dp,
+                        topEnd = 50.dp,
+                        bottomEnd = 50.dp
+                    ),
                     enabled = prompt.isNotEmpty()
                 ) {
                     Text(text = stringResource(R.string.action_go))
