@@ -127,7 +127,7 @@ fun MainScreen(
                 }
             }
             Row(
-                modifier = Modifier.padding(all = 16.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 5.dp)
             ) {
                 OutlinedTextField(
                     value = prompt,
@@ -137,10 +137,10 @@ fun MainScreen(
                         .weight(0.8f)
                         .align(Alignment.CenterVertically),
                     shape = RoundedCornerShape(
-                        topStart = 50.dp, // Circular on the top-left
-                        bottomStart = 50.dp, // Circular on the bottom-left
-                        topEnd = 0.dp, // Sharp on the top-right
-                        bottomEnd = 0.dp // Sharp on the bottom-right
+                        topStart = 50.dp,
+                        bottomStart = 50.dp,
+                        topEnd = 0.dp,
+                        bottomEnd = 0.dp
                     ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
@@ -153,7 +153,7 @@ fun MainScreen(
                     onClick = {
 
                     },
-                    modifier = Modifier.padding(top = 3.5.dp),
+                    modifier = Modifier.padding(top = 3.7.dp),
                     shape = RoundedCornerShape(
                         topStart = 0.dp,
                         bottomStart = 0.dp,
