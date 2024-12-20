@@ -2,9 +2,11 @@ package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -126,43 +128,49 @@ fun MainScreen(
                     Text(text = stringResource(R.string.ai))
                 }
             }
-            Row(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 5.dp)
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 5.dp)
+                    .fillMaxWidth()
             ) {
-                OutlinedTextField(
-                    value = prompt,
-                    label = { Text("") },
-                    onValueChange = { prompt = it },
+                Row(
                     modifier = Modifier
-                        .weight(0.8f)
-                        .align(Alignment.CenterVertically),
-                    shape = RoundedCornerShape(
-                        topStart = 50.dp,
-                        bottomStart = 50.dp,
-                        topEnd = 0.dp,
-                        bottomEnd = 0.dp
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedBorderColor = Color.Black, // Set the focused outline to black
-                        unfocusedBorderColor = Color.Black,
-                    ),
-                )
-                Button(
-                    onClick = {
-
-                    },
-                    modifier = Modifier.padding(top = 3.7.dp),
-                    shape = RoundedCornerShape(
-                        topStart = 0.dp,
-                        bottomStart = 0.dp,
-                        topEnd = 50.dp,
-                        bottomEnd = 50.dp
-                    ),
-                    enabled = prompt.isNotEmpty()
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min) // Ensures both children match their heights
                 ) {
-                    Text(text = stringResource(R.string.action_go))
+                    OutlinedTextField(
+                        value = prompt,
+                        label = { Text("") },
+                        onValueChange = { prompt = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(), // Makes the TextField fill the parent's height
+                        shape = RoundedCornerShape(50.dp),
+                        maxLines = 3,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Black,
+                        ),
+                        trailingIcon = {
+                            Button(
+                                onClick = {
+
+                                },
+                                modifier = Modifier .fillMaxHeight(),
+                                shape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    bottomStart = 0.dp,
+                                    topEnd = 50.dp,
+                                    bottomEnd = 50.dp
+                                ),
+                                enabled = prompt.isNotEmpty()
+                            ) {
+                                Text(text = stringResource(R.string.action_go))
+                            }
+                        }
+                    )
                 }
             }
         }
