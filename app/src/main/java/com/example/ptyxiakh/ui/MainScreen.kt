@@ -133,6 +133,7 @@ fun MainScreen(
                 text = result,
                 textAlign = TextAlign.Start,
                 color = textColor,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(start = 16.dp, end = 16.dp)
