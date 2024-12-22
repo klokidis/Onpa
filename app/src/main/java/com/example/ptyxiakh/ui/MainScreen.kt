@@ -2,6 +2,7 @@ package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -150,34 +150,25 @@ private fun SpeechToTextUi() {
 @Composable
 private fun TopButtons() {
     Row(
-        modifier = Modifier.wrapContentSize()
+        modifier = Modifier.wrapContentSize().padding(end = 5.dp, start = 5.dp, top = 5.dp)
     ) {
-        IconButton(
-            onClick = { },
+        Icon(
             modifier = Modifier
-                .padding(start = 5.dp)
-        ) {
-            Icon(
-                modifier = Modifier
-                    .size(27.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.menu_24px),
-                contentDescription = "",
-            )
-        }
+                .size(30.dp)
+                .clickable {  },
+            imageVector = ImageVector.vectorResource(R.drawable.menu_24px),
+            contentDescription = "",
+        )
+
         Spacer(modifier = Modifier.weight(1f))
         Row {
-            IconButton(
-                onClick = { },
+            Icon(
                 modifier = Modifier
-                    .padding(end = 5.dp)
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .size(27.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.settings_24px),
-                    contentDescription = "",
-                )
-            }
+                    .size(30.dp)
+                    .clickable {  },
+                imageVector = ImageVector.vectorResource(R.drawable.settings_24px),
+                contentDescription = "",
+            )
         }
     }
 }
