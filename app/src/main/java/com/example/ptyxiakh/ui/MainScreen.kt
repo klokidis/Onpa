@@ -116,9 +116,9 @@ private fun ResultsUi(
                 .fillMaxWidth()
                 .padding(start = 18.dp, end = 18.dp, top = 10.dp)
                 .border(
-                    width = 1.dp, // Thickness of the outline
-                    color = Color.Black, // Color of the outline
-                    shape = RoundedCornerShape(16.dp) // Rounded corner shape
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = RoundedCornerShape(16.dp)
                 )
                 .heightIn(min = 100.dp) // Minimum height
         ) {
