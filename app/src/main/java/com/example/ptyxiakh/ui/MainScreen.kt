@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -120,7 +119,6 @@ private fun ResultsUi(
                     color = Color.Black,
                     shape = RoundedCornerShape(16.dp)
                 )
-                .heightIn(min = 100.dp) // Minimum height
         ) {
             Text(
                 text = result1,
@@ -128,7 +126,7 @@ private fun ResultsUi(
                 color = textColor,
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(15.dp)
                     .verticalScroll(scrollState)
             )
         }
