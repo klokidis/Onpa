@@ -2,6 +2,7 @@ package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,11 +75,7 @@ fun MainScreen(
             uiState,
             result,
             Modifier.Companion.align(Alignment.CenterHorizontally),
-            Modifier.Companion.weight(1f),
-            Modifier.Companion
-                .align(Alignment.CenterHorizontally)
-                .padding(start = 16.dp, end = 16.dp)
-                .weight(1f)
+            Modifier.Companion.weight(1f)
         )
 
     }
@@ -92,8 +92,7 @@ private fun ResultsUi(
     uiState: UiState,
     result: String,
     modifier: Modifier,
-    weightModifier: Modifier,
-    textModifier: Modifier
+    weightModifier: Modifier
 ) {
     var result1 = result
     if (uiState is UiState.Loading) {
@@ -109,16 +108,33 @@ private fun ResultsUi(
             result1 = uiState.outputText
         }
         val scrollState = rememberScrollState()
-        Text(
-            text = result1,
-            textAlign = TextAlign.Start,
-            color = textColor,
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
-            modifier = textModifier
-                .verticalScroll(scrollState)
-        )
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 18.dp, end = 18.dp, top = 10.dp)
+                .border(
+                    width = 1.dp, // Thickness of the outline
+                    color = Color.Black, // Color of the outline
+                    shape = RoundedCornerShape(16.dp) // Rounded corner shape
+                )
+                .heightIn(min = 100.dp) // Minimum height
+        ) {
+            Text(
+                text = result1,
+                textAlign = TextAlign.Start,
+                color = textColor,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .verticalScroll(scrollState)
+            )
+        }
     }
 }
+
 
 @Composable
 private fun SpeechToTextUi() {
@@ -150,12 +166,14 @@ private fun SpeechToTextUi() {
 @Composable
 private fun TopButtons() {
     Row(
-        modifier = Modifier.wrapContentSize().padding(end = 5.dp, start = 5.dp, top = 5.dp)
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(end = 5.dp, start = 5.dp, top = 5.dp)
     ) {
         Icon(
             modifier = Modifier
                 .size(30.dp)
-                .clickable {  },
+                .clickable { },
             imageVector = ImageVector.vectorResource(R.drawable.menu_24px),
             contentDescription = "",
         )
@@ -165,7 +183,7 @@ private fun TopButtons() {
             Icon(
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable {  },
+                    .clickable { },
                 imageVector = ImageVector.vectorResource(R.drawable.settings_24px),
                 contentDescription = "",
             )
