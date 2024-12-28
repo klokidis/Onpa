@@ -17,8 +17,7 @@ val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = notosans,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 20.sp,
         letterSpacing = 0.5.sp,
     )
     /* Other default text styles to override

@@ -121,10 +121,10 @@ private fun ResultsUi(
                 )
         ) {
             Text(
-                text = result1,
+                text = result1.trim(),
                 textAlign = TextAlign.Start,
                 color = textColor,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .padding(15.dp)
                     .verticalScroll(scrollState)

@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ptyxiakh.ui.MainScreen
+import com.example.ptyxiakh.ui.SettingsScreen
 
 enum class AppScreens {
     Main,
@@ -33,6 +34,9 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
         ) {
             composable(route = AppScreens.Main.name) {
                 MainScreen()
+            }
+            composable(route = AppScreens.Settings.name) {
+                SettingsScreen()
             }
         }
     }
