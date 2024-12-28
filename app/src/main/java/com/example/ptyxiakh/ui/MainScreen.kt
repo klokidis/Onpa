@@ -1,6 +1,7 @@
 package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -93,46 +94,76 @@ private fun ResultsUi(
     modifier: Modifier,
     weightModifier: Modifier
 ) {
+    val scrollState = rememberScrollState()
     var result1 = result
-    if (uiState is UiState.Loading) {
-        CircularProgressIndicator(modifier = modifier)
-        Spacer(modifier = weightModifier)
-    } else {
-        var textColor = MaterialTheme.colorScheme.onSurface
-        if (uiState is UiState.Error) {
+    var textColor = MaterialTheme.colorScheme.onSurface
+    when (uiState) {
+        is UiState.Error -> {
             textColor = MaterialTheme.colorScheme.error
             result1 = uiState.errorMessage
-        } else if (uiState is UiState.Success) {
+            ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Center)
+        }
+
+        is UiState.Success -> {
             textColor = MaterialTheme.colorScheme.onSurface
             result1 = uiState.outputText
+            ResultCard(result1, textColor, scrollState)
         }
-        val scrollState = rememberScrollState()
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.background,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 18.dp, end = 18.dp, top = 10.dp)
-                .border(
-                    width = 1.dp,
-                    color = Color.Black,
-                    shape = RoundedCornerShape(16.dp)
-                )
-        ) {
-            Text(
-                text = result1.trim(),
-                textAlign = TextAlign.Start,
-                color = textColor,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(15.dp)
-                    .verticalScroll(scrollState)
-            )
+
+        is UiState.Initial -> {
+            ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Center)
+        }
+
+        UiState.Loading -> {
+            CircularProgressIndicator(modifier = modifier)
+            Spacer(modifier = weightModifier)
         }
     }
 }
 
+@Composable
+private fun ResultCard(
+    result1: String,
+    textColor: Color,
+    scrollState: ScrollState
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, end = 18.dp, top = 10.dp)
+            .border(
+                width = 1.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(16.dp)
+            )
+    ) {
+        ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Start)
+    }
+}
+
+@Composable
+fun ResultText(
+    resultText: String,
+    textColor: Color,
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+    inputTextAlign: TextAlign = TextAlign.Center,
+    inputStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+) {
+    Text(
+        text = resultText.trim(),
+        textAlign = inputTextAlign,
+        color = textColor,
+        style = inputStyle,
+        modifier = modifier
+            .padding(15.dp)
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+    )
+}
 
 @Composable
 private fun SpeechToTextUi() {
