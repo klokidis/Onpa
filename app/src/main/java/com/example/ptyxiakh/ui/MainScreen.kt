@@ -24,7 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -230,11 +229,11 @@ private fun BottomUi(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            Button(
+            OutlinedButton(
                 onClick = {
                     sendPrompt(prompt)
                 },
-                enabled = prompt.isNotEmpty(),
+                enabled = prompt.trim().isNotEmpty(),
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape), // Make it circular
@@ -278,7 +277,7 @@ private fun BottomUi(
                             topEnd = 50.dp,
                             bottomEnd = 50.dp
                         ),
-                        enabled = prompt.isNotEmpty(),
+                        enabled = prompt.trim().isNotEmpty(),
                         border = BorderStroke(
                             0.dp,
                             Color.Transparent
