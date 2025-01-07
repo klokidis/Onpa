@@ -1,7 +1,8 @@
-package com.example.ptyxiakh
+package com.example.ptyxiakh.ai
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ptyxiakh.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,10 @@ data class ResultUiState(
 
 class GeminiViewModel : ViewModel() {
 
-    private val _uiState: MutableStateFlow<UiState> =
-        MutableStateFlow(UiState.Initial)
-    val uiState: StateFlow<UiState> =
-        _uiState.asStateFlow()
+    private val _responseState: MutableStateFlow<ResponseState> =
+        MutableStateFlow(ResponseState.Initial)
+    val responseState: StateFlow<ResponseState> =
+        _responseState.asStateFlow()
 
     private val _resultUiState = MutableStateFlow(ResultUiState())
     val resultUiState: StateFlow<ResultUiState> = _resultUiState.asStateFlow()
@@ -34,7 +35,7 @@ class GeminiViewModel : ViewModel() {
     fun sendPrompt(
         prompt: String
     ) {
-        _uiState.value = UiState.Loading
+        _responseState.value = ResponseState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -44,7 +45,7 @@ class GeminiViewModel : ViewModel() {
                     }
                 )
                 response.text?.let { outputContent ->
-                    _uiState.value = UiState.Success(outputContent)
+                    _responseState.value = ResponseState.Success(outputContent)
                     _resultUiState.update { currentState ->
                         currentState.copy(
                             answersList = currentState.answersList + outputContent
@@ -52,7 +53,7 @@ class GeminiViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.localizedMessage ?: "")
+                _responseState.value = ResponseState.Error(e.localizedMessage ?: "")
             }
         }
     }

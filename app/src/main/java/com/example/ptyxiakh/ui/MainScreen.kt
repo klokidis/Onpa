@@ -52,9 +52,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ptyxiakh.GeminiViewModel
+import com.example.ptyxiakh.ai.GeminiViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.UiState
+import com.example.ptyxiakh.ai.ResponseState
 
 
 @Composable
@@ -63,8 +63,8 @@ fun MainScreen(
 ) {
     val placeholderResult = stringResource(R.string.results_placeholder)
     val result by rememberSaveable { mutableStateOf(placeholderResult) }
-    val uiState by geminiViewModel.uiState.collectAsState()
-    val gameUiState by geminiViewModel.resultUiState.collectAsState()
+    val responseUiState by geminiViewModel.responseState.collectAsState()
+    val resultUiState by geminiViewModel.resultUiState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -72,10 +72,10 @@ fun MainScreen(
         TopButtons()
         SpeechToTextUi()
         ResultsUi(
-            uiState,
+            responseUiState,
             result,
             Modifier.Companion.align(Alignment.CenterHorizontally),
-            gameUiState.answersList,
+            resultUiState.answersList,
             Modifier.Companion.weight(1f)
         )
 
@@ -90,7 +90,7 @@ fun MainScreen(
 
 @Composable
 private fun ResultsUi(
-    uiState: UiState,
+    uiState: ResponseState,
     result: String,
     modifier: Modifier,
     answersList: List<String>,
@@ -101,38 +101,41 @@ private fun ResultsUi(
     var textColor = MaterialTheme.colorScheme.onSurface
 
     //here add the list of the results
-    if (uiState != UiState.Initial) {
-        LazyColumn(
-            state = listState,
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
                 ResultCard(answer)
             }
-            item {
-                Spacer(modifier = Modifier.size(200.dp))
+        }
+        item {
+            when (uiState) {
+                is ResponseState.Error -> {
+                    textColor = MaterialTheme.colorScheme.error
+                    result1 = uiState.errorMessage
+                    ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
+                }
+
+                is ResponseState.Initial -> {
+                    ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
+                }
+
+                ResponseState.Loading -> {
+                    Spacer(modifier = Modifier.padding(15.dp))
+                    CircularProgressIndicator(modifier = modifier)
+                    Spacer(modifier = weightModifier)
+                }
+
+                is ResponseState.Success -> {} // no need
             }
         }
-    }
-
-    when (uiState) {
-        is UiState.Error -> {
-            textColor = MaterialTheme.colorScheme.error
-            result1 = uiState.errorMessage
-            ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
+        item {
+            Spacer(modifier = Modifier.size(200.dp))
         }
-
-        is UiState.Initial -> {
-            ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
-        }
-
-        UiState.Loading -> {
-            CircularProgressIndicator(modifier = modifier)
-            Spacer(modifier = weightModifier)
-        }
-
-        is UiState.Success -> { } // no need
     }
 }
 
