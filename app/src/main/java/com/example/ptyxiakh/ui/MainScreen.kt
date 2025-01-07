@@ -229,19 +229,7 @@ private fun BottomUi(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            OutlinedButton(
-                onClick = {
-                    sendPrompt(prompt)
-                },
-                enabled = prompt.trim().isNotEmpty(),
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape), // Make it circular
-                shape = CircleShape, // Ensure the button's shape is circular
-                contentPadding = PaddingValues(0.dp) //remove extra padding
-            ) {
-                Text(text = stringResource(R.string.ai))
-            }
+            CustomButton(sendPrompt) { prompt }
         }
         Row(
             modifier = Modifier
@@ -249,63 +237,92 @@ private fun BottomUi(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min) // Ensures both children match their heights
         ) {
-            OutlinedTextField(
-                value = prompt,
-                label = { Text("") },
-                onValueChange = { prompt = it },
-                modifier = Modifier
+            CustomTextField(
+                { prompt },
+                Modifier.Companion
                     .weight(1f)
-                    .fillMaxHeight(), // Makes the TextField fill the parent's height
-                shape = RoundedCornerShape(50.dp),
-                maxLines = 3,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Black,
-                ),
-                trailingIcon = {
-                    OutlinedButton(
-                        onClick = {
-
-                        },
-                        modifier = Modifier
-                            .fillMaxHeight(),
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            bottomStart = 0.dp,
-                            topEnd = 50.dp,
-                            bottomEnd = 50.dp
-                        ),
-                        enabled = prompt.trim().isNotEmpty(),
-                        border = BorderStroke(
-                            0.dp,
-                            Color.Transparent
-                        ), // Makes the outline transparent
-                        contentPadding = PaddingValues(0.dp) //remove extra padding
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between line and icon
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(1.dp) // Line thickness
-                                    .fillMaxHeight() // Line height
-                                    .background(Color.Black) // Line color
-                            )
-                            Icon(
-                                modifier = Modifier
-                                    .size(30.dp),
-                                imageVector = ImageVector.vectorResource(R.drawable.graphic_eq_24px),
-                                contentDescription = "",
-                            )
-                        }
-                    }
-                }
-            )
+                    .fillMaxHeight()
+            ) { prompt = it }
         }
     }
+}
+
+@Composable
+private fun CustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
+    OutlinedButton(
+        onClick = {
+            sendPrompt(prompt())
+        },
+        enabled = prompt().trim().isNotEmpty(),
+        modifier = Modifier
+            .size(56.dp)
+            .clip(CircleShape), // Make it circular
+        shape = CircleShape, // Ensure the button's shape is circular
+        contentPadding = PaddingValues(0.dp) //remove extra padding
+    ) {
+        Text(text = stringResource(R.string.ai))
+    }
+}
+
+@Composable
+private fun CustomTextField(
+    prompt: () -> String,
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = prompt(),
+        label = { Text("") },
+        onValueChange = { onValueChange(it) },
+        modifier = modifier, // Makes the TextField fill the parent's height
+        shape = RoundedCornerShape(50.dp),
+        maxLines = 3,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedBorderColor = Color.Black,
+            unfocusedBorderColor = Color.Black,
+        ),
+        trailingIcon = {
+            OutlinedButton(
+                onClick = {
+
+                },
+                modifier = Modifier
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    bottomStart = 0.dp,
+                    topEnd = 50.dp,
+                    bottomEnd = 50.dp
+                ),
+                enabled = prompt().trim().isNotEmpty(),
+                border = BorderStroke(
+                    0.dp,
+                    Color.Transparent
+                ), // Makes the outline transparent
+                contentPadding = PaddingValues(0.dp) //remove extra padding
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between line and icon
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp) // Line thickness
+                            .fillMaxHeight() // Line height
+                            .background(Color.Black) // Line color
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(30.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.graphic_eq_24px),
+                        contentDescription = "",
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)
