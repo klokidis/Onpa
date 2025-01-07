@@ -8,13 +8,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class ResultUiState(
+    val answersList: List<String> = listOf(),
+)
+
+
 class GeminiViewModel : ViewModel() {
+
     private val _uiState: MutableStateFlow<UiState> =
         MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> =
         _uiState.asStateFlow()
+
+    private val _resultUiState = MutableStateFlow(ResultUiState())
+    val resultUiState: StateFlow<ResultUiState> = _resultUiState.asStateFlow()
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
@@ -35,6 +45,11 @@ class GeminiViewModel : ViewModel() {
                 )
                 response.text?.let { outputContent ->
                     _uiState.value = UiState.Success(outputContent)
+                    _resultUiState.update { currentState ->
+                        currentState.copy(
+                            answersList = currentState.answersList + outputContent
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.localizedMessage ?: "")

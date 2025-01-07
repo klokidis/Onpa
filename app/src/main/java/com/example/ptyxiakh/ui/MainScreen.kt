@@ -1,7 +1,6 @@
 package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,10 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,6 +64,7 @@ fun MainScreen(
     val placeholderResult = stringResource(R.string.results_placeholder)
     val result by rememberSaveable { mutableStateOf(placeholderResult) }
     val uiState by geminiViewModel.uiState.collectAsState()
+    val gameUiState by geminiViewModel.resultUiState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -74,6 +75,7 @@ fun MainScreen(
             uiState,
             result,
             Modifier.Companion.align(Alignment.CenterHorizontally),
+            gameUiState.answersList,
             Modifier.Companion.weight(1f)
         )
 
@@ -91,40 +93,52 @@ private fun ResultsUi(
     uiState: UiState,
     result: String,
     modifier: Modifier,
+    answersList: List<String>,
     weightModifier: Modifier
 ) {
-    val scrollState = rememberScrollState()
+    val listState = rememberLazyListState()
     var result1 = result
     var textColor = MaterialTheme.colorScheme.onSurface
+
+    //here add the list of the results
+    if (uiState != UiState.Initial) {
+        LazyColumn(
+            state = listState,
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            items(answersList) { answer ->
+                ResultCard(answer)
+            }
+            item {
+                Spacer(modifier = Modifier.size(200.dp))
+            }
+        }
+    }
+
     when (uiState) {
         is UiState.Error -> {
             textColor = MaterialTheme.colorScheme.error
             result1 = uiState.errorMessage
-            ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Center)
-        }
-
-        is UiState.Success -> {
-            textColor = MaterialTheme.colorScheme.onSurface
-            result1 = uiState.outputText
-            ResultCard(result1, textColor, scrollState)
+            ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
         }
 
         is UiState.Initial -> {
-            ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Center)
+            ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
         }
 
         UiState.Loading -> {
             CircularProgressIndicator(modifier = modifier)
             Spacer(modifier = weightModifier)
         }
+
+        is UiState.Success -> { } // no need
     }
 }
 
 @Composable
 private fun ResultCard(
     result1: String,
-    textColor: Color,
-    scrollState: ScrollState
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -139,7 +153,7 @@ private fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             )
     ) {
-        ResultText(result1, textColor, scrollState, inputTextAlign = TextAlign.Start)
+        ResultText(result1, Color.Black, inputTextAlign = TextAlign.Start)
     }
 }
 
@@ -147,7 +161,6 @@ private fun ResultCard(
 fun ResultText(
     resultText: String,
     textColor: Color,
-    scrollState: ScrollState,
     modifier: Modifier = Modifier,
     inputTextAlign: TextAlign = TextAlign.Center,
     inputStyle: TextStyle = MaterialTheme.typography.bodyLarge,
@@ -160,7 +173,6 @@ fun ResultText(
         modifier = modifier
             .padding(15.dp)
             .fillMaxWidth()
-            .verticalScroll(scrollState)
     )
 }
 
