@@ -45,7 +45,7 @@ class GeminiViewModel : ViewModel() {
                     }
                 )
                 response.text?.let { outputContent ->
-                    _responseState.value = ResponseState.Success(outputContent)
+                    _responseState.value = ResponseState.Success
                     _resultUiState.update { currentState ->
                         currentState.copy(
                             answersList = currentState.answersList + outputContent
