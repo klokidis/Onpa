@@ -1,5 +1,6 @@
 package com.example.ptyxiakh.ai
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ptyxiakh.BuildConfig
@@ -41,20 +42,28 @@ class GeminiViewModel : ViewModel() {
             try {
                 val response = generativeModel.generateContent(
                     content {
-                        text(prompt)
+                        text("Generate 3 different responses with different moods to this: $prompt. separated by 1 , 2 ,3 ")
                     }
                 )
                 response.text?.let { outputContent ->
                     _responseState.value = ResponseState.Success
                     _resultUiState.update { currentState ->
                         currentState.copy(
-                            answersList = currentState.answersList + outputContent
+                            answersList = currentState.answersList + editResults(outputContent)
                         )
                     }
+                    Log.d("response", outputContent)
                 }
             } catch (e: Exception) {
                 _responseState.value = ResponseState.Error(e.localizedMessage ?: "")
             }
         }
+    }
+
+    private fun editResults(answer: String): List<String> {
+        return answer
+            .replace("**", "") // Remove bold markers
+            .split(Regex("\\d\\.?\\s*"))
+            .filter { it.isNotBlank() } // Remove empty entries
     }
 }

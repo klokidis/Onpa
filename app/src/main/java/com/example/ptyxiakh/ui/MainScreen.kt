@@ -188,7 +188,7 @@ private fun SpeechToTextUi() {
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp)
-            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
+            .padding(start = 10.dp, end = 10.dp),
         onValueChange = {},
         label = { Text("") },
         textStyle = TextStyle(
