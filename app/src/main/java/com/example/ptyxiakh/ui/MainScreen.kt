@@ -1,5 +1,6 @@
 package com.example.ptyxiakh.ui
 
+import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.ai.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.ai.ResponseState
+import com.example.ptyxiakh.tts.rememberTextToSpeech
 
 
 @Composable
@@ -150,22 +152,28 @@ private fun ResultsUi(
 
 @Composable
 private fun ResultCard(
-    result1: String,
+    result : String,
 ) {
+    val tts = rememberTextToSpeech()
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
         ),
         modifier = Modifier
-            .fillMaxWidth()
             .padding(start = 18.dp, end = 18.dp, top = 10.dp)
+            .fillMaxWidth()
+            .clickable{
+                tts.value?.speak(
+                    result, TextToSpeech.QUEUE_FLUSH, null, ""
+                )
+            }
             .border(
                 width = 1.dp,
                 color = Color.Black,
                 shape = RoundedCornerShape(16.dp)
             )
     ) {
-        ResultText(result1, Color.Black, inputTextAlign = TextAlign.Start)
+        ResultText(result, Color.Black, inputTextAlign = TextAlign.Start)
     }
 }
 
