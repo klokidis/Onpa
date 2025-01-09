@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,6 +100,13 @@ private fun ResultsUi(
     val listState = rememberLazyListState()
     var result1 = result
     var textColor = MaterialTheme.colorScheme.onSurface
+
+    // Automatically scroll when the list updates
+    LaunchedEffect(answersList) {
+        if (answersList.isNotEmpty()) {
+            listState.animateScrollToItem(answersList.size - 2)
+        }
+    }
 
     //here add the list of the results
     LazyColumn(

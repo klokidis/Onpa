@@ -42,7 +42,9 @@ class GeminiViewModel : ViewModel() {
             try {
                 val response = generativeModel.generateContent(
                     content {
-                        text("Generate 3 different responses with different moods to this: $prompt. separated by 1 , 2 ,3 ")
+                        text(
+                            "Generate three distinct responses to: $prompt, Each with a different tone. Separate with 1, 2, and 3. Avoid emojis or excess phrasing."
+                        )
                     }
                 )
                 response.text?.let { outputContent ->
@@ -61,9 +63,13 @@ class GeminiViewModel : ViewModel() {
     }
 
     private fun editResults(answer: String): List<String> {
+        val emojiRegex = Regex("[\\p{So}\\p{Cn}]") // Matches most emojis
         return answer
             .replace("**", "") // Remove bold markers
-            .split(Regex("\\d\\.?\\s*"))
+            .replace("...", "") // Remove ellipses
+            .replace(emojiRegex, "") // Remove emojis
+            .replace(Regex("\\(.*?\\)"), "") // Remove (..)
+            .split(Regex("\\d\\.?\\s*")) // Split by numbers, optional periods, and spaces
             .filter { it.isNotBlank() } // Remove empty entries
     }
 }
