@@ -3,6 +3,8 @@ package com.example.ptyxiakh
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
@@ -37,7 +39,12 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
                     navigateSettings = { navController.navigate(AppScreens.Settings.name) }
                 )
             }
-            composable(route = AppScreens.Settings.name) {
+            composable(
+                route = AppScreens.Settings.name,
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) }, // Slide in from the right
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) } // Slide out to the right
+
+            ) {
                 SettingsScreen(
                     navigateMainScreen = { navController.navigate(AppScreens.Main.name) }
                 )
