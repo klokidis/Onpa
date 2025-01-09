@@ -34,7 +34,11 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
             enterTransition = { fadeIn(animationSpec = tween(0)) },
             exitTransition = { fadeOut(animationSpec = tween(0)) },
         ) {
-            composable(route = AppScreens.Main.name) {
+            composable(
+                route = AppScreens.Main.name,
+                enterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Slide in from the left
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) } // Slide out to the left
+            ) {
                 MainScreen(
                     navigateSettings = { navController.navigate(AppScreens.Settings.name) }
                 )
