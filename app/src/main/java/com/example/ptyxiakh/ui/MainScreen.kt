@@ -60,6 +60,7 @@ import com.example.ptyxiakh.ai.ResponseState
 
 @Composable
 fun MainScreen(
+    navigateSettings: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel()
 ) {
     val placeholderResult = stringResource(R.string.results_placeholder)
@@ -70,7 +71,7 @@ fun MainScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TopButtons()
+        TopButtons(navigateSettings)
         SpeechToTextUi()
         ResultsUi(
             responseUiState,
@@ -215,7 +216,7 @@ private fun SpeechToTextUi() {
 }
 
 @Composable
-private fun TopButtons() {
+private fun TopButtons(navigateSettings: () -> Unit) {
     Row(
         modifier = Modifier
             .wrapContentSize()
@@ -234,7 +235,7 @@ private fun TopButtons() {
             Icon(
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable { },
+                    .clickable { navigateSettings() },
                 imageVector = ImageVector.vectorResource(R.drawable.settings_24px),
                 contentDescription = "",
             )
@@ -351,5 +352,5 @@ private fun CustomTextField(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen()
+    MainScreen(navigateSettings = {  })
 }

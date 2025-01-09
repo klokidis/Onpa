@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ptyxiakh.R
 
 @Composable
-fun SettingsScreen(){
+fun SettingsScreen(navigateMainScreen: () -> Unit) {
 
     val scrollState = rememberScrollState()
 
@@ -35,7 +35,7 @@ fun SettingsScreen(){
         contentAlignment = Alignment.TopStart
     ) {
         IconButton(
-            onClick = {  },
+            onClick = { navigateMainScreen() },
             modifier = Modifier
                 .padding(start = 5.dp)
         ) {
@@ -74,5 +74,5 @@ fun SettingsScreen(){
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen()
+    SettingsScreen {  }
 }

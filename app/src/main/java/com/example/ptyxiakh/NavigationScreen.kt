@@ -33,10 +33,14 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
             exitTransition = { fadeOut(animationSpec = tween(0)) },
         ) {
             composable(route = AppScreens.Main.name) {
-                MainScreen()
+                MainScreen(
+                    navigateSettings = { navController.navigate(AppScreens.Settings.name) }
+                )
             }
             composable(route = AppScreens.Settings.name) {
-                SettingsScreen()
+                SettingsScreen(
+                    navigateMainScreen = { navController.navigate(AppScreens.Main.name) }
+                )
             }
         }
     }
