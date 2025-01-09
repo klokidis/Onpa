@@ -145,6 +145,9 @@ private fun ResultsUi(
             }
         }
         item {
+            ResultCard("hello THERE WHATS UP")
+        }
+        item {
             Spacer(modifier = Modifier.size(200.dp))
         }
     }

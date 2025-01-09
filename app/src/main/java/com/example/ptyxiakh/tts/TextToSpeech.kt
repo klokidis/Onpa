@@ -1,6 +1,7 @@
 package com.example.ptyxiakh.tts
 
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -19,6 +20,7 @@ fun rememberTextToSpeech(): MutableState<TextToSpeech?> {
             if (status == TextToSpeech.SUCCESS) {
                 tts.value?.language = Locale.US
             }
+            Log.d("Voice", tts.value?.availableLanguages.toString())
         }
         tts.value = textToSpeech
 
@@ -28,4 +30,32 @@ fun rememberTextToSpeech(): MutableState<TextToSpeech?> {
         }
     }
     return tts
+}
+
+fun checkLanguages(){
+    /*
+    val textToSpeech = TextToSpeech(context) { status ->
+        if (status == TextToSpeech.SUCCESS) {
+            val locale = Locale("es", "ES") // Spanish (Spain)
+
+            // Check if the language is available
+            val langAvailable = tts.value?.isLanguageAvailable(locale) == TextToSpeech.LANG_AVAILABLE
+
+            if (langAvailable) {
+                // Set Spanish as the language
+                tts.value?.language = locale
+            } else {
+                // Prompt the user to install the language data if it's not available
+                val installStatus = tts.value?.setLanguage(locale)
+                if (installStatus == TextToSpeech.LANG_MISSING_DATA || installStatus == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Direct the user to install language data via settings
+                    val intent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+                    context.startActivity(intent)
+                }
+            }
+        }
+        Log.d("Voice", tts.value?.availableLanguages.toString())
+    }
+    tts.value = textToSpeech
+     */
 }
