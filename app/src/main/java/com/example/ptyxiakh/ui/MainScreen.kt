@@ -145,7 +145,7 @@ private fun ResultsUi(
             }
         }
         item {
-            ResultCard("hello THERE WHATS UP")
+            ResultCard("hello there what is up")
         }
         item {
             Spacer(modifier = Modifier.size(200.dp))
@@ -155,7 +155,7 @@ private fun ResultsUi(
 
 @Composable
 private fun ResultCard(
-    result : String,
+    result: String,
 ) {
     val tts = rememberTextToSpeech()
     Card(
@@ -165,7 +165,7 @@ private fun ResultCard(
         modifier = Modifier
             .padding(start = 18.dp, end = 18.dp, top = 10.dp)
             .fillMaxWidth()
-            .clickable{
+            .clickable {
                 tts.value?.speak(
                     result, TextToSpeech.QUEUE_FLUSH, null, ""
                 )
@@ -363,5 +363,5 @@ private fun CustomTextField(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(navigateSettings = {  })
+    MainScreen(navigateSettings = { })
 }
