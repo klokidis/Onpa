@@ -102,7 +102,6 @@ private fun ResultsUi(
 ) {
     val listState = rememberLazyListState()
     var result1 = result
-    var textColor = MaterialTheme.colorScheme.onSurface
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -126,13 +125,16 @@ private fun ResultsUi(
         item {
             when (uiState) {
                 is ResponseState.Error -> {
-                    textColor = MaterialTheme.colorScheme.error
                     result1 = uiState.errorMessage
-                    ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
+                    ResultText(
+                        result1,
+                        textColor = MaterialTheme.colorScheme.error,
+                        inputTextAlign = TextAlign.Center
+                    )
                 }
 
                 is ResponseState.Initial -> {
-                    ResultText(result1, textColor, inputTextAlign = TextAlign.Center)
+                    ResultText(result1, inputTextAlign = TextAlign.Center)
                 }
 
                 ResponseState.Loading -> {
@@ -172,19 +174,19 @@ private fun ResultCard(
             }
             .border(
                 width = 1.dp,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(16.dp)
             )
     ) {
-        ResultText(result, Color.Black, inputTextAlign = TextAlign.Start)
+        ResultText(result, inputTextAlign = TextAlign.Start)
     }
 }
 
 @Composable
 fun ResultText(
     resultText: String,
-    textColor: Color,
     modifier: Modifier = Modifier,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     inputTextAlign: TextAlign = TextAlign.Center,
     inputStyle: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
@@ -214,13 +216,14 @@ private fun SpeechToTextUi() {
         textStyle = TextStyle(
             textAlign = TextAlign.Start,
             //fontFamily = FontFamily(Font(R.font.radiocanadabigregular)),
-            fontSize = 26.sp
+            fontSize = 26.sp,
+            color = MaterialTheme.colorScheme.onBackground
         ),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedBorderColor = Color.Black, // Set the focused outline to black
-            unfocusedBorderColor = Color.Black,
+            focusedBorderColor = MaterialTheme.colorScheme.onBackground, // Set the focused outline to black
+            unfocusedBorderColor = MaterialTheme.colorScheme.onBackground
         ),
         shape = RoundedCornerShape(20.dp)
     )
@@ -284,18 +287,27 @@ private fun BottomUi(
 
 @Composable
 private fun CustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
+    val isEnabled = prompt().trim().isNotEmpty()
+
     OutlinedButton(
         onClick = {
             sendPrompt(prompt())
         },
-        enabled = prompt().trim().isNotEmpty(),
+        enabled = isEnabled,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
+        ),
         modifier = Modifier
             .size(56.dp)
             .clip(CircleShape), // Make it circular
         shape = CircleShape, // Ensure the button's shape is circular
         contentPadding = PaddingValues(0.dp) //remove extra padding
     ) {
-        Text(text = stringResource(R.string.ai))
+        Text(
+            text = stringResource(R.string.ai),
+            color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
+        )
     }
 }
 
@@ -313,10 +325,10 @@ private fun CustomTextField(
         shape = RoundedCornerShape(50.dp),
         maxLines = 3,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedBorderColor = Color.Black,
-            unfocusedBorderColor = Color.Black,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onBackground,
         ),
         trailingIcon = {
             OutlinedButton(
@@ -346,7 +358,7 @@ private fun CustomTextField(
                         modifier = Modifier
                             .width(1.dp) // Line thickness
                             .fillMaxHeight() // Line height
-                            .background(Color.Black) // Line color
+                            .background(MaterialTheme.colorScheme.onBackground) // Line color
                     )
                     Icon(
                         modifier = Modifier
