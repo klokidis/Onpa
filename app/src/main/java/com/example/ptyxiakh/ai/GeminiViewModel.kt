@@ -43,7 +43,7 @@ class GeminiViewModel : ViewModel() {
                 val response = generativeModel.generateContent(
                     content {
                         text(
-                            "Generate three distinct responses to: $prompt, Each with a different tone. Separate with 1, 2, and 3. Avoid emojis or excess phrasing."
+                            "Generate three distinct responses to: $prompt, Each with a different mood. Separate with 1, 2, and 3. Avoid emojis or excess phrasing."
                         )
                     }
                 )
