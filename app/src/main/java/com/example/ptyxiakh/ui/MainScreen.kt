@@ -75,7 +75,7 @@ fun MainScreen(
     ) {
         TopButtons(navigateSettings)
         SpeechToTextUi()
-        ResultsUi(
+        ResultsLazyList(
             responseUiState,
             result,
             Modifier.Companion.align(Alignment.CenterHorizontally),
@@ -88,12 +88,12 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        BottomUi(geminiViewModel::sendPrompt)
+        TextFieldUpperButton(geminiViewModel::sendPrompt)
     }
 }
 
 @Composable
-private fun ResultsUi(
+private fun ResultsLazyList(
     uiState: ResponseState,
     result: String,
     modifier: Modifier,
@@ -258,7 +258,7 @@ private fun TopButtons(navigateSettings: () -> Unit) {
 }
 
 @Composable
-private fun BottomUi(
+private fun TextFieldUpperButton(
     sendPrompt: (String) -> Unit,
 ) {
     var prompt by rememberSaveable { mutableStateOf("") }
@@ -267,7 +267,7 @@ private fun BottomUi(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            CustomButton(sendPrompt) { prompt }
+            OutlinedCustomButton(sendPrompt) { prompt }
         }
         Row(
             modifier = Modifier
@@ -275,7 +275,7 @@ private fun BottomUi(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min) // Ensures both children match their heights
         ) {
-            CustomTextField(
+            TextFieldWithInsideIcon(
                 { prompt },
                 Modifier.Companion
                     .weight(1f)
@@ -286,7 +286,7 @@ private fun BottomUi(
 }
 
 @Composable
-private fun CustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
+private fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
     val isEnabled = prompt().trim().isNotEmpty()
 
     OutlinedButton(
@@ -312,7 +312,7 @@ private fun CustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
 }
 
 @Composable
-private fun CustomTextField(
+private fun TextFieldWithInsideIcon(
     prompt: () -> String,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
