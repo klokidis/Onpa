@@ -321,6 +321,8 @@ private fun TextFieldWithInsideIcon(
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
 
+    val tts = rememberTextToSpeech()
+
     OutlinedTextField(
         value = prompt(),
         label = { Text("") },
@@ -338,7 +340,9 @@ private fun TextFieldWithInsideIcon(
         trailingIcon = {
             OutlinedButton(
                 onClick = {
-
+                    tts.value?.speak(
+                        prompt().trim(), TextToSpeech.QUEUE_FLUSH, null, ""
+                    )
                 },
                 modifier = Modifier
                     .fillMaxHeight(),
@@ -361,7 +365,7 @@ private fun TextFieldWithInsideIcon(
                 ) {
                     Box(
                         modifier = Modifier
-                            .width(if(isFocused) 2.dp else 1.dp) // Line thickness
+                            .width(if (isFocused) 2.dp else 1.dp) // Line thickness
                             .fillMaxHeight() // Line height
                             .background(MaterialTheme.colorScheme.onBackground) // Line color
                     )
