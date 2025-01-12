@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -317,11 +318,15 @@ private fun TextFieldWithInsideIcon(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
 ) {
+    // State to track the focus of the TextField
+    var isFocused by rememberSaveable { mutableStateOf(false) }
+
     OutlinedTextField(
         value = prompt(),
         label = { Text("") },
         onValueChange = { onValueChange(it) },
-        modifier = modifier, // Makes the TextField fill the parent's height
+        modifier = modifier
+            .onFocusChanged { focusState -> isFocused = focusState.isFocused },
         shape = RoundedCornerShape(50.dp),
         maxLines = 3,
         colors = OutlinedTextFieldDefaults.colors(
@@ -356,7 +361,7 @@ private fun TextFieldWithInsideIcon(
                 ) {
                     Box(
                         modifier = Modifier
-                            .width(1.dp) // Line thickness
+                            .width(if(isFocused) 2.dp else 1.dp) // Line thickness
                             .fillMaxHeight() // Line height
                             .background(MaterialTheme.colorScheme.onBackground) // Line color
                     )
