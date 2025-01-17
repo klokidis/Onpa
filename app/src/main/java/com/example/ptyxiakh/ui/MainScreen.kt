@@ -1,6 +1,9 @@
 package com.example.ptyxiakh.ui
 
+import android.Manifest
 import android.speech.tts.TextToSpeech
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -58,6 +63,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.ai.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.ai.ResponseState
+import com.example.ptyxiakh.stt.VoiceToTextParser
 import com.example.ptyxiakh.tts.rememberTextToSpeech
 
 
@@ -70,6 +76,24 @@ fun MainScreen(
     val result by rememberSaveable { mutableStateOf(placeholderResult) }
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
+
+    val context = LocalContext.current
+    val voiceToTextParser by remember { mutableStateOf(VoiceToTextParser(context)) }
+
+    val sttState by voiceToTextParser.sttState.collectAsState()
+
+    var canRecord by remember { mutableStateOf(false) }
+
+    val recordAudioLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            canRecord = isGranted
+        }
+    )
+
+    LaunchedEffect(key1 = recordAudioLauncher) {
+        recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()

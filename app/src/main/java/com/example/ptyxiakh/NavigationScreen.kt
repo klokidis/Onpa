@@ -1,6 +1,5 @@
 package com.example.ptyxiakh
 
-import android.app.Application
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,7 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.ptyxiakh.stt.SpeechViewModel
+import com.example.ptyxiakh.ui.MainScreen
 import com.example.ptyxiakh.ui.SettingsScreen
 
 enum class AppScreens {
@@ -40,6 +39,9 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Slide in from the left
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) } // Slide out to the left
             ) {
+                MainScreen(
+                    navigateSettings = { navController.navigate(AppScreens.Settings.name) }
+                )
             }
             composable(
                 route = AppScreens.Settings.name,

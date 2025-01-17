@@ -1,17 +1,15 @@
 package com.example.ptyxiakh.stt
 
-import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import com.example.ptyxiakh.ai.ResultUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.Locale
 
 data class VoiceToTextState(
     val spokenText: String = "",
@@ -20,20 +18,20 @@ data class VoiceToTextState(
 )
 
 class VoiceToTextParser(
-    private val application: Application
+    private val context: Context
 ) : RecognitionListener {
 
     private val _sttState = MutableStateFlow(VoiceToTextState())
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
 
-    val recognizer = SpeechRecognizer.createSpeechRecognizer(application)
+    val recognizer = SpeechRecognizer.createSpeechRecognizer(context)
 
     fun startListening(languageCode: String = "en") {
         _sttState.update {
             VoiceToTextState()
         }
 
-        if (!SpeechRecognizer.isRecognitionAvailable(application)) {
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             _sttState.update {
                 it.copy(
                     error = "the SpeechRecognizer is jot available"
