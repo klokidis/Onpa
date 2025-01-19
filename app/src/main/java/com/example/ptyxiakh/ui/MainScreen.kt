@@ -28,6 +28,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -63,7 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.ai.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.ai.ResponseState
-import com.example.ptyxiakh.stt.VoiceToTextParser
+import com.example.ptyxiakh.stt.VoiceToTextViewModel
 import com.example.ptyxiakh.tts.rememberTextToSpeech
 
 
@@ -77,10 +79,8 @@ fun MainScreen(
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
 
-    val context = LocalContext.current
-    val voiceToTextParser by remember { mutableStateOf(VoiceToTextParser(context)) }
-
-    val sttState by voiceToTextParser.sttState.collectAsState()
+    val voiceToTextViewModel: VoiceToTextViewModel = viewModel()
+    val sttState by voiceToTextViewModel.sttState.collectAsState()
 
     var canRecord by remember { mutableStateOf(false) }
 
@@ -99,13 +99,13 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TopButtons(navigateSettings)
-        SpeechToTextUi()
+        SpeechToTextUi(sttState.listOfSpokenText)
         ResultsLazyList(
             responseUiState,
             result,
-            Modifier.Companion.align(Alignment.CenterHorizontally),
+            Modifier.align(Alignment.CenterHorizontally),
             resultUiState.answersList,
-            Modifier.Companion.weight(1f)
+            Modifier.weight(1f)
         )
 
     }
@@ -113,7 +113,13 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        TextFieldUpperButton(geminiViewModel::sendPrompt)
+        TextFieldUpperButtons(
+            geminiViewModel::sendPrompt,
+            startListening = voiceToTextViewModel::startListening,
+            stopListening = voiceToTextViewModel::stopListening,
+            isEnabled = !sttState.error,
+            isListening = sttState.isSpeaking,
+        )
     }
 }
 
@@ -227,9 +233,9 @@ fun ResultText(
 }
 
 @Composable
-private fun SpeechToTextUi() {
+private fun SpeechToTextUi(listOfSpokenText: List<String>) {
     OutlinedTextField(
-        value = " ",
+        value = listOfSpokenText.joinToString(separator = "\n"),
         singleLine = false,
         enabled = true,
         modifier = Modifier
@@ -283,8 +289,12 @@ private fun TopButtons(navigateSettings: () -> Unit) {
 }
 
 @Composable
-private fun TextFieldUpperButton(
+private fun TextFieldUpperButtons(
     sendPrompt: (String) -> Unit,
+    startListening: () -> Unit,
+    stopListening: () -> Unit,
+    isListening: Boolean,
+    isEnabled: Boolean
 ) {
     var prompt by rememberSaveable { mutableStateOf("") }
     Column {
@@ -292,6 +302,13 @@ private fun TextFieldUpperButton(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
         ) {
             Spacer(modifier = Modifier.weight(1f))
+            OutlinedCustomIconButton(
+                startListening = startListening,
+                stopListening = stopListening,
+                isListening = isListening,
+                isEnabled = isEnabled
+            )
+            Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(sendPrompt) { prompt }
         }
         Row(
@@ -302,7 +319,7 @@ private fun TextFieldUpperButton(
         ) {
             TextFieldWithInsideIcon(
                 { prompt },
-                Modifier.Companion
+                Modifier
                     .weight(1f)
                     .fillMaxHeight()
             ) { prompt = it }
@@ -332,6 +349,41 @@ private fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> Str
         Text(
             text = stringResource(R.string.ai),
             color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
+        )
+    }
+}
+
+@Composable
+private fun OutlinedCustomIconButton(
+    startListening: () -> Unit,
+    stopListening: () -> Unit,
+    isListening: Boolean,
+    isEnabled: Boolean = true
+) {
+    OutlinedButton(
+        onClick = {
+            if (isListening) {
+                stopListening()
+            } else {
+                startListening()
+            }
+        },
+        enabled = isEnabled,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
+        ),
+        modifier = Modifier
+            .size(56.dp)
+            .clip(CircleShape), // Make it circular
+        shape = CircleShape, // Ensure the button's shape is circular
+        contentPadding = PaddingValues(0.dp) //remove extra padding
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(30.dp),
+            imageVector = if (isListening) Icons.Rounded.Mic else Icons.Rounded.MicOff,
+            contentDescription = "",
         )
     }
 }
