@@ -99,7 +99,7 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TopButtons(navigateSettings)
-        SpeechToTextUi(sttState.listOfSpokenText)
+        SpeechToTextUi(sttState.fullTranscripts,sttState.partialTranscripts)
         ResultsLazyList(
             responseUiState,
             result,
@@ -117,7 +117,7 @@ fun MainScreen(
             geminiViewModel::sendPrompt,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
-            isEnabled = !sttState.error,
+            isEnabled = !sttState.hasError,
             isListening = sttState.isSpeaking,
         )
     }
@@ -233,9 +233,9 @@ fun ResultText(
 }
 
 @Composable
-private fun SpeechToTextUi(listOfSpokenText: List<String>) {
+private fun SpeechToTextUi(listOfSpokenText: List<String>,listOfSpokenEarlyText: List<String>) {
     OutlinedTextField(
-        value = listOfSpokenText.joinToString(separator = "\n"),
+        value = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString(),
         singleLine = false,
         enabled = true,
         modifier = Modifier
@@ -368,7 +368,7 @@ private fun OutlinedCustomIconButton(
                 startListening()
             }
         },
-        enabled = isEnabled,
+        enabled = true,
         border = BorderStroke(
             width = 1.dp,
             color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray

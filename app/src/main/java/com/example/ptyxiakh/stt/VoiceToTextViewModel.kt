@@ -8,16 +8,16 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 
 data class VoiceToTextState(
-    val listOfSpokenText: List<String> = listOf(),
     val spokenText: String = "",
+    val partialText: String = "",
+    val fullTranscripts: List<String> = emptyList(),
+    val partialTranscripts: List<String> = emptyList(),
     val isSpeaking: Boolean = false,
-    val error: Boolean = false
+    val hasError: Boolean = false
 )
 
 class VoiceToTextViewModel(application: Application) : AndroidViewModel(application),
@@ -27,50 +27,83 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
 
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(application.applicationContext)
+    private var updateJob: Job? = null
 
     init {
         recognizer.setRecognitionListener(this)
+        Log.d(TAG, "VoiceToTextViewModel initialized")
     }
 
     fun startListening(languageCode: String = "en") {
         if (!SpeechRecognizer.isRecognitionAvailable(getApplication())) {
-            _sttState.update { it.copy(error = true) }
+            Log.e(TAG, "Speech recognition not available")
+            _sttState.update { it.copy(hasError = true) }
             return
         }
-        _sttState.update { it.copy(isSpeaking = true) }
-        startRecognition(languageCode)
+
+        Log.d(TAG, "Starting recognition with language: $languageCode")
+        val intent = createRecognizerIntent(languageCode)
+        recognizer.startListening(intent)
+        _sttState.update { it.copy(isSpeaking = true, hasError = false) }
     }
 
-    private fun startRecognition(languageCode: String) {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-            )
+    private fun createRecognizerIntent(languageCode: String): Intent {
+        return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageCode)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         }
-
-        recognizer.startListening(intent)
-        _sttState.update { it.copy(isSpeaking = true) }
     }
 
     fun stopListening() {
-        _sttState.update { it.copy(isSpeaking = true) }
+        Log.d(TAG, "Stopping recognition")
+        updateJob?.cancel()
         recognizer.stopListening()
+        _sttState.update { it.copy(isSpeaking = false) }
     }
 
     override fun onReadyForSpeech(params: Bundle?) {
-        _sttState.update { it.copy(error = false) }
+        Log.d(TAG, "Ready for speech")
+        _sttState.update { it.copy(hasError = false) }
+    }
+
+    override fun onBeginningOfSpeech() {
+        Log.d(TAG, "Speech started")
+    }
+
+    override fun onRmsChanged(rmsdB: Float) {
+        // Optional: Log or use rmsdB for visual feedback
+    }
+
+    override fun onBufferReceived(buffer: ByteArray?) {
+        // Not used
     }
 
     override fun onEndOfSpeech() {
-        if (sttState.value.isSpeaking) {
-            startRecognition("en") // Replace "en" with dynamic language if needed
+        Log.d(TAG, "Speech ended")
+        if (_sttState.value.isSpeaking) {
+            Log.d(TAG, "Restarting recognition after speech ended")
+            startListening() // Restart listening
+        } else {
+            _sttState.update { it.copy(isSpeaking = false) }
         }
     }
 
     override fun onError(error: Int) {
-        val message = when (error) {
+        val errorMessage = mapError(error)
+        Log.e(TAG, "Recognition error: $errorMessage")
+
+        // Retry recognition for recoverable errors
+        if (_sttState.value.isSpeaking && isRecoverableError(error)) {
+            Log.d(TAG, "Retrying recognition...")
+            startListening()
+        } else {
+            _sttState.update { it.copy(hasError = true, isSpeaking = false) }
+        }
+    }
+
+    private fun mapError(error: Int): String {
+        return when (error) {
             SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
             SpeechRecognizer.ERROR_CLIENT -> "Client error"
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
@@ -81,34 +114,66 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
             else -> "Unknown error"
         }
-        Log.e("VoiceToTextViewModel", "Error: $message")
+    }
+
+    private fun isRecoverableError(error: Int): Boolean {
+        return error !in listOf(
+            SpeechRecognizer.ERROR_CLIENT,
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
+        )
     }
 
     override fun onResults(results: Bundle?) {
-        results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.getOrNull(0)
-            ?.let { result ->
-                _sttState.update {
-                    it.copy(
-                        spokenText = result,
-                        listOfSpokenText = it.listOfSpokenText + result
-                    )
-                }
+        val spokenText = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+        spokenText?.let {
+            Log.d(TAG, "Final result: $it")
+            _sttState.update { state ->
+                state.copy(
+                    spokenText = it,
+                    fullTranscripts = state.fullTranscripts + it,
+                    partialTranscripts = emptyList(),
+                    partialText = ""
+                )
             }
-
-        if (sttState.value.isSpeaking) {
-            startRecognition("en") // Replace "en" with dynamic language if needed
         }
     }
 
-    // Unused RecognitionListener methods
-    override fun onBeginningOfSpeech() = Unit
-    override fun onRmsChanged(rmsdB: Float) = Unit
-    override fun onBufferReceived(buffer: ByteArray?) = Unit
-    override fun onPartialResults(partialResults: Bundle?) = Unit
-    override fun onEvent(eventType: Int, params: Bundle?) = Unit
+    override fun onPartialResults(partialResults: Bundle?) {
+        val partialText = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+        partialText?.let { text ->
+            // Remove commas and split into words
+            val cleanedText = text.replace(",", "").trim()
+            val existingWords = _sttState.value.partialTranscripts.flatMap { it.split(" ") }.toSet()
+
+            // Add only new unique words
+            val uniqueWords = cleanedText.split(" ").filterNot { existingWords.contains(it) }
+
+            if (uniqueWords.isNotEmpty()) {
+                val updatedText = uniqueWords.joinToString(" ")
+                Log.d(TAG, "Filtered partial result: $updatedText")
+                _sttState.update { state ->
+                    state.copy(
+                        partialText = updatedText,
+                        partialTranscripts = state.partialTranscripts + updatedText
+                    )
+                }
+            }
+        }
+    }
+
+
+    override fun onEvent(eventType: Int, params: Bundle?) {
+        // Not used
+    }
 
     override fun onCleared() {
         super.onCleared()
+        Log.d(TAG, "Clearing resources")
+        updateJob?.cancel()
         recognizer.destroy()
+    }
+
+    companion object {
+        private const val TAG = "VoiceToTextViewModel"
     }
 }
