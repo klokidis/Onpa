@@ -7,6 +7,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -35,8 +36,11 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun startListening(languageCode: String = "en") {
-        if (!SpeechRecognizer.isRecognitionAvailable(getApplication())) {
-            Log.e(TAG, "Speech recognition not available")
+        val context = getApplication<Application>().applicationContext
+
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            // Inform the user about the missing service
+            Toast.makeText(context, "Speech recognition is not available. Please install or enable Google Speech Services.", Toast.LENGTH_LONG).show()
             _sttState.update { it.copy(hasError = true) }
             return
         }
