@@ -50,7 +50,11 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
 
             ) {
                 SettingsScreen(
-                    navigateMainScreen = { navController.navigate(AppScreens.Main.name) }
+                    navigateMainScreen = {
+                        navController.navigate(AppScreens.Main.name) {
+                            popUpTo(AppScreens.Main.name) { inclusive = true } // Clear back stack
+                        }
+                    }
                 )
             }
         }
