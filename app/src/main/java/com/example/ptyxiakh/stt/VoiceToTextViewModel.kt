@@ -9,8 +9,10 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 data class VoiceToTextState(
     val spokenText: String = "",
@@ -28,7 +30,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
 
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(application.applicationContext)
-    private var updateJob: Job? = null
 
     init {
         recognizer.setRecognitionListener(this)
@@ -61,7 +62,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     fun stopListening() {
         Log.d(TAG, "Stopping recognition")
-        updateJob?.cancel()
         recognizer.stopListening()
         _sttState.update { it.copy(isSpeaking = false) }
     }
@@ -173,7 +173,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     override fun onCleared() {
         super.onCleared()
         Log.d(TAG, "Clearing resources")
-        updateJob?.cancel()
         recognizer.destroy()
     }
 

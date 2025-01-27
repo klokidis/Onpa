@@ -72,14 +72,13 @@ import com.example.ptyxiakh.tts.rememberTextToSpeech
 @Composable
 fun MainScreen(
     navigateSettings: () -> Unit,
-    geminiViewModel: GeminiViewModel = viewModel()
+    geminiViewModel: GeminiViewModel = viewModel(),
+    voiceToTextViewModel: VoiceToTextViewModel = viewModel()
 ) {
     val placeholderResult = stringResource(R.string.results_placeholder)
     val result by rememberSaveable { mutableStateOf(placeholderResult) }
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
-
-    val voiceToTextViewModel: VoiceToTextViewModel = viewModel()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
 
     var canRecord by remember { mutableStateOf(false) }
