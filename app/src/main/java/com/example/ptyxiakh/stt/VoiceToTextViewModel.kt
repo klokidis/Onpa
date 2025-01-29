@@ -41,7 +41,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             // Inform the user about the missing service
-            Toast.makeText(
+            Toast.makeText( //change this to the ui with live data observe
                 context,
                 "Speech recognition is not available. Please install or enable Google Speech Services.",
                 Toast.LENGTH_LONG
