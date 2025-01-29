@@ -41,7 +41,11 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             // Inform the user about the missing service
-            Toast.makeText(context, "Speech recognition is not available. Please install or enable Google Speech Services.", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                "Speech recognition is not available. Please install or enable Google Speech Services.",
+                Toast.LENGTH_LONG
+            ).show()
             _sttState.update { it.copy(hasError = true) }
             return
         }
@@ -54,7 +58,10 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun createRecognizerIntent(languageCode: String): Intent {
         return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageCode)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         }
@@ -128,7 +135,8 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     override fun onResults(results: Bundle?) {
-        val spokenText = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+        val spokenText =
+            results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         spokenText?.let {
             Log.d(TAG, "Final result: $it")
             _sttState.update { state ->
@@ -143,7 +151,8 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
-        val partialText = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+        val partialText =
+            partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         partialText?.let { text ->
             // Remove commas and split into words
             val cleanedText = text.replace(",", "").trim()

@@ -77,6 +77,7 @@ fun MainScreen(
 ) {
     val placeholderResult = stringResource(R.string.results_placeholder)
     val result by rememberSaveable { mutableStateOf(placeholderResult) }
+
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
@@ -357,7 +358,7 @@ private fun OutlinedCustomIconButton(
     startListening: () -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
-    isEnabled: Boolean = true
+    isEnabled: Boolean,
 ) {
     OutlinedButton(
         onClick = {
