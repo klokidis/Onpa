@@ -92,12 +92,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     override fun onEndOfSpeech() {
         Log.d(TAG, "Speech ended")
-        if (_sttState.value.isSpeaking) {
-            Log.d(TAG, "Restarting recognition after speech ended")
-            startListening() // Restart listening
-        } else {
-            _sttState.update { it.copy(isSpeaking = false) }
-        }
     }
 
     override fun onError(error: Int) {
@@ -114,23 +108,27 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun mapError(error: Int): String {
+        Log.e(TAG, "error: $error")
         return when (error) {
             SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
             SpeechRecognizer.ERROR_CLIENT -> "Client error"
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
             SpeechRecognizer.ERROR_NETWORK -> "Network error"
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network error"
             SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
             SpeechRecognizer.ERROR_SERVER -> "Server error"
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
-            else -> "Unknown error"
+            else -> "Unknown error" //add unknow for offline error
         }
     }
 
     private fun isRecoverableError(error: Int): Boolean {
         return error !in listOf(
             SpeechRecognizer.ERROR_CLIENT,
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS,
+            SpeechRecognizer.ERROR_NETWORK,
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
         )
     }
 
@@ -148,6 +146,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
                 )
             }
         }
+        startListening() // Restart listening
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
