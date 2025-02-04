@@ -99,7 +99,7 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TopButtons(navigateSettings)
-        SpeechToTextUi(sttState.fullTranscripts,sttState.partialTranscripts)
+        SpeechToTextUi(sttState.fullTranscripts, sttState.partialTranscripts)
         ResultsLazyList(
             responseUiState,
             result,
@@ -233,7 +233,7 @@ fun ResultText(
 }
 
 @Composable
-private fun SpeechToTextUi(listOfSpokenText: List<String>,listOfSpokenEarlyText: List<String>) {
+private fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<String>) {
     OutlinedTextField(
         value = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString(),
         singleLine = false,
@@ -414,37 +414,34 @@ private fun TextFieldWithInsideIcon(
             unfocusedBorderColor = MaterialTheme.colorScheme.onBackground,
         ),
         trailingIcon = {
-            OutlinedButton(
-                onClick = {
-                    tts.value?.speak(
-                        prompt().trim(), TextToSpeech.QUEUE_FLUSH, null, ""
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxHeight(),
-                shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    bottomStart = 0.dp,
-                    topEnd = 50.dp,
-                    bottomEnd = 50.dp
-                ),
-                enabled = prompt().trim().isNotEmpty(),
-                border = BorderStroke(
-                    0.dp,
-                    Color.Transparent
-                ), // Makes the outline transparent
-                contentPadding = PaddingValues(0.dp) //remove extra padding
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between line and icon
+            Row {
+                Box(
+                    modifier = Modifier
+                        .width(if (isFocused) 2.dp else 1.dp) // Line thickness
+                        .fillMaxHeight() // Line height
+                        .background(MaterialTheme.colorScheme.onBackground) // Line color
+                )
+                OutlinedButton(
+                    onClick = {
+                        tts.value?.speak(
+                            prompt().trim(), TextToSpeech.QUEUE_FLUSH, null, ""
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        bottomStart = 0.dp,
+                        topEnd = 50.dp,
+                        bottomEnd = 50.dp
+                    ),
+                    enabled = prompt().trim().isNotEmpty(),
+                    border = BorderStroke(
+                        0.dp,
+                        Color.Transparent
+                    ), // Makes the outline transparent
+                    contentPadding = PaddingValues(0.dp) //remove extra padding
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(if (isFocused) 2.dp else 1.dp) // Line thickness
-                            .fillMaxHeight() // Line height
-                            .background(MaterialTheme.colorScheme.onBackground) // Line color
-                    )
                     Icon(
                         modifier = Modifier
                             .size(30.dp),
