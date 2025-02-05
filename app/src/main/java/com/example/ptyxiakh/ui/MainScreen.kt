@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -133,6 +134,7 @@ private fun ResultsLazyList(
 ) {
     val listState = rememberLazyListState()
     var result1 = result
+    val tts = rememberTextToSpeech()
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -150,7 +152,7 @@ private fun ResultsLazyList(
     ) {
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
-                ResultCard(answer)
+                ResultCard(answer,tts)
             }
         }
         item {
@@ -178,7 +180,7 @@ private fun ResultsLazyList(
             }
         }
         item {
-            ResultCard("hello there what is up")
+            ResultCard("hello there what is up", tts)
         }
         item {
             Spacer(modifier = Modifier.size(200.dp))
@@ -189,8 +191,8 @@ private fun ResultsLazyList(
 @Composable
 private fun ResultCard(
     result: String,
+    tts: MutableState<TextToSpeech?>,
 ) {
-    val tts = rememberTextToSpeech()
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
