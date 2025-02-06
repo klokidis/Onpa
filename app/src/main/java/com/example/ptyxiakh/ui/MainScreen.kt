@@ -261,7 +261,7 @@ private fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText
             modifier = Modifier
                 .padding(10.dp)
                 .verticalScroll(scrollState),
-            text = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString() + "dsandjsadnsandsdjhasjhdshjdjshadahjashjdhjjhshjasjhhjsahjdahjasjhdasjhdajhdasjdhsahjdsa",
+            text = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString(),
             style = TextStyle(
                 textAlign = TextAlign.Start,
                 //fontFamily = FontFamily(Font(R.font.radiocanadabigregular)),
