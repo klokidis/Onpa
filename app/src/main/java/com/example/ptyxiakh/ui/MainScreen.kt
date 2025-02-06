@@ -2,6 +2,7 @@ package com.example.ptyxiakh.ui
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -58,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -85,7 +87,7 @@ fun MainScreen(
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
-
+    val context = LocalContext.current
     var canRecord by remember { mutableStateOf(false) }
 
     val recordAudioLauncher = rememberLauncherForActivityResult(
@@ -97,6 +99,25 @@ fun MainScreen(
 
     LaunchedEffect(key1 = recordAudioLauncher) {
         recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+    LaunchedEffect(key1 = sttState.offlineError) {
+        // Inform the user about the missing service
+        if (sttState.offlineError) {
+            Toast.makeText(
+                context,
+                "Speech recognition is offline. Please enable Wi-Fi.",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            if (!sttState.availableSTT) {
+                Toast.makeText( //change this to the ui with live data observe
+                    context,
+                    "Speech recognition is not available. Please install or enable Google Speech Services.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     Column(
@@ -121,7 +142,7 @@ fun MainScreen(
             geminiViewModel::sendPrompt,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
-            isEnabled = !sttState.hasError,
+            isEnabled = !sttState.offlineError && sttState.availableSTT,
             isListening = sttState.isSpeaking,
         )
     }
@@ -303,7 +324,7 @@ private fun TopButtons(navigateSettings: () -> Unit) {
 @Composable
 private fun TextFieldUpperButtons(
     sendPrompt: (String) -> Unit,
-    startListening: () -> Unit,
+    startListening: (String) -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
     isEnabled: Boolean
@@ -367,7 +388,7 @@ private fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> Str
 
 @Composable
 private fun OutlinedCustomIconButton(
-    startListening: () -> Unit,
+    startListening: (String) -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
     isEnabled: Boolean,
@@ -377,10 +398,10 @@ private fun OutlinedCustomIconButton(
             if (isListening) {
                 stopListening()
             } else {
-                startListening()
+                startListening("en")
             }
         },
-        enabled = true,
+        enabled = isEnabled,
         border = BorderStroke(
             width = 1.dp,
             color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray

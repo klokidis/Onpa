@@ -7,7 +7,6 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +19,9 @@ data class VoiceToTextState(
     val fullTranscripts: List<String> = emptyList(),
     val partialTranscripts: List<String> = emptyList(),
     val isSpeaking: Boolean = false,
-    val hasError: Boolean = false
+    val hasError: Boolean = false,
+    val offlineError: Boolean = false,
+    val availableSTT: Boolean = true,
 )
 
 class VoiceToTextViewModel(application: Application) : AndroidViewModel(application),
@@ -40,20 +41,14 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         val context = getApplication<Application>().applicationContext
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            // Inform the user about the missing service
-            Toast.makeText( //change this to the ui with live data observe
-                context,
-                "Speech recognition is not available. Please install or enable Google Speech Services.",
-                Toast.LENGTH_LONG
-            ).show()
-            _sttState.update { it.copy(hasError = true) }
-            return
+            _sttState.update { it.copy(availableSTT = false, hasError = true) }
+            recognizer.stopListening()
+        } else {
+            Log.d(TAG, "Starting recognition with language: $languageCode")
+            val intent = createRecognizerIntent(languageCode)
+            recognizer.startListening(intent)
+            _sttState.update { it.copy(availableSTT = true, isSpeaking = true, hasError = false) }
         }
-
-        Log.d(TAG, "Starting recognition with language: $languageCode")
-        val intent = createRecognizerIntent(languageCode)
-        recognizer.startListening(intent)
-        _sttState.update { it.copy(isSpeaking = true, hasError = false) }
     }
 
     private fun createRecognizerIntent(languageCode: String): Intent {
@@ -109,17 +104,28 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun mapError(error: Int): String {
         Log.e(TAG, "error: $error")
-        return when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network error"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
-            SpeechRecognizer.ERROR_SERVER -> "Server error"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
-            else -> "Unknown error" //add unknow for offline error
+        when (error) {
+            SpeechRecognizer.ERROR_AUDIO -> return "Audio recording error"
+            SpeechRecognizer.ERROR_CLIENT -> return "Client error"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> return "Insufficient permissions"
+            SpeechRecognizer.ERROR_NETWORK -> {
+                _sttState.update { it.copy(offlineError = true) }
+                return "Network error"
+            }
+
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> {
+                _sttState.update { it.copy(offlineError = true) }
+                return "Network error"
+            }
+
+            SpeechRecognizer.ERROR_NO_MATCH -> return "No match found"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> return "Recognizer busy"
+            SpeechRecognizer.ERROR_SERVER -> return "Server error"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> return "Speech timeout"
+            else -> {
+                _sttState.update { it.copy(offlineError = true) }
+                return "Unknown error" //add unknow for offline error
+            }
         }
     }
 
@@ -129,7 +135,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS,
             SpeechRecognizer.ERROR_NETWORK,
             SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
-        )
+        ) && !sttState.value.offlineError && sttState.value.availableSTT
     }
 
     override fun onResults(results: Bundle?) {
