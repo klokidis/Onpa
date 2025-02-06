@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
@@ -37,6 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -152,7 +155,7 @@ private fun ResultsLazyList(
     ) {
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
-                ResultCard(answer,tts)
+                ResultCard(answer, tts)
             }
         }
         item {
@@ -236,30 +239,37 @@ fun ResultText(
 
 @Composable
 private fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<String>) {
-    OutlinedTextField(
-        value = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString(),
-        singleLine = false,
-        enabled = true,
+    val scrollState = rememberScrollState()
+    val combinedText = listOfSpokenText + listOfSpokenEarlyText
+
+    LaunchedEffect(combinedText.size) {
+        scrollState.animateScrollTo(scrollState.maxValue)
+    }
+
+    OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp)
             .padding(start = 10.dp, end = 10.dp),
-        onValueChange = {},
-        label = { Text("") },
-        textStyle = TextStyle(
-            textAlign = TextAlign.Start,
-            //fontFamily = FontFamily(Font(R.font.radiocanadabigregular)),
-            fontSize = 26.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        ),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedBorderColor = MaterialTheme.colorScheme.onBackground, // Set the focused outline to black
-            unfocusedBorderColor = MaterialTheme.colorScheme.onBackground
-        ),
-        shape = RoundedCornerShape(20.dp)
-    )
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = Color.Transparent,
+        )
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(10.dp)
+                .verticalScroll(scrollState),
+            text = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString() + "dsandjsadnsandsdjhasjhdshjdjshadahjashjdhjjhshjasjhhjsahjdahjasjhdasjhdajhdasjdhsahjdsa",
+            style = TextStyle(
+                textAlign = TextAlign.Start,
+                //fontFamily = FontFamily(Font(R.font.radiocanadabigregular)),
+                fontSize = 26.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
+    }
 }
 
 @Composable
