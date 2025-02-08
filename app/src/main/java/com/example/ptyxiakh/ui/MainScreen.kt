@@ -38,6 +38,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -60,6 +61,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -149,7 +151,7 @@ fun MainScreen(
 }
 
 @Composable
-private fun ResultsLazyList(
+fun ResultsLazyList(
     uiState: ResponseState,
     result: String,
     modifier: Modifier,
@@ -213,7 +215,7 @@ private fun ResultsLazyList(
 }
 
 @Composable
-private fun ResultCard(
+fun ResultCard(
     result: String,
     tts: MutableState<TextToSpeech?>,
 ) {
@@ -259,7 +261,7 @@ fun ResultText(
 }
 
 @Composable
-private fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<String>) {
+fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<String>) {
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
 
@@ -294,27 +296,34 @@ private fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText
 }
 
 @Composable
-private fun TopButtons(navigateSettings: () -> Unit) {
+fun TopButtons(navigateSettings: () -> Unit) {
     Row(
         modifier = Modifier
             .wrapContentSize()
-            .padding(end = 5.dp, start = 5.dp, top = 5.dp)
     ) {
-        Icon(
+        IconButton(
+            onClick = { },
             modifier = Modifier
-                .size(30.dp)
-                .clickable { },
-            imageVector = ImageVector.vectorResource(R.drawable.menu_24px),
-            contentDescription = "",
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-        Row {
+                .padding(start = 5.dp)
+        ) {
             Icon(
                 modifier = Modifier
-                    .size(30.dp)
-                    .clickable { navigateSettings() },
-                imageVector = ImageVector.vectorResource(R.drawable.settings_24px),
+                    .size(30.dp),
+                painter = painterResource(R.drawable.menu_24px),
+                contentDescription = "",
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = { navigateSettings() },
+            modifier = Modifier
+                .padding(end = 5.dp)
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(30.dp),
+                painter = painterResource(R.drawable.settings_24px),
                 contentDescription = "",
             )
         }
@@ -322,7 +331,7 @@ private fun TopButtons(navigateSettings: () -> Unit) {
 }
 
 @Composable
-private fun TextFieldUpperButtons(
+fun TextFieldUpperButtons(
     sendPrompt: (String) -> Unit,
     startListening: (String) -> Unit,
     stopListening: () -> Unit,
@@ -361,7 +370,7 @@ private fun TextFieldUpperButtons(
 }
 
 @Composable
-private fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
+fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
     val isEnabled = prompt().trim().isNotEmpty()
 
     OutlinedButton(
@@ -387,7 +396,7 @@ private fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> Str
 }
 
 @Composable
-private fun OutlinedCustomIconButton(
+fun OutlinedCustomIconButton(
     startListening: (String) -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
@@ -422,7 +431,7 @@ private fun OutlinedCustomIconButton(
 }
 
 @Composable
-private fun TextFieldWithInsideIcon(
+fun TextFieldWithInsideIcon(
     prompt: () -> String,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
@@ -489,6 +498,8 @@ private fun TextFieldWithInsideIcon(
 
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
-    MainScreen(navigateSettings = { })
+fun PreviewTopButtons() {
+    Column {
+        TopButtons(navigateSettings = {})
+    }
 }
