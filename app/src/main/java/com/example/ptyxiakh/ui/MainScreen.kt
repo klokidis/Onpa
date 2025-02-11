@@ -2,6 +2,7 @@ package com.example.ptyxiakh.ui
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -64,7 +65,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -126,7 +129,11 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TopButtons(navigateSettings)
-        SpeechToTextUi(sttState.fullTranscripts, sttState.partialTranscripts)
+        SpeechToTextUi(
+            sttState.fullTranscripts,
+            sttState.partialTranscripts,
+            sttState.spokenPromptText.length
+        )
         ResultsLazyList(
             responseUiState,
             result,
@@ -147,6 +154,11 @@ fun MainScreen(
             stopListening = voiceToTextViewModel::stopListening,
             isEnabled = !sttState.offlineError && sttState.availableSTT,
             isListening = sttState.isSpeaking,
+            prompt = {
+                sttState.fullTranscripts
+                    .joinToString().drop(sttState.spokenPromptText.length)
+            },
+            changeValues = voiceToTextViewModel::changeSpokenPromptText,
         )
     }
 }
@@ -259,9 +271,14 @@ fun ResultText(
 }
 
 @Composable
-fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<String>) {
+fun SpeechToTextUi(
+    listOfSpokenText: List<String>,
+    listOfSpokenEarlyText: List<String>,
+    spokenTextUsed: Int
+) {
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
+    val fullText = combinedText.joinToString()
 
     LaunchedEffect(combinedText.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
@@ -282,12 +299,30 @@ fun SpeechToTextUi(listOfSpokenText: List<String>, listOfSpokenEarlyText: List<S
             modifier = Modifier
                 .padding(10.dp)
                 .verticalScroll(scrollState),
-            text = listOfSpokenText.joinToString() + listOfSpokenEarlyText.joinToString(),
+            text = buildAnnotatedString {
+                // Ensure the indices are correct for take and drop operations
+                val grayText = fullText.take(spokenTextUsed) // Gray-colored text
+                val defaultText = fullText.drop(spokenTextUsed) // Default-colored text
+
+                // Add the gray text
+                append(grayText)
+                addStyle(
+                    style = SpanStyle(color = Color.Gray),
+                    start = 0,
+                    end = grayText.length
+                )
+
+                // Add the default text
+                append(defaultText)
+                addStyle(
+                    style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
+                    start = grayText.length,
+                    end = grayText.length + defaultText.length
+                )
+            },
             style = TextStyle(
                 textAlign = TextAlign.Start,
-                //fontFamily = FontFamily(Font(R.font.radiocanadabigregular)),
                 fontSize = 26.sp,
-                color = MaterialTheme.colorScheme.onBackground
             )
         )
     }
@@ -335,9 +370,10 @@ fun TextFieldUpperButtons(
     changeLanguage: (String) -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
-    isEnabled: Boolean
+    isEnabled: Boolean,
+    prompt: () -> String,
+    changeValues: () -> Unit
 ) {
-    var prompt by rememberSaveable { mutableStateOf("") }
     Column {
         Row(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
@@ -351,7 +387,11 @@ fun TextFieldUpperButtons(
                 changeLanguage = changeLanguage
             )
             Spacer(modifier = Modifier.padding(10.dp))
-            OutlinedCustomButton(sendPrompt) { prompt }
+            OutlinedCustomButton(
+                sendPrompt = sendPrompt,
+                prompt = prompt,
+                changeValues = changeValues
+            )
         }
         Row(
             modifier = Modifier
@@ -360,22 +400,27 @@ fun TextFieldUpperButtons(
                 .height(IntrinsicSize.Min) // Ensures both children match their heights
         ) {
             TextFieldWithInsideIcon(
-                { prompt },
                 Modifier
                     .weight(1f)
                     .fillMaxHeight()
-            ) { prompt = it }
+            )
         }
     }
 }
 
 @Composable
-fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
+fun OutlinedCustomButton(
+    sendPrompt: (String) -> Unit,
+    prompt: () -> String,
+    changeValues: () -> Unit
+) {
     val isEnabled = prompt().trim().isNotEmpty()
 
     OutlinedButton(
         onClick = {
             sendPrompt(prompt())
+            changeValues()
+            Log.d("kloki", prompt())
         },
         enabled = isEnabled,
         border = BorderStroke(
@@ -434,19 +479,18 @@ fun OutlinedCustomIconButton(
 
 @Composable
 fun TextFieldWithInsideIcon(
-    prompt: () -> String,
     modifier: Modifier = Modifier,
-    onValueChange: (String) -> Unit,
 ) {
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
+    var prompt by rememberSaveable { mutableStateOf("") }
 
     val tts = rememberTextToSpeech()
 
     OutlinedTextField(
-        value = prompt(),
+        value = prompt,
         label = { Text("") },
-        onValueChange = { onValueChange(it) },
+        onValueChange = { prompt = it },
         modifier = modifier
             .onFocusChanged { focusState -> isFocused = focusState.isFocused },
         shape = RoundedCornerShape(50.dp),
@@ -468,7 +512,7 @@ fun TextFieldWithInsideIcon(
                 OutlinedButton(
                     onClick = {
                         tts.value?.speak(
-                            prompt().trim(), TextToSpeech.QUEUE_FLUSH, null, ""
+                            prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
                         )
                     },
                     modifier = Modifier
@@ -479,7 +523,7 @@ fun TextFieldWithInsideIcon(
                         topEnd = 50.dp,
                         bottomEnd = 50.dp
                     ),
-                    enabled = prompt().trim().isNotEmpty(),
+                    enabled = prompt.trim().isNotEmpty(),
                     border = BorderStroke(
                         0.dp,
                         Color.Transparent

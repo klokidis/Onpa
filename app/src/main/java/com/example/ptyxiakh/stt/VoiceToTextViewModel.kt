@@ -23,6 +23,7 @@ data class VoiceToTextState(
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
     val language: String = "en",
+    val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
 )
 
 class VoiceToTextViewModel(application: Application) : AndroidViewModel(application),
@@ -195,11 +196,20 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         private const val TAG = "VoiceToTextViewModel"
     }
 
-    fun changeLanguage(newLanguage: String){
+    fun changeLanguage(newLanguage: String) {
         _sttState.update { state ->
             state.copy(
                 language = newLanguage,
             )
         }
+    }
+
+    fun changeSpokenPromptText() {
+        _sttState.update { state ->
+            state.copy(
+                spokenPromptText = (state.fullTranscripts + state.partialTranscripts).toString()
+            )
+        }
+        Log.d(TAG, sttState.value.spokenPromptText.length.toString())
     }
 }
