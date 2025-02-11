@@ -22,6 +22,7 @@ data class VoiceToTextState(
     val hasError: Boolean = false,
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
+    val language: String = "en",
 )
 
 class VoiceToTextViewModel(application: Application) : AndroidViewModel(application),
@@ -37,7 +38,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         Log.d(TAG, "VoiceToTextViewModel initialized")
     }
 
-    fun startListening(languageCode: String = "en") {
+    fun startListening(languageCode: String) {
         val context = getApplication<Application>().applicationContext
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
@@ -96,7 +97,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         // Retry recognition for recoverable errors
         if (_sttState.value.isSpeaking && isRecoverableError(error)) {
             Log.d(TAG, "Retrying recognition...")
-            startListening()
+            startListening(sttState.value.language)
         } else {
             _sttState.update { it.copy(hasError = true, isSpeaking = false) }
         }
@@ -152,7 +153,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
                 )
             }
         }
-        startListening() // Restart listening
+        startListening(sttState.value.language) // Restart listening
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
@@ -192,5 +193,13 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     companion object {
         private const val TAG = "VoiceToTextViewModel"
+    }
+
+    fun changeLanguage(newLanguage: String){
+        _sttState.update { state ->
+            state.copy(
+                language = newLanguage,
+            )
+        }
     }
 }

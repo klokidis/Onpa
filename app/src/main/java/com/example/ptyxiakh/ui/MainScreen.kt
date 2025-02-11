@@ -142,6 +142,7 @@ fun MainScreen(
     ) {
         TextFieldUpperButtons(
             geminiViewModel::sendPrompt,
+            changeLanguage = voiceToTextViewModel::changeLanguage,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
             isEnabled = !sttState.offlineError && sttState.availableSTT,
@@ -331,6 +332,7 @@ fun TopButtons(navigateSettings: () -> Unit) {
 fun TextFieldUpperButtons(
     sendPrompt: (String) -> Unit,
     startListening: (String) -> Unit,
+    changeLanguage: (String) -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
     isEnabled: Boolean
@@ -345,7 +347,8 @@ fun TextFieldUpperButtons(
                 startListening = startListening,
                 stopListening = stopListening,
                 isListening = isListening,
-                isEnabled = isEnabled
+                isEnabled = isEnabled,
+                changeLanguage = changeLanguage
             )
             Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(sendPrompt) { prompt }
@@ -396,6 +399,7 @@ fun OutlinedCustomButton(sendPrompt: (String) -> Unit, prompt: () -> String) {
 fun OutlinedCustomIconButton(
     startListening: (String) -> Unit,
     stopListening: () -> Unit,
+    changeLanguage: (String) -> Unit,
     isListening: Boolean,
     isEnabled: Boolean,
 ) {
@@ -404,7 +408,8 @@ fun OutlinedCustomIconButton(
             if (isListening) {
                 stopListening()
             } else {
-                startListening("en")
+                changeLanguage("el-GR")
+                startListening("el-GR")
             }
         },
         enabled = isEnabled,
