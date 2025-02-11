@@ -159,8 +159,8 @@ fun ResultsLazyList(
     weightModifier: Modifier
 ) {
     val listState = rememberLazyListState()
-    var result1 = result
     val tts = rememberTextToSpeech()
+    var result1 = result
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -193,10 +193,10 @@ fun ResultsLazyList(
                 }
 
                 is ResponseState.Initial -> {
-                    ResultText(result1, inputTextAlign = TextAlign.Center)
+                    ResultText(result1, inputTextAlign = TextAlign.Center, textColor = Color.Gray)
                 }
 
-                ResponseState.Loading -> {
+                is ResponseState.Loading -> {
                     Spacer(modifier = Modifier.padding(15.dp))
                     CircularProgressIndicator(modifier = modifier)
                     Spacer(modifier = weightModifier)
@@ -204,9 +204,6 @@ fun ResultsLazyList(
 
                 is ResponseState.Success -> {} // no need
             }
-        }
-        item {
-            ResultCard("hello there what is up", tts)
         }
         item {
             Spacer(modifier = Modifier.size(200.dp))
