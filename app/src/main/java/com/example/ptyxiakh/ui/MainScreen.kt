@@ -9,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -233,19 +232,20 @@ fun ResultCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
         ),
+        shape = RoundedCornerShape(16.dp), // Ensure the shape is consistent
         modifier = Modifier
             .padding(start = 18.dp, end = 18.dp, top = 10.dp)
             .fillMaxWidth()
-            .clickable {
-                tts.value?.speak(
-                    result, TextToSpeech.QUEUE_FLUSH, null, ""
-                )
-            }
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(16.dp)
+            ),
+        onClick = {
+            tts.value?.speak(
+                result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
+        }
     ) {
         ResultText(result, inputTextAlign = TextAlign.Start)
     }
