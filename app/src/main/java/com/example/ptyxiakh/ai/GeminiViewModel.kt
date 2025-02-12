@@ -66,6 +66,7 @@ class GeminiViewModel : ViewModel() {
         val emojiRegex = Regex("[\\p{So}\\p{Cn}]") // Matches most emojis
         return answer
             .replace("**", "") // Remove bold markers
+            .replace("*", "") // Remove bold markers
             .replace("...", "") // Remove ellipses
             .replace(emojiRegex, "") // Remove emojis
             .replace(Regex("\\(.*?\\)"), "") // Remove (..)

@@ -278,7 +278,7 @@ fun SpeechToTextUi(
 ) {
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
-    val fullText = combinedText.joinToString()
+    val fullText = combinedText.joinToString(" ")
 
     LaunchedEffect(combinedText.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
