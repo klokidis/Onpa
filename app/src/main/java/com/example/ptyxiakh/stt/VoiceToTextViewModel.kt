@@ -14,12 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class VoiceToTextState(
-    val spokenText: String = "",
-    val partialText: String = "",
     val fullTranscripts: List<String> = emptyList(),
     val partialTranscripts: List<String> = emptyList(),
     val isSpeaking: Boolean = false,
-    val hasError: Boolean = false,
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
     val language: String = "en",
@@ -43,13 +40,13 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         val context = getApplication<Application>().applicationContext
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            _sttState.update { it.copy(availableSTT = false, hasError = true) }
+            _sttState.update { it.copy(availableSTT = false) }
             recognizer.stopListening()
         } else {
             Log.d(TAG, "Starting recognition with language: $languageCode")
             val intent = createRecognizerIntent(languageCode)
             recognizer.startListening(intent)
-            _sttState.update { it.copy(availableSTT = true, isSpeaking = true, hasError = false) }
+            _sttState.update { it.copy(availableSTT = true, isSpeaking = true) }
         }
     }
 
@@ -72,7 +69,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     override fun onReadyForSpeech(params: Bundle?) {
         Log.d(TAG, "Ready for speech")
-        _sttState.update { it.copy(hasError = false) }
+        _sttState.update { it.copy() }
     }
 
     override fun onBeginningOfSpeech() {
@@ -100,7 +97,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             Log.d(TAG, "Retrying recognition...")
             startListening(sttState.value.language)
         } else {
-            _sttState.update { it.copy(hasError = true, isSpeaking = false) }
+            _sttState.update { it.copy(isSpeaking = false) }
         }
     }
 
@@ -147,10 +144,8 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             Log.d(TAG, "Final result: $it")
             _sttState.update { state ->
                 state.copy(
-                    spokenText = it,
                     fullTranscripts = state.fullTranscripts + it,
                     partialTranscripts = emptyList(),
-                    partialText = ""
                 )
             }
         }
@@ -173,7 +168,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
                 Log.d(TAG, "Filtered partial result: $updatedText")
                 _sttState.update { state ->
                     state.copy(
-                        partialText = updatedText,
                         partialTranscripts = state.partialTranscripts + updatedText
                     )
                 }

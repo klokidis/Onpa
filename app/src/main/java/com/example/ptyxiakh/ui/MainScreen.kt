@@ -2,7 +2,6 @@ package com.example.ptyxiakh.ui
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -85,8 +84,6 @@ fun MainScreen(
     geminiViewModel: GeminiViewModel = viewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = viewModel()
 ) {
-    val placeholderResult = stringResource(R.string.results_placeholder)
-    val result by rememberSaveable { mutableStateOf(placeholderResult) }
 
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
@@ -135,7 +132,6 @@ fun MainScreen(
         )
         ResultsLazyList(
             responseUiState,
-            result,
             Modifier.align(Alignment.CenterHorizontally),
             resultUiState.answersList,
             Modifier.weight(1f)
@@ -154,10 +150,10 @@ fun MainScreen(
             isEnabled = !sttState.offlineError && sttState.availableSTT,
             isListening = sttState.isSpeaking,
             prompt = {
-                sttState.fullTranscripts
+                (sttState.fullTranscripts + sttState.partialTranscripts)
                     .joinToString().drop(sttState.spokenPromptText.length)
             },
-            changeValues = voiceToTextViewModel::changeSpokenPromptText,
+            changeSpokenPromptText = voiceToTextViewModel::changeSpokenPromptText,
         )
     }
 }
@@ -165,14 +161,12 @@ fun MainScreen(
 @Composable
 fun ResultsLazyList(
     uiState: ResponseState,
-    result: String,
     modifier: Modifier,
     answersList: List<String>,
     weightModifier: Modifier
 ) {
     val listState = rememberLazyListState()
     val tts = rememberTextToSpeech()
-    var result1 = result
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -196,16 +190,19 @@ fun ResultsLazyList(
         item {
             when (uiState) {
                 is ResponseState.Error -> {
-                    result1 = uiState.errorMessage
                     ResultText(
-                        result1,
+                        uiState.errorMessage,
                         textColor = MaterialTheme.colorScheme.error,
                         inputTextAlign = TextAlign.Center
                     )
                 }
 
                 is ResponseState.Initial -> {
-                    ResultText(result1, inputTextAlign = TextAlign.Center, textColor = Color.Gray)
+                    ResultText(
+                        stringResource(R.string.results_placeholder),
+                        inputTextAlign = TextAlign.Center,
+                        textColor = Color.Gray
+                    )
                 }
 
                 is ResponseState.Loading -> {
@@ -372,7 +369,7 @@ fun TextFieldUpperButtons(
     isListening: Boolean,
     isEnabled: Boolean,
     prompt: () -> String,
-    changeValues: () -> Unit
+    changeSpokenPromptText: () -> Unit
 ) {
     Column {
         Row(
@@ -390,7 +387,7 @@ fun TextFieldUpperButtons(
             OutlinedCustomButton(
                 sendPrompt = sendPrompt,
                 prompt = prompt,
-                changeValues = changeValues
+                changeSpokenPromptText = changeSpokenPromptText
             )
         }
         Row(
@@ -412,15 +409,14 @@ fun TextFieldUpperButtons(
 fun OutlinedCustomButton(
     sendPrompt: (String) -> Unit,
     prompt: () -> String,
-    changeValues: () -> Unit
+    changeSpokenPromptText: () -> Unit
 ) {
     val isEnabled = prompt().trim().isNotEmpty()
 
     OutlinedButton(
         onClick = {
             sendPrompt(prompt())
-            changeValues()
-            Log.d("kloki", prompt())
+            changeSpokenPromptText()
         },
         enabled = isEnabled,
         border = BorderStroke(

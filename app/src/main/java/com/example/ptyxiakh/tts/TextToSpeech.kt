@@ -20,7 +20,7 @@ fun rememberTextToSpeech(): MutableState<TextToSpeech?> {
             if (status == TextToSpeech.SUCCESS) {
                 tts.value?.language = Locale.US
             }
-            Log.d("Voice", tts.value?.availableLanguages.toString())
+            Log.d("availableLanguages", tts.value?.availableLanguages.toString())
         }
         tts.value = textToSpeech
 
