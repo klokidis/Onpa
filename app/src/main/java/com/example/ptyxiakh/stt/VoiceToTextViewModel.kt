@@ -201,9 +201,13 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     fun changeSpokenPromptText() {
         _sttState.update { state ->
             state.copy(
-                spokenPromptText = (state.fullTranscripts + state.partialTranscripts).toString()
+                spokenPromptText = (state.fullTranscripts + state.partialTranscripts)
+                    .joinToString(" ") // Converts list to a string with spaces
+                    .replace(",", "") // Removes commas
+                    .replace(Regex("\\s+"), " ") // Replaces multiple spaces with a single space
+                    .trim() // Ensures no leading/trailing spaces
             )
         }
-        Log.d(TAG, sttState.value.spokenPromptText.length.toString())
+        Log.d(TAG, sttState.value.spokenPromptText)
     }
 }
