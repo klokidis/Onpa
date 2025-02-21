@@ -8,17 +8,17 @@ sealed interface ResponseState {
     /**
      * Empty state when the screen is first shown
      */
-    object Initial : ResponseState
+    data object Initial : ResponseState
 
     /**
      * Still loading
      */
-    object Loading : ResponseState
+    data object Loading : ResponseState
 
     /**
      * Text has been generated
      */
-    object Success : ResponseState
+    data object Success : ResponseState
 
     /**
      * There was an error generating text

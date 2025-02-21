@@ -171,7 +171,7 @@ fun ResultsLazyList(
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
         if (answersList.isNotEmpty()) {
-            listState.animateScrollToItem(answersList.size - 2)
+            listState.animateScrollToItem(answersList.size - 3)
         }
     }
 
@@ -276,6 +276,9 @@ fun SpeechToTextUi(
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
     val fullText = combinedText.joinToString(" ")
+        .removePrefix(" ") //removes the first " "
+        .replace(Regex(" +"), " ") // Replace multiple spaces with a single space
+
 
     LaunchedEffect(combinedText.size) {
         scrollState.animateScrollTo(scrollState.maxValue)

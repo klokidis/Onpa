@@ -19,6 +19,7 @@ data class VoiceToTextState(
     val isSpeaking: Boolean = false,
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
+    val aiClicked: Boolean = false,
     val language: String = "en",
     val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
 )
@@ -141,15 +142,21 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         val spokenText =
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         spokenText?.let {
+            if (sttState.value.aiClicked && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(" ").length) {
+                changeSpokenPromptText() //if the final result is smaller than the Partial Result
+            }
             Log.d(TAG, "Final result: $it")
             _sttState.update { state ->
                 state.copy(
                     fullTranscripts = state.fullTranscripts + it,
                     partialTranscripts = emptyList(),
+                    aiClicked = false,
                 )
             }
         }
-        startListening(sttState.value.language) // Restart listening
+        if (sttState.value.isSpeaking) {
+            startListening(sttState.value.language) // Restart listening
+        }
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
@@ -201,8 +208,9 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     fun changeSpokenPromptText() {
         _sttState.update { state ->
             state.copy(
+                aiClicked = true,
                 spokenPromptText = (state.fullTranscripts + state.partialTranscripts)
-                    .joinToString(" ") // Converts list to a string with spaces
+                    .joinToString(" ").replaceFirst("\" ", "\"") // Converts list to a string with spaces
                     .replace(",", "") // Removes commas
                     .replace(Regex("\\s+"), " ") // Replaces multiple spaces with a single space
                     .trim() // Ensures no leading/trailing spaces

@@ -69,6 +69,7 @@ class GeminiViewModel : ViewModel() {
             .replace("*", "") // Remove bold markers
             .replace("...", "") // Remove ellipses
             .replace(emojiRegex, "") // Remove emojis
+            .replace(Regex(" - .*?(?=\n|$)"), "") // Remove text after " - " until the end of the line
             .replace(Regex("\\(.*?\\)"), "") // Remove (..)
             .split(Regex("\\d\\.?\\s*")) // Split by numbers, optional periods, and spaces
             .filter { it.isNotBlank() } // Remove empty entries
