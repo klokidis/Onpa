@@ -99,11 +99,11 @@ fun MainScreen(
         }
     )
 
-    LaunchedEffect(key1 = recordAudioLauncher) {
+    LaunchedEffect(recordAudioLauncher) {
         recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
-    LaunchedEffect(key1 = sttState.offlineError) {
+    LaunchedEffect(sttState.offlineError) {
         // Inform the user about the missing service
         if (sttState.offlineError) {
             Toast.makeText(
@@ -114,7 +114,7 @@ fun MainScreen(
         }
     }
 
-    LaunchedEffect(key1 = !sttState.availableSTT) {
+    LaunchedEffect(!sttState.availableSTT) {
         if (!sttState.availableSTT) {
             Toast.makeText(
                 context,
