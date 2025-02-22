@@ -86,7 +86,6 @@ fun MainScreen(
     geminiViewModel: GeminiViewModel = viewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = viewModel()
 ) {
-
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
@@ -112,14 +111,16 @@ fun MainScreen(
                 "Speech recognition is offline. Please enable Wi-Fi.",
                 Toast.LENGTH_LONG
             ).show()
-        } else {
-            if (!sttState.availableSTT) {
-                Toast.makeText( //change this to the ui with live data observe
-                    context,
-                    "Speech recognition is not available. Please install or enable Google Speech Services.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        }
+    }
+
+    LaunchedEffect(key1 = !sttState.availableSTT) {
+        if (!sttState.availableSTT) {
+            Toast.makeText(
+                context,
+                "Speech recognition is not available. Please install or enable Google Speech Services.",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
