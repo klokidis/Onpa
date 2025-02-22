@@ -68,6 +68,16 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         _sttState.update { it.copy(isSpeaking = false) }
     }
 
+    fun clearTexts(){
+        _sttState.update {
+            it.copy(
+                fullTranscripts = emptyList(),
+                partialTranscripts = emptyList(),
+                spokenPromptText = "",
+            )
+        }
+    }
+
     override fun onReadyForSpeech(params: Bundle?) {
         Log.d(TAG, "Ready for speech")
         _sttState.update { it.copy() }

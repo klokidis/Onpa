@@ -128,7 +128,11 @@ fun MainScreen(
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
-            sttState.spokenPromptText.length
+            sttState.spokenPromptText.length,
+            sttState.isSpeaking,
+            voiceToTextViewModel::clearTexts,
+            voiceToTextViewModel::stopListening,
+            voiceToTextViewModel::startListening,
         )
         ResultsLazyList(
             responseUiState,
@@ -271,7 +275,11 @@ fun ResultText(
 fun SpeechToTextUi(
     listOfSpokenText: List<String>,
     listOfSpokenEarlyText: List<String>,
-    spokenTextUsed: Int
+    spokenTextUsed: Int,
+    isSpeaking: Boolean,
+    clearText: () -> Unit,
+    stopListening: () -> Unit,
+    startListening: (String) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
@@ -325,6 +333,29 @@ fun SpeechToTextUi(
                 fontSize = 26.sp,
             )
         )
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            IconButton(
+                onClick = {
+                    stopListening()
+                    clearText()
+                    if (isSpeaking) {
+                        startListening("el-GR")
+                    }
+                },
+                modifier = Modifier
+                    .align(alignment = Alignment.BottomEnd)
+                    .padding(5.dp)
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(27.dp),
+                    painter = painterResource(R.drawable.mop_24px),
+                    contentDescription = stringResource(R.string.clear_text),
+                )
+            }
+        }
     }
 }
 
