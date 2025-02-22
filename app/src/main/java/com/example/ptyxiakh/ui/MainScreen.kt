@@ -153,7 +153,7 @@ fun MainScreen(
             changeLanguage = voiceToTextViewModel::changeLanguage,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
-            isEnabled = !sttState.offlineError && sttState.availableSTT,
+            isEnabled = true,
             isListening = sttState.isSpeaking,
             prompt = {
                 (sttState.fullTranscripts + sttState.partialTranscripts)
@@ -407,7 +407,7 @@ fun TextFieldUpperButtons(
     isListening: Boolean,
     isEnabled: Boolean,
     prompt: () -> String,
-    changeSpokenPromptText: () -> Unit
+    changeSpokenPromptText: () -> Unit,
 ) {
     Column {
         Row(
@@ -419,7 +419,7 @@ fun TextFieldUpperButtons(
                 stopListening = stopListening,
                 isListening = isListening,
                 isEnabled = isEnabled,
-                changeLanguage = changeLanguage
+                changeLanguage = changeLanguage,
             )
             Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(
@@ -486,11 +486,15 @@ fun OutlinedCustomIconButton(
 ) {
     OutlinedButton(
         onClick = {
-            if (isListening) {
-                stopListening()
-            } else {
-                changeLanguage("el-GR")
-                startListening("el-GR")
+            when {
+                isListening -> {
+                    stopListening()
+                }
+
+                else -> {
+                    changeLanguage("el-GR")
+                    startListening("el-GR")
+                }
             }
         },
         enabled = isEnabled,

@@ -47,7 +47,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             Log.d(TAG, "Starting recognition with language: $languageCode")
             val intent = createRecognizerIntent(languageCode)
             recognizer.startListening(intent)
-            _sttState.update { it.copy(availableSTT = true, isSpeaking = true) }
+            _sttState.update { it.copy(availableSTT = true, isSpeaking = true, offlineError = false) }
         }
     }
 
@@ -192,21 +192,6 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        // Not used
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d(TAG, "Clearing resources")
-        recognizer.destroy()
-    }
-
-    companion object {
-        private const val TAG = "VoiceToTextViewModel"
-    }
-
     fun changeLanguage(newLanguage: String) {
         _sttState.update { state ->
             state.copy(
@@ -227,5 +212,19 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
         Log.d(TAG, sttState.value.spokenPromptText)
+    }
+
+    override fun onEvent(eventType: Int, params: Bundle?) {
+        // Not used
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d(TAG, "Clearing resources")
+        recognizer.destroy()
+    }
+
+    companion object {
+        private const val TAG = "VoiceToTextViewModel"
     }
 }
