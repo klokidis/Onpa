@@ -51,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,6 +77,7 @@ import com.example.ptyxiakh.R
 import com.example.ptyxiakh.ai.ResponseState
 import com.example.ptyxiakh.stt.VoiceToTextViewModel
 import com.example.ptyxiakh.tts.rememberTextToSpeech
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -129,16 +131,15 @@ fun MainScreen(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
             sttState.spokenPromptText.length,
-            sttState.isSpeaking,
-            voiceToTextViewModel::clearTexts,
-            voiceToTextViewModel::stopListening,
-            voiceToTextViewModel::startListening,
+            clearText = voiceToTextViewModel::clearTexts,
         )
         ResultsLazyList(
-            responseUiState,
-            Modifier.align(Alignment.CenterHorizontally),
-            resultUiState.answersList,
-            Modifier.weight(1f)
+            uiState = responseUiState,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            answersList = resultUiState.answersList,
+            stopListening = voiceToTextViewModel::stopListening,
+            startListening = voiceToTextViewModel::startListening,
+            weightModifier = Modifier.weight(1f)
         )
 
     }
@@ -167,10 +168,17 @@ fun ResultsLazyList(
     uiState: ResponseState,
     modifier: Modifier,
     answersList: List<String>,
+    startListening: (String) -> Unit,
+    stopListening: () -> Unit,
     weightModifier: Modifier
 ) {
     val listState = rememberLazyListState()
-    val tts = rememberTextToSpeech()
+    val coroutineScope = rememberCoroutineScope()
+    val tts = rememberTextToSpeech {
+        coroutineScope.launch {
+            startListening("el-GR")
+        }
+    }
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -188,7 +196,7 @@ fun ResultsLazyList(
     ) {
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
-                ResultCard(answer, tts)
+                ResultCard(answer, tts, stopListening)
             }
         }
         item {
@@ -228,6 +236,7 @@ fun ResultsLazyList(
 fun ResultCard(
     result: String,
     tts: MutableState<TextToSpeech?>,
+    stopListening: () -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -238,11 +247,12 @@ fun ResultCard(
             .padding(start = 18.dp, end = 18.dp, top = 10.dp)
             .fillMaxWidth()
             .border(
-                width = 1.dp,
+                width = 1.5.dp,
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
+            stopListening()
             tts.value?.speak(
                 result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
@@ -276,10 +286,7 @@ fun SpeechToTextUi(
     listOfSpokenText: List<String>,
     listOfSpokenEarlyText: List<String>,
     spokenTextUsed: Int,
-    isSpeaking: Boolean,
     clearText: () -> Unit,
-    stopListening: () -> Unit,
-    startListening: (String) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
@@ -298,7 +305,7 @@ fun SpeechToTextUi(
             .height(250.dp)
             .padding(start = 10.dp, end = 10.dp),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.onBackground),
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent,
         )
@@ -338,11 +345,7 @@ fun SpeechToTextUi(
         ) {
             IconButton(
                 onClick = {
-                    stopListening()
                     clearText()
-                    if (isSpeaking) {
-                        startListening("el-GR")
-                    }
                 },
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
@@ -431,7 +434,9 @@ fun TextFieldUpperButtons(
                 .height(IntrinsicSize.Min) // Ensures both children match their heights
         ) {
             TextFieldWithInsideIcon(
-                Modifier
+                stopListening = stopListening,
+                startListening = startListening,
+                modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
             )
@@ -454,7 +459,7 @@ fun OutlinedCustomButton(
         },
         enabled = isEnabled,
         border = BorderStroke(
-            width = 1.dp,
+            width = 1.5.dp,
             color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
         ),
         modifier = Modifier
@@ -489,7 +494,7 @@ fun OutlinedCustomIconButton(
         },
         enabled = isEnabled,
         border = BorderStroke(
-            width = 1.dp,
+            width = 1.5.dp,
             color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
         ),
         modifier = Modifier
@@ -510,12 +515,16 @@ fun OutlinedCustomIconButton(
 @Composable
 fun TextFieldWithInsideIcon(
     modifier: Modifier = Modifier,
+    stopListening: () -> Unit,
+    startListening: (String) -> Unit,
 ) {
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
     var prompt by rememberSaveable { mutableStateOf("") }
 
-    val tts = rememberTextToSpeech()
+    val tts = rememberTextToSpeech {
+        startListening("el-GR")
+    }
 
     OutlinedTextField(
         value = prompt,
@@ -541,6 +550,7 @@ fun TextFieldWithInsideIcon(
                 )
                 OutlinedButton(
                     onClick = {
+                        stopListening()
                         tts.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
                         )
