@@ -5,9 +5,10 @@ import androidx.room.RoomDatabase
 import com.example.ptyxiakh.data.dao.UserDao
 import com.example.ptyxiakh.data.dao.UserDataDao
 import com.example.ptyxiakh.data.model.User
+import com.example.ptyxiakh.data.model.UserData
 
-@Database(entities = [User::class], version = 1, exportSchema = false)
-abstract class UserDatabase: RoomDatabase() {
+@Database(entities = [User::class, UserData::class], version = 1, exportSchema = false)
+abstract class UserDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun userDataDao(): UserDataDao
