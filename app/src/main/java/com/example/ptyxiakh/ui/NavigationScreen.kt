@@ -1,4 +1,4 @@
-package com.example.ptyxiakh
+package com.example.ptyxiakh.ui
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -14,8 +14,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.ptyxiakh.ui.MainScreen
-import com.example.ptyxiakh.ui.SettingsScreen
+import com.example.ptyxiakh.ui.main.MainScreen
+import com.example.ptyxiakh.ui.settings.SettingsScreen
 
 enum class AppScreens {
     Main,

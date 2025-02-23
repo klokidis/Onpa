@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.ui.main
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
