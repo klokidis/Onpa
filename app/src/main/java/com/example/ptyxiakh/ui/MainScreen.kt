@@ -526,9 +526,12 @@ fun TextFieldWithInsideIcon(
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
     var prompt by rememberSaveable { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     val tts = rememberTextToSpeech {
-        startListening("el-GR")
+        coroutineScope.launch {
+            startListening("el-GR")
+        }
     }
 
     OutlinedTextField(
