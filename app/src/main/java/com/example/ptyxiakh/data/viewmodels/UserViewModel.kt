@@ -31,7 +31,6 @@ class UserViewModel @Inject constructor(
         )
 
     init {
-        loadUsers()
     }
 
     private fun loadUsers() {

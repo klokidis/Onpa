@@ -71,10 +71,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.ai.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.ai.ResponseState
+import com.example.ptyxiakh.data.viewmodels.UserViewModel
 import com.example.ptyxiakh.stt.VoiceToTextViewModel
 import com.example.ptyxiakh.tts.rememberTextToSpeech
 import kotlinx.coroutines.launch
@@ -84,7 +86,8 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navigateSettings: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel(),
-    voiceToTextViewModel: VoiceToTextViewModel = viewModel()
+    voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()

@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
         entity = User::class,
         parentColumns = ["userId"],
         childColumns = ["userId"],
-        onDelete = CASCADE  // Ensures deletion of user deletes favorites
+        onDelete = CASCADE  // Ensures deletion of user deletes data
     )],
     indices = [Index(value = ["userId"])]
 )
