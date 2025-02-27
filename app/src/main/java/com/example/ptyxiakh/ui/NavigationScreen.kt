@@ -9,31 +9,58 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ptyxiakh.data.viewmodels.UserViewModel
+import com.example.ptyxiakh.ui.loading.LoadingScreen
 import com.example.ptyxiakh.ui.main.MainScreen
+import com.example.ptyxiakh.ui.setUp.SetUp
 import com.example.ptyxiakh.ui.settings.SettingsScreen
 
 enum class AppScreens {
+    Loading,
+    SetUp,
     Main,
     Settings
 }
 
 @Composable
-fun NavigationScreen(navController: NavHostController = rememberNavController()) {
+fun NavigationScreen(
+    userViewModel: UserViewModel = hiltViewModel(),
+    navController: NavHostController = rememberNavController()
+) {
+    val userUiState by userViewModel.userUiState.collectAsState()
+
     Scaffold(
         modifier = Modifier.safeDrawingPadding()
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = AppScreens.Main.name,
+            startDestination = when {
+                userUiState.isLoading -> AppScreens.Loading.name
+                userUiState.users.isEmpty() -> AppScreens.SetUp.name
+                else -> AppScreens.Main.name
+            },
             modifier = Modifier.padding(paddingValues),
             enterTransition = { fadeIn(animationSpec = tween(0)) },
             exitTransition = { fadeOut(animationSpec = tween(0)) },
         ) {
+            composable(
+                route = AppScreens.Loading.name
+            ) {
+                LoadingScreen()
+            }
+            composable(
+                route = AppScreens.SetUp.name
+            ) {
+                SetUp()
+            }
             composable(
                 route = AppScreens.Main.name,
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Slide in from the left
@@ -52,7 +79,9 @@ fun NavigationScreen(navController: NavHostController = rememberNavController())
                 SettingsScreen(
                     navigateMainScreen = {
                         navController.navigate(AppScreens.Main.name) {
-                            popUpTo(AppScreens.Main.name) { inclusive = true } // Clear back stack
+                            popUpTo(AppScreens.Main.name) {
+                                inclusive = true
+                            } // Clear back stack
                         }
                     }
                 )

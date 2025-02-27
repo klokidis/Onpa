@@ -20,42 +20,19 @@ class UserViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _userUiState = MutableStateFlow(UserUiState(isLoading = true))
-
-    // Using stateIn to retain the state across configuration changes
-    val userUiState: StateFlow<UserUiState> = _userUiState
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = UserUiState(isLoading = true)
-        )
+    val userUiState: StateFlow<UserUiState> =
+        userRepository.getAllUsers()
+            .map { user ->
+                UserUiState(users = user, isLoading = false)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = UserUiState(isLoading = true)
+            )
 
     init {
-    }
 
-    private fun loadUsers() {
-        viewModelScope.launch {
-            userRepository.getAllUsers()
-                .filterNotNull()
-                .collect { users ->
-                    val selectedUser = users.firstOrNull() // Pick the first user if available
-                    _userUiState.value = UserUiState(
-                        users = users,
-                        selectedUser = selectedUser,
-                        isLoading = false
-                    )
-                }
-        }
-    }
-
-    fun loadUser(userId: Int) {
-        viewModelScope.launch {
-            userRepository.getUserById(userId).collect { fetchedUser ->
-                _userUiState.value = _userUiState.value.copy(
-                    selectedUser = fetchedUser
-                )
-            }
-        }
     }
 
     fun addUser(name: String) {
