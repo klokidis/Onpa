@@ -31,9 +31,6 @@ class UserViewModel @Inject constructor(
                 initialValue = UserUiState(isLoading = true)
             )
 
-    init {
-
-    }
 
     fun addUser(name: String) {
         viewModelScope.launch {
