@@ -18,10 +18,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
-import com.example.ptyxiakh.ui.loading.LoadingScreen
-import com.example.ptyxiakh.ui.main.MainScreen
-import com.example.ptyxiakh.ui.setUp.SetUp
-import com.example.ptyxiakh.ui.settings.SettingsScreen
 
 enum class AppScreens {
     Loading,

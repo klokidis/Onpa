@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui.loading
+package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

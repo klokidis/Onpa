@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui.setUp
+package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui.settings
+package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
