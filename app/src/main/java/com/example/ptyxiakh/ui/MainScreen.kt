@@ -269,7 +269,7 @@ fun ResultText(
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     inputTextAlign: TextAlign = TextAlign.Center,
-    inputStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    inputStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     Text(
         text = resultText.trim(),
@@ -536,7 +536,8 @@ fun TextFieldWithInsideIcon(
 
     OutlinedTextField(
         value = prompt,
-        label = { Text("") },
+        label = { Text("", style = MaterialTheme.typography.bodyMedium) },
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
         onValueChange = { prompt = it },
         modifier = modifier
             .onFocusChanged { focusState -> isFocused = focusState.isFocused },

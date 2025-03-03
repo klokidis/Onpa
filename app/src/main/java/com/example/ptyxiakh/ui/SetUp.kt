@@ -1,6 +1,5 @@
 package com.example.ptyxiakh.ui
 
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
@@ -9,8 +8,5 @@ import com.example.ptyxiakh.data.viewmodels.UserViewModel
 fun SetUp(
     userViewModel: UserViewModel = hiltViewModel(),
 ) {
-
-    val scrollState = rememberScrollState()
-
 
 }

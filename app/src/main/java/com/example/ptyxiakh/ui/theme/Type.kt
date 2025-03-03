@@ -16,8 +16,14 @@ val notosans = FontFamily(
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = notosans,
+        fontWeight = FontWeight.Bold,
+        fontSize = 40.sp,
+        letterSpacing = 0.5.sp,
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = notosans,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp,
+        fontSize = 17.sp,
         letterSpacing = 0.5.sp,
     )
     /* Other default text styles to override

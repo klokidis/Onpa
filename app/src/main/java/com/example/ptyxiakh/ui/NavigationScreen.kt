@@ -21,6 +21,7 @@ import com.example.ptyxiakh.data.viewmodels.UserViewModel
 
 enum class AppScreens {
     Loading,
+    Welcome,
     SetUp,
     Main,
     Settings
@@ -40,7 +41,7 @@ fun NavigationScreen(
             navController = navController,
             startDestination = when {
                 userUiState.isLoading -> AppScreens.Loading.name
-                userUiState.users.isEmpty() -> AppScreens.SetUp.name
+                userUiState.users.isEmpty() -> AppScreens.Welcome.name
                 else -> AppScreens.Main.name
             },
             modifier = Modifier.padding(paddingValues),
@@ -51,6 +52,13 @@ fun NavigationScreen(
                 route = AppScreens.Loading.name
             ) {
                 LoadingScreen()
+            }
+            composable(
+                route = AppScreens.Welcome.name
+            ) {
+                Welcome(
+                    navigateSetUp = { navController.navigate(AppScreens.SetUp.name) }
+                )
             }
             composable(
                 route = AppScreens.SetUp.name
