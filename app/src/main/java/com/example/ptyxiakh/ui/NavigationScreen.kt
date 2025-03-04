@@ -63,7 +63,7 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.SetUp.name
             ) {
-                SetUp()
+                SignUp()
             }
             composable(
                 route = AppScreens.Main.name,

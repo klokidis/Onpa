@@ -32,12 +32,15 @@ class UserViewModel @Inject constructor(
             )
 
 
-    fun addUser(name: String) {
+    fun addUser(name: String): Int {
+        var userId = 0
         viewModelScope.launch {
             val user = User(userName = name)
-            userRepository.insertUser(user)
+            userId = userRepository.insertUser(user).toInt()
         }
+        return userId
     }
+
 
     fun deleteUser(userId: Int) {
         viewModelScope.launch {

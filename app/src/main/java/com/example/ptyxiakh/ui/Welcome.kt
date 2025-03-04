@@ -51,7 +51,7 @@ fun Welcome(navigateSetUp: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(0.1f))
+        Spacer(modifier = Modifier.padding(20.dp))
         AnimatedVisibility(
             visible = isVisible,
             enter = fadeIn(animationSpec = tween(800)) + slideInHorizontally(

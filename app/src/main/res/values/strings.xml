@@ -15,5 +15,7 @@
     <string name="icon">Launcher icon</string>
     <string name="welcome">Welcome to Oto!</string>
     <string name="app_details">"AI-powered app that helps with communication and sound awareness! "</string>
-    <string name="sign_up">Sign Up</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_up_details">just a few things to get started</string>
+    <string name="enter_name">Enter your name</string>
 </resources>

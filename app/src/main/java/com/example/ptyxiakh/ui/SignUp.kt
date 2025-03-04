@@ -1,0 +1,125 @@
+package com.example.ptyxiakh.ui
+
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ptyxiakh.R
+import com.example.ptyxiakh.data.viewmodels.UserViewModel
+import kotlinx.coroutines.delay
+
+@Composable
+fun SignUp(
+    userViewModel: UserViewModel = hiltViewModel(),
+) {
+    var name by rememberSaveable { mutableStateOf("") }
+    var isVisible by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        delay(100) // Small delay before starting animation
+        isVisible = true
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.padding(20.dp))
+        Icon(
+            modifier = Modifier
+                .size(170.dp),
+            imageVector = Icons.Default.Person,
+            contentDescription = stringResource(R.string.icon),
+        )
+
+        Text(
+            text = stringResource(R.string.sign_up),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 30.sp
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    bottom = 10.dp,
+                ),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.sign_up_details),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    bottom = 40.dp
+                ),
+            textAlign = TextAlign.Center
+        )
+        OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+            },
+            textStyle = MaterialTheme.typography.bodyMedium,
+            label = {
+                Text(
+                    stringResource(R.string.enter_name),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 25.dp, end = 25.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (name.trim().isNotEmpty()) {
+
+                    }
+                }
+            ),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "User Icon"
+                )
+            },
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+}
