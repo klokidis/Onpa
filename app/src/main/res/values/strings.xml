@@ -13,8 +13,7 @@
     <string name="settings">Settings</string>
     <string name="clear_text">Clear text</string>
     <string name="icon">Launcher icon</string>
-    <string name="welcome">Welcome to</string>
-    <string name="welcome_name">Oto!</string>
+    <string name="welcome">Welcome to Oto!</string>
     <string name="app_details">"AI-powered app that helps with communication and sound awareness! "</string>
     <string name="sign_up">Sign Up</string>
 </resources>

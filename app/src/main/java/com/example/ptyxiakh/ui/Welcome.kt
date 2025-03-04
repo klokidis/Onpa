@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,8 +51,21 @@ fun Welcome(navigateSetUp: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.weight(0.1f))
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = fadeIn(animationSpec = tween(800)) + slideInHorizontally(
+                initialOffsetX = { -100 }, animationSpec = tween(800)
+            )
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(200.dp),
+                painter = painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = stringResource(R.string.icon),
+            )
+        }
         AnimatedText(isVisible, stringResource(R.string.welcome), 1000)
-        AnimatedText(isVisible, stringResource(R.string.welcome_name), 1200)
         AnimatedText(isVisible, stringResource(R.string.app_details), 1400, isMedium = true)
 
         Spacer(modifier = Modifier.weight(0.6f))
@@ -58,7 +74,7 @@ fun Welcome(navigateSetUp: () -> Unit) {
             visible = isVisible,
             enter = fadeIn(animationSpec = tween(1600))
         ) {
-            Button(onClick = navigateSetUp) {
+            Button(onClick = navigateSetUp, modifier = Modifier.padding(bottom = 40.dp)) {
                 Text(
                     text = stringResource(R.string.sign_up),
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -69,14 +85,12 @@ fun Welcome(navigateSetUp: () -> Unit) {
                     modifier = Modifier.padding(
                         top = 6.dp,
                         bottom = 6.dp,
-                        start = 60.dp,
-                        end = 60.dp
+                        start = 50.dp,
+                        end = 50.dp
                     )
                 )
             }
         }
-
-        Spacer(modifier = Modifier.weight(0.4f))
     }
 }
 
@@ -91,16 +105,14 @@ fun AnimatedText(isVisible: Boolean, text: String, duration: Int, isMedium: Bool
         Text(
             text = text,
             style = if (isMedium) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 40.sp
+                fontSize = 30.sp
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = 15.dp,
-                    top = if (isMedium) 10.dp else 3.dp,
-                    end = if (isMedium) 50.dp else 0.dp
+                    top = if (isMedium) 10.dp else 5.dp,
                 ),
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Center
         )
     }
 }
