@@ -22,7 +22,7 @@ import com.example.ptyxiakh.data.viewmodels.UserViewModel
 enum class AppScreens {
     Loading,
     Welcome,
-    SetUp,
+    SignUp,
     Main,
     Settings
 }
@@ -57,11 +57,11 @@ fun NavigationScreen(
                 route = AppScreens.Welcome.name
             ) {
                 Welcome(
-                    navigateSetUp = { navController.navigate(AppScreens.SetUp.name) }
+                    navigateSetUp = { navController.navigate(AppScreens.SignUp.name) }
                 )
             }
             composable(
-                route = AppScreens.SetUp.name
+                route = AppScreens.SignUp.name
             ) {
                 SignUp()
             }
