@@ -30,7 +30,7 @@ import com.example.ptyxiakh.data.viewmodels.UserDataViewModel
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
 
 @Composable
-fun UserDataScreen(
+fun UserDetailsScreen(
     navigate: () -> Unit,
     userViewModel: UserViewModel = hiltViewModel(),
     userDataViewModel: UserDataViewModel = hiltViewModel(),

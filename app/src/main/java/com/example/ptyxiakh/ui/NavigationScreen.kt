@@ -24,7 +24,7 @@ enum class AppScreens {
     Loading,
     Welcome,
     SignUp,
-    UserData,
+    UserDetails,
     Main,
     Settings
 }
@@ -69,16 +69,16 @@ fun NavigationScreen(
             ) {
                 SignUp(
                     navigate = {
-                        navController.navigate(AppScreens.UserData.name) {
+                        navController.navigate(AppScreens.UserDetails.name) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
                 )
             }
             composable(
-                route = AppScreens.UserData.name
+                route = AppScreens.UserDetails.name
             ) {
-                UserDataScreen(
+                UserDetailsScreen(
                     navigate = { navController.navigate(AppScreens.Main.name) }
                 )
             }

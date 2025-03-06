@@ -58,6 +58,12 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    fun deleteAllUser() {
+        viewModelScope.launch {
+            userRepository.deleteAllUser()
+        }
+    }
+
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }

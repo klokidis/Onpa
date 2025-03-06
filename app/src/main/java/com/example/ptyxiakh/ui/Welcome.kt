@@ -31,11 +31,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.data.viewmodels.UserViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Welcome(navigateSetUp: () -> Unit) {
+fun Welcome(
+    navigateSetUp: () -> Unit,
+    userViewModel: UserViewModel = hiltViewModel(),
+) {
     val scrollState = rememberScrollState()
     var isVisible by remember { mutableStateOf(false) }
 
@@ -74,7 +79,13 @@ fun Welcome(navigateSetUp: () -> Unit) {
             visible = isVisible,
             enter = fadeIn(animationSpec = tween(1600))
         ) {
-            Button(onClick = navigateSetUp, modifier = Modifier.padding(bottom = 40.dp)) {
+            Button(
+                onClick = {
+                    userViewModel.deleteAllUser()//just in case
+                    navigateSetUp()
+                },
+                modifier = Modifier.padding(bottom = 40.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.sign_up),
                     style = MaterialTheme.typography.bodyMedium.copy(
