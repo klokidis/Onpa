@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.ptyxiakh.data.model.UserData
+import com.example.ptyxiakh.model.UserData
 import kotlinx.coroutines.flow.Flow
 
 @Dao

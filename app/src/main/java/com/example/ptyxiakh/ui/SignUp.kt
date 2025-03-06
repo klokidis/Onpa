@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.data.viewmodels.UserViewModel
+import com.example.ptyxiakh.viewmodels.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable

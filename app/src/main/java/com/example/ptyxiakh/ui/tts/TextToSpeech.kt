@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.tts
+package com.example.ptyxiakh.ui.tts
 
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener

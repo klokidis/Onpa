@@ -1,8 +1,8 @@
-package com.example.ptyxiakh.data.viewmodels
+package com.example.ptyxiakh.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ptyxiakh.data.model.UserData
+import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.data.repository.UserDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

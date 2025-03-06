@@ -72,11 +72,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ptyxiakh.ai.GeminiViewModel
+import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.ai.ResponseState
-import com.example.ptyxiakh.stt.VoiceToTextViewModel
-import com.example.ptyxiakh.tts.rememberTextToSpeech
+import com.example.ptyxiakh.model.ResponseState
+import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
+import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
 import kotlinx.coroutines.launch
 
 

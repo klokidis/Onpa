@@ -17,8 +17,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.ptyxiakh.data.viewmodels.UserDataViewModel
-import com.example.ptyxiakh.data.viewmodels.UserViewModel
+import com.example.ptyxiakh.viewmodels.UserDataViewModel
+import com.example.ptyxiakh.viewmodels.UserViewModel
 
 enum class AppScreens {
     Loading,

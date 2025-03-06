@@ -1,9 +1,10 @@
-package com.example.ptyxiakh.ai
+package com.example.ptyxiakh.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ptyxiakh.BuildConfig
+import com.example.ptyxiakh.model.ResponseState
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers

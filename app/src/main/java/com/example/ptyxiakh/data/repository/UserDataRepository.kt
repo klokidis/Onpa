@@ -1,7 +1,7 @@
 package com.example.ptyxiakh.data.repository
 
 import com.example.ptyxiakh.data.dao.UserDataDao
-import com.example.ptyxiakh.data.model.UserData
+import com.example.ptyxiakh.model.UserData
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

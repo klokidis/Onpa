@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.stt
+package com.example.ptyxiakh.viewmodels
 
 import android.app.Application
 import android.content.Intent
