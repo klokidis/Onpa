@@ -24,10 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -41,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,14 +47,8 @@ fun SignUp(
     userViewModel: UserViewModel = hiltViewModel(),
 ) {
     var name by rememberSaveable { mutableStateOf("") }
-    var isVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        delay(100) // Small delay before starting animation
-        isVisible = true
-    }
 
     Column(
         modifier = Modifier
@@ -87,7 +78,7 @@ fun SignUp(
             textAlign = TextAlign.Center
         )
         Text(
-            text = stringResource(R.string.sign_up_details),
+            text = stringResource(R.string.sign_up_meaning),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()

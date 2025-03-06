@@ -2,12 +2,7 @@
     <string name="app_name">Ptyxiakh</string>
     <string name="action_go">Go</string>
     <string name="ai">Ai</string>
-    <string name="baking_title">Baking with Gemini</string>
     <string name="label_prompt">Prompt</string>
-    <string name="prompt_placeholder">Provide a recipe for the baked goods in the image</string>
-    <string name="image1_description">Cupcake</string>
-    <string name="image2_description">Cookies</string>
-    <string name="image3_description">Cake</string>
     <string name="results_placeholder">(Results will appear here)</string>
     <string name="back">Navigate back</string>
     <string name="settings">Settings</string>
@@ -16,8 +11,11 @@
     <string name="welcome">Welcome to Oto!</string>
     <string name="app_details">"AI-powered app that helps with communication and sound awareness! "</string>
     <string name="sign_up">Sign up</string>
-    <string name="sign_up_details">just a few things to get started</string>
+    <string name="sign_up_meaning">just a few things to get started</string>
     <string name="enter_name">Enter your name</string>
     <string name="next_screen_icon">Next screen icon</string>
     <string name="user_icon">User icon</string>
+    <string name="data_icon">Data icon</string>
+    <string name="user_details">User details</string>
+    <string name="user_details_meaning">adding details about yourself helps improve the AI\'s suggested responses.</string>
 </resources>
