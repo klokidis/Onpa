@@ -18,4 +18,6 @@
     <string name="sign_up">Sign up</string>
     <string name="sign_up_details">just a few things to get started</string>
     <string name="enter_name">Enter your name</string>
+    <string name="next_screen_icon">Next screen icon</string>
+    <string name="user_icon">User icon</string>
 </resources>

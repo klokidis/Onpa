@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ptyxiakh.data.viewmodels.UserDataViewModel
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
 
 enum class AppScreens {
@@ -30,9 +31,11 @@ enum class AppScreens {
 @Composable
 fun NavigationScreen(
     userViewModel: UserViewModel = hiltViewModel(),
+    userDataViewModel: UserDataViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     val userUiState by userViewModel.userUiState.collectAsState()
+    val userDataUiState by userDataViewModel.userDataUiState.collectAsState()
 
     Scaffold(
         modifier = Modifier.safeDrawingPadding()
@@ -41,7 +44,7 @@ fun NavigationScreen(
             navController = navController,
             startDestination = when {
                 userUiState.isLoading -> AppScreens.Loading.name
-                userUiState.users.isEmpty() -> AppScreens.Welcome.name
+                userDataUiState.userData.isEmpty() -> AppScreens.Welcome.name
                 else -> AppScreens.Main.name
             },
             modifier = Modifier.padding(paddingValues),
@@ -63,7 +66,9 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.SignUp.name
             ) {
-                SignUp()
+                SignUp(
+                    navigate = { navController.navigate(AppScreens.Main.name) }
+                )
             }
             composable(
                 route = AppScreens.Main.name,

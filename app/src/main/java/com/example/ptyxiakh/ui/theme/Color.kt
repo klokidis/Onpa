@@ -2,7 +2,7 @@ package com.example.ptyxiakh.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF694FB6)
+val primaryLight = Color(0xFF415F91)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFD6E3FF)
 val onPrimaryContainerLight = Color(0xFF001B3E)

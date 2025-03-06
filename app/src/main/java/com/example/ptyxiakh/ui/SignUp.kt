@@ -3,6 +3,7 @@ package com.example.ptyxiakh.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +15,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,14 +42,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.data.viewmodels.UserViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUp(
+    navigate: () -> Unit,
     userViewModel: UserViewModel = hiltViewModel(),
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         delay(100) // Small delay before starting animation
@@ -109,17 +116,42 @@ fun SignUp(
             keyboardActions = KeyboardActions(
                 onDone = {
                     if (name.trim().isNotEmpty()) {
-
+                        coroutineScope.launch {
+                            userViewModel.addUser(name.trim())
+                        }
+                        navigate()
                     }
                 }
             ),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "User Icon"
+                    contentDescription = stringResource(R.string.user_icon)
                 )
             },
             shape = RoundedCornerShape(20.dp)
         )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(modifier = Modifier.padding(20.dp)) {
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = {
+                    if (name.trim().isNotEmpty()) {
+                        coroutineScope.launch {
+                            userViewModel.addUser(name.trim())
+                        }
+                        navigate()
+                    }
+                },
+                enabled = name.trim().isNotEmpty()
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.next_screen_icon)
+                )
+            }
+        }
     }
 }

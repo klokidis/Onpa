@@ -27,7 +27,7 @@ class UserDataViewModel @Inject constructor(
     private val _userDataUiState = MutableStateFlow(UserDataUiState(isLoading = true))
 
     // Using stateIn to retain the state across configuration changes
-    val userUiState: StateFlow<UserDataUiState> = _userDataUiState
+    val userDataUiState: StateFlow<UserDataUiState> = _userDataUiState
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),

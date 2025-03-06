@@ -20,24 +20,33 @@ class UserViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val userUiState: StateFlow<UserUiState> =
-        userRepository.getAllUsers()
-            .map { user ->
-                UserUiState(users = user, isLoading = false)
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = UserUiState(isLoading = true)
-            )
+    private val _userUiState = MutableStateFlow(UserUiState(isLoading = true))
+    val userUiState: StateFlow<UserUiState> = _userUiState.asStateFlow()
 
-
-    fun addUser(name: String): Int {
-        var userId = 0
+    init {
         viewModelScope.launch {
-            val user = User(userName = name)
-            userId = userRepository.insertUser(user).toInt()
+            userRepository.getAllUsers()
+                .collect { users ->
+                    _userUiState.value = UserUiState(
+                        users = users,
+                        selectedUser = users.firstOrNull(),
+                        isLoading = false
+                    )
+                }
         }
+    }
+
+    suspend fun addUser(name: String): Int {
+        val user = User(userName = name)
+        val userId = userRepository.insertUser(user).toInt()
+
+        // Update UI state after adding a new user
+        val updatedUsers = userRepository.getAllUsers().first()
+        _userUiState.value = _userUiState.value.copy(
+            users = updatedUsers,
+            selectedUser = _userUiState.value.selectedUser ?: updatedUsers.firstOrNull()
+        )
+
         return userId
     }
 
