@@ -77,9 +77,7 @@ fun NavigationScreen(
             ) {
                 SignUp(
                     navigate = {
-                        navController.navigate(AppScreens.UserDetails.name) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                        navController.popBackStack()
                     }
                 )
             }
@@ -95,7 +93,6 @@ fun NavigationScreen(
             }
             composable(
                 route = AppScreens.Main.name,
-                enterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Slide in from the left
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) } // Slide out to the left
             ) {
                 MainScreen(
@@ -105,8 +102,6 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.Settings.name,
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) }, // Slide in from the right
-                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) } // Slide out to the right
-
             ) {
                 SettingsScreen(
                     navigateMainScreen = {
