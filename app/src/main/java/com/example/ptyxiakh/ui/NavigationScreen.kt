@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -38,14 +39,21 @@ fun NavigationScreen(
     val userUiState by userViewModel.userUiState.collectAsState()
     val userDataUiState by userDataViewModel.userDataUiState.collectAsState()
 
+    LaunchedEffect(userUiState.selectedUser?.userId) { //load the userdata based on the selected id
+        if (userUiState.selectedUser?.userId != null) {
+            userDataViewModel.loadUserData(userUiState.selectedUser!!.userId)
+        }
+    }
+
     Scaffold(
         modifier = Modifier.safeDrawingPadding()
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = when {
-                userUiState.isLoading -> AppScreens.Loading.name
-                userDataUiState.userData.isEmpty() -> AppScreens.Welcome.name
+                userUiState.isLoading || userDataUiState.isLoading -> AppScreens.Loading.name
+                userUiState.users.isEmpty() -> AppScreens.Welcome.name
+                userDataUiState.userData.isEmpty() -> AppScreens.UserDetails.name
                 else -> AppScreens.Main.name
             },
             modifier = Modifier.padding(paddingValues),
@@ -79,7 +87,10 @@ fun NavigationScreen(
                 route = AppScreens.UserDetails.name
             ) {
                 UserDetailsScreen(
-                    navigate = { navController.navigate(AppScreens.Main.name) }
+                    user = userUiState.selectedUser,
+                    userData = userDataUiState.userData,
+                    navigate = { navController.navigate(AppScreens.Main.name) },
+                    addOneUserData = userDataViewModel::addFavorite
                 )
             }
             composable(

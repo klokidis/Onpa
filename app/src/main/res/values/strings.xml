@@ -18,4 +18,10 @@
     <string name="data_icon">Data icon</string>
     <string name="user_details">User details</string>
     <string name="user_details_meaning">adding details about yourself helps improve the AI\'s suggested responses.</string>
+    <string name="for_user">"for user "</string>
+    <string name="name">Name</string>
+    <string name="arrow">Arrow showing to value</string>
+    <string name="remove">Remove last data detail</string>
+    <string name="add">Add new detail</string>
+    <string name="create_account">Create account</string>
 </resources>
