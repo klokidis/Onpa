@@ -24,4 +24,6 @@
     <string name="remove">Remove last data detail</string>
     <string name="add">Add new detail</string>
     <string name="create_account">Create account</string>
+    <string name="category">Category</string>
+    <string name="value">Value</string>
 </resources>

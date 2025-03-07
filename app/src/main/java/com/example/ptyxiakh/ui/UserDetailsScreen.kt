@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -99,7 +100,7 @@ fun UserDetailsScreen(
                 .padding(
                     start = 10.dp,
                     end = 10.dp,
-                    bottom = 20.dp
+                    bottom = 5.dp
                 ),
             textAlign = TextAlign.Center
         )
@@ -112,10 +113,34 @@ fun UserDetailsScreen(
                 .padding(
                     start = 10.dp,
                     end = 10.dp,
-                    bottom = 20.dp
+                    bottom = 10.dp
                 ),
             textAlign = TextAlign.Center
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 10.dp,
+                    end = 30.dp,
+                    bottom = 5.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.category),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.padding(start = 140.dp))
+            Text(
+                text = stringResource(R.string.value),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
+            )
+        }
 
         if (userData.isEmpty()) {//first data
             UserData(firstList)
@@ -127,17 +152,22 @@ fun UserDetailsScreen(
             NewUserData(index, userDetailsViewModel::editValuesBasedOnLength)
         }
 
-        ListButtons(userDetailsViewModel::addLine,userDetailsViewModel::minusLine)
+        ListButtons(userDetailsViewModel::addLine, userDetailsViewModel::minusLine)
 
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = {
-                addOneUserData(user?.userId ?: 0, firstList.first().category, firstList.first().value)
+                addOneUserData(
+                    user?.userId ?: 0,
+                    firstList.first().category,
+                    firstList.first().value
+                )
                 if (user?.userId != null && userDetailsUiState.newUserDetails.isNotEmpty()) {
-                    navigate()
                     userDetailsUiState.newUserDetails.forEachIndexed { index, pair ->
-                        addOneUserData(user.userId, pair.first, pair.second)
+                        if (pair.first.trim().isNotEmpty() && pair.second.trim().isNotEmpty()) {
+                            addOneUserData(user.userId, pair.first, pair.second)
+                        }
                     }
                 } else {
                     navigate()
