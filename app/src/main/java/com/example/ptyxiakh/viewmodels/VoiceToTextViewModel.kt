@@ -39,15 +39,22 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     fun startListening(languageCode: String) {
         val context = getApplication<Application>().applicationContext
-
+        _sttState.update { it.copy(isSpeaking = true) }
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             _sttState.update { it.copy(availableSTT = false) }
             recognizer.stopListening()
+            Log.d(TAG, "not available")
         } else {
             Log.d(TAG, "Starting recognition with language: $languageCode")
             val intent = createRecognizerIntent(languageCode)
             recognizer.startListening(intent)
-            _sttState.update { it.copy(availableSTT = true, isSpeaking = true, offlineError = false) }
+            _sttState.update {
+                it.copy(
+                    availableSTT = true,
+                    isSpeaking = true,
+                    offlineError = false
+                )
+            }
         }
     }
 
@@ -104,7 +111,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         Log.e(TAG, "Recognition error: $errorMessage")
 
         // Retry recognition for recoverable errors
-        if (_sttState.value.isSpeaking && isRecoverableError(error)) {
+        if (sttState.value.isSpeaking && isRecoverableError(error)) {
             Log.d(TAG, "Retrying recognition...")
             startListening(sttState.value.language)
         } else {
@@ -152,7 +159,10 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         val spokenText =
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         spokenText?.let {
-            if (sttState.value.aiClicked && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(" ").length) {
+            if (sttState.value.aiClicked && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(
+                    " "
+                ).length
+            ) {
                 changeSpokenPromptText() //if the final result is smaller than the Partial Result
             }
             Log.d(TAG, "Final result: $it")
@@ -205,7 +215,8 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             state.copy(
                 aiClicked = true,
                 spokenPromptText = (state.fullTranscripts + state.partialTranscripts)
-                    .joinToString(" ").replaceFirst("\" ", "\"") // Converts list to a string with spaces
+                    .joinToString(" ")
+                    .replaceFirst("\" ", "\"") // Converts list to a string with spaces
                     .replace(",", "") // Removes commas
                     .replace(Regex("\\s+"), " ") // Replaces multiple spaces with a single space
                     .trim() // Ensures no leading/trailing spaces

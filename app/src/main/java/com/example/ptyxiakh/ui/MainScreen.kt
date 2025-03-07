@@ -2,6 +2,7 @@ package com.example.ptyxiakh.ui
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -136,6 +137,7 @@ fun MainScreen(
         )
         ResultsLazyList(
             uiState = responseUiState,
+            isListening = sttState.isSpeaking,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             answersList = resultUiState.answersList,
             stopListening = voiceToTextViewModel::stopListening,
@@ -171,7 +173,8 @@ fun ResultsLazyList(
     answersList: List<String>,
     startListening: (String) -> Unit,
     stopListening: () -> Unit,
-    weightModifier: Modifier
+    weightModifier: Modifier,
+    isListening: Boolean
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -180,7 +183,6 @@ fun ResultsLazyList(
             startListening("el-GR")
         }
     }
-
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
         if (answersList.isNotEmpty()) {
@@ -197,7 +199,7 @@ fun ResultsLazyList(
     ) {
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
-                ResultCard(answer, tts, stopListening)
+                ResultCard(answer, tts, stopListening,isListening)
             }
         }
         item {
@@ -238,6 +240,7 @@ fun ResultCard(
     result: String,
     tts: MutableState<TextToSpeech?>,
     stopListening: () -> Unit,
+    isListening: Boolean,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -253,7 +256,9 @@ fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
-            stopListening()
+            if(isListening) {
+                stopListening()
+            }
             tts.value?.speak(
                 result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
@@ -437,6 +442,8 @@ fun TextFieldUpperButtons(
             TextFieldWithInsideIcon(
                 stopListening = stopListening,
                 startListening = startListening,
+                changeLanguage = changeLanguage,
+                isListening = isListening,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -484,6 +491,7 @@ fun OutlinedCustomIconButton(
     isListening: Boolean,
     isEnabled: Boolean,
 ) {
+    Log.d("klok", isListening.toString())
     OutlinedButton(
         onClick = {
             when {
@@ -522,6 +530,8 @@ fun TextFieldWithInsideIcon(
     modifier: Modifier = Modifier,
     stopListening: () -> Unit,
     startListening: (String) -> Unit,
+    changeLanguage: (String) -> Unit,
+    isListening: Boolean
 ) {
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
@@ -530,6 +540,7 @@ fun TextFieldWithInsideIcon(
 
     val tts = rememberTextToSpeech {
         coroutineScope.launch {
+            changeLanguage("el-GR")
             startListening("el-GR")
         }
     }
@@ -559,7 +570,9 @@ fun TextFieldWithInsideIcon(
                 )
                 OutlinedButton(
                     onClick = {
-                        stopListening()
+                        if (isListening) {
+                            stopListening()
+                        }
                         tts.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
                         )
