@@ -45,7 +45,7 @@ fun Welcome(
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        delay(300) // Small delay before starting animation
+        delay(100) // Small delay before starting animation
         isVisible = true
     }
 
@@ -56,7 +56,7 @@ fun Welcome(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.padding(10.dp))
         AnimatedVisibility(
             visible = isVisible,
             enter = fadeIn(animationSpec = tween(800)) + slideInHorizontally(

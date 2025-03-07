@@ -71,7 +71,7 @@ fun UserDetailsScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.padding(10.dp))
         Icon(
             modifier = Modifier
                 .size(170.dp),

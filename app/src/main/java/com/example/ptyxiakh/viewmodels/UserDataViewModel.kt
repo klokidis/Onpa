@@ -47,6 +47,19 @@ class UserDataViewModel @Inject constructor(
         }
     }
 
+    fun loadAllUserData() {
+        viewModelScope.launch {
+            repository.getAllUserData().collect { data ->
+                _userDataUiState.update { currentState ->
+                    currentState.copy(
+                        userData = data,
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
     fun addFavorite(userId: Int, category: String, value: String) {
         viewModelScope.launch {
             repository.insertUserData(

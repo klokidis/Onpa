@@ -13,6 +13,9 @@ class UserDataRepository @Inject constructor(
     fun getAllUserDataById(userId: Int): Flow<List<UserData>> =
         userDataDao.getUserDataForUser(userId = userId)
 
+    fun getAllUserData(): Flow<List<UserData>> =
+        userDataDao.getUserAllData()
+
     suspend fun insertUserData(userData: UserData) {
         userDataDao.insertUserDataItem(userData)
     }
