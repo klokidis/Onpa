@@ -17,6 +17,7 @@ data class VoiceToTextState(
     val fullTranscripts: List<String> = emptyList(),
     val partialTranscripts: List<String> = emptyList(),
     val isSpeaking: Boolean = false,
+    val canRunAgain: Boolean = true, //so it doesn't loop
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
     val aiClicked: Boolean = false,
@@ -206,6 +207,14 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         _sttState.update { state ->
             state.copy(
                 language = newLanguage,
+            )
+        }
+    }
+
+    fun changeCanRunAgain(newValue: Boolean) {
+        _sttState.update { state ->
+            state.copy(
+                canRunAgain = newValue,
             )
         }
     }

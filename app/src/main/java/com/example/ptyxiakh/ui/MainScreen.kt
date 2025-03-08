@@ -144,6 +144,7 @@ fun MainScreen(
             answersList = resultUiState.answersList,
             stopListening = voiceToTextViewModel::stopListening,
             startListening = voiceToTextViewModel::startListening,
+            changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
             weightModifier = Modifier.weight(1f)
         )
 
@@ -158,7 +159,8 @@ fun MainScreen(
             changeLanguage = voiceToTextViewModel::changeLanguage,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
-            isEnabled = true,
+            changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
+            isEnabled = sttState.canRunAgain,
             isListening = sttState.isSpeaking,
             prompt = {
                 (sttState.fullTranscripts + sttState.partialTranscripts)
@@ -177,15 +179,19 @@ fun ResultsLazyList(
     startListening: (String) -> Unit,
     stopListening: () -> Unit,
     weightModifier: Modifier,
-    isListening: Boolean
+    isListening: Boolean,
+    changeCanRunAgain: (Boolean) -> Unit
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val tts = rememberTextToSpeech {
-        coroutineScope.launch {
-            startListening("el-GR")
+    val tts = rememberTextToSpeech(
+        onFinished = {
+            coroutineScope.launch {
+                changeCanRunAgain(true)
+                startListening("el-GR")
+            }
         }
-    }
+    )
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
         if (answersList.isNotEmpty()) {
@@ -202,7 +208,9 @@ fun ResultsLazyList(
     ) {
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
-                ResultCard(answer, tts, stopListening,isListening)
+                ResultCard(
+                    answer, tts, stopListening, isListening
+                ) { changeCanRunAgain(false) }
             }
         }
         item {
@@ -244,6 +252,7 @@ fun ResultCard(
     tts: MutableState<TextToSpeech?>,
     stopListening: () -> Unit,
     isListening: Boolean,
+    canRecordFun: () -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -259,9 +268,10 @@ fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
-            if(isListening) {
+            if (isListening) {
                 stopListening()
             }
+            canRecordFun()
             tts.value?.speak(
                 result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
@@ -417,6 +427,7 @@ fun TextFieldUpperButtons(
     prompt: () -> String,
     changeSpokenPromptText: () -> Unit,
     userData: List<UserData>,
+    changeCanRunAgain: (Boolean) -> Unit,
 ) {
     Column {
         Row(
@@ -449,6 +460,7 @@ fun TextFieldUpperButtons(
                 startListening = startListening,
                 changeLanguage = changeLanguage,
                 isListening = isListening,
+                changeCanRunAgain = changeCanRunAgain,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -468,7 +480,7 @@ fun OutlinedCustomButton(
 
     OutlinedButton(
         onClick = {
-            sendPrompt(prompt(),userData)
+            sendPrompt(prompt(), userData)
             changeSpokenPromptText()
         },
         enabled = isEnabled,
@@ -537,19 +549,23 @@ fun TextFieldWithInsideIcon(
     stopListening: () -> Unit,
     startListening: (String) -> Unit,
     changeLanguage: (String) -> Unit,
-    isListening: Boolean
+    isListening: Boolean,
+    changeCanRunAgain: (Boolean) -> Unit
 ) {
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
     var prompt by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    val tts = rememberTextToSpeech {
-        coroutineScope.launch {
-            changeLanguage("el-GR")
-            startListening("el-GR")
+    val tts = rememberTextToSpeech(
+        onFinished = {
+            coroutineScope.launch {
+                changeCanRunAgain(true)
+                changeLanguage("el-GR")
+                startListening("el-GR")
+            }
         }
-    }
+    )
 
     OutlinedTextField(
         value = prompt,
@@ -579,6 +595,7 @@ fun TextFieldWithInsideIcon(
                         if (isListening) {
                             stopListening()
                         }
+                        changeCanRunAgain(false)
                         tts.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
                         )
