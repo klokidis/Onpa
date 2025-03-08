@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ptyxiakh.BuildConfig
 import com.example.ptyxiakh.model.ResponseState
+import com.example.ptyxiakh.model.UserData
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
@@ -35,16 +36,21 @@ class GeminiViewModel : ViewModel() {
     )
 
     fun sendPrompt(
-        prompt: String
+        prompt: String,
+        userData: List<UserData>
     ) {
         _responseState.value = ResponseState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                val userContext = userData.joinToString(", ") { "${it.category}: ${it.value}" }
+
                 val response = generativeModel.generateContent(
                     content {
                         text(
-                            "Generate three distinct responses to: $prompt, Each with a different mood. Separate with 1, 2, and 3. Avoid emojis or excess phrasing."
+                            "Prompt: \"$prompt\"\n\n" +
+                                    "User context: $userContext\n" +
+                                    "Generate three distinct responses with different moods as if you were the user. Number them (1, 2, 3). Avoid emojis and unnecessary phrasing."
                         )
                     }
                 )
@@ -56,6 +62,8 @@ class GeminiViewModel : ViewModel() {
                         )
                     }
                     Log.d("response", outputContent)
+                    Log.d("response edited", resultUiState.value.answersList.toString() )
+                    Log.d("user", userContext)
                 }
             } catch (e: Exception) {
                 _responseState.value = ResponseState.Error(e.localizedMessage ?: "")
@@ -65,14 +73,17 @@ class GeminiViewModel : ViewModel() {
 
     private fun editResults(answer: String): List<String> {
         val emojiRegex = Regex("[\\p{So}\\p{Cn}]") // Matches most emojis
-        return answer
+        val cleanedAnswer = answer
             .replace("**", "") // Remove bold markers
             .replace("*", "") // Remove bold markers
             .replace("...", "") // Remove ellipses
             .replace(emojiRegex, "") // Remove emojis
             .replace(Regex(" - .*?(?=\n|$)"), "") // Remove text after " - " until the end of the line
             .replace(Regex("\\(.*?\\)"), "") // Remove (..)
-            .split(Regex("\\d\\.?\\s*")) // Split by numbers, optional periods, and spaces
-            .filter { it.isNotBlank() } // Remove empty entries
+
+        val regex = Regex("(?:^|\\n)\\s*\\d+\\.\\s*(.*?)(?=\\s*(?:\\n\\s*\\d+\\.|$))", RegexOption.DOT_MATCHES_ALL)
+        return regex.findAll(cleanedAnswer)
+            .map { it.groupValues[1].trim() } // Extract the matched text and trim whitespace
+            .toList()
     }
 }

@@ -76,6 +76,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.model.ResponseState
+import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
 import kotlinx.coroutines.launch
@@ -85,7 +86,8 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navigateSettings: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel(),
-    voiceToTextViewModel: VoiceToTextViewModel = viewModel()
+    voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
+    userData: List<UserData>
 ) {
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
@@ -152,6 +154,7 @@ fun MainScreen(
     ) {
         TextFieldUpperButtons(
             geminiViewModel::sendPrompt,
+            userData = userData,
             changeLanguage = voiceToTextViewModel::changeLanguage,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
@@ -405,7 +408,7 @@ fun TopButtons(navigateSettings: () -> Unit) {
 
 @Composable
 fun TextFieldUpperButtons(
-    sendPrompt: (String) -> Unit,
+    sendPrompt: (String, List<UserData>) -> Unit,
     startListening: (String) -> Unit,
     changeLanguage: (String) -> Unit,
     stopListening: () -> Unit,
@@ -413,6 +416,7 @@ fun TextFieldUpperButtons(
     isEnabled: Boolean,
     prompt: () -> String,
     changeSpokenPromptText: () -> Unit,
+    userData: List<UserData>,
 ) {
     Column {
         Row(
@@ -429,6 +433,7 @@ fun TextFieldUpperButtons(
             Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(
                 sendPrompt = sendPrompt,
+                userData = userData,
                 prompt = prompt,
                 changeSpokenPromptText = changeSpokenPromptText
             )
@@ -454,7 +459,8 @@ fun TextFieldUpperButtons(
 
 @Composable
 fun OutlinedCustomButton(
-    sendPrompt: (String) -> Unit,
+    sendPrompt: (String, List<UserData>) -> Unit,
+    userData: List<UserData>,
     prompt: () -> String,
     changeSpokenPromptText: () -> Unit
 ) {
@@ -462,7 +468,7 @@ fun OutlinedCustomButton(
 
     OutlinedButton(
         onClick = {
-            sendPrompt(prompt())
+            sendPrompt(prompt(),userData)
             changeSpokenPromptText()
         },
         enabled = isEnabled,
