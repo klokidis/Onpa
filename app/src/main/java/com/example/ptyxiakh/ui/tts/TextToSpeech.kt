@@ -23,7 +23,7 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
                 tts.value?.language = Locale.US
                 tts.value?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
-                        // Speech started
+                        Log.d("availableLanguages", tts.value?.availableLanguages.toString())
                     }
 
                     override fun onDone(utteranceId: String?) {

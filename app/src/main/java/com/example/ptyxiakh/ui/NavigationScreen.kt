@@ -98,6 +98,7 @@ fun NavigationScreen(
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) } // Slide out to the left
             ) {
                 MainScreen(
+                    selectedUser = userUiState.selectedUser,
                     navigateSettings = { navController.navigate(AppScreens.Settings.name) },
                     userData = userDataUiState.userData,
                 )

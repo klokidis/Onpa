@@ -14,12 +14,16 @@ class UserRepository @Inject constructor(
 
     fun getAllUsers(): Flow<List<User>> = userDao.getAllUsers()
 
-    suspend fun insertUser(user: User): Long { //maybe return?
+    suspend fun insertUser(user: User): Long {
         return userDao.insertUser(user)
     }
 
     suspend fun updateUserName(userId: Int, newName: String) {
         userDao.updateUserName(userId, newName)
+    }
+
+    suspend fun updateVoiceLanguage(userId: Int, newLanguage: String) {
+        userDao.updateUserLanguage(userId, newLanguage)
     }
 
     suspend fun deleteUser(userId: Int) {

@@ -19,6 +19,9 @@ interface UserDao {
     @Query("UPDATE users SET userName = :newName WHERE userId = :userId")
     suspend fun updateUserName(userId: Int, newName: String)
 
+    @Query("UPDATE users SET voiceLanguage = :newLanguage WHERE userId = :userId")
+    suspend fun updateUserLanguage(userId: Int, newLanguage: String)
+
     @Query("SELECT * FROM users")
     fun getAllUsers(): Flow<List<User>>
 

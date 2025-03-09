@@ -36,8 +36,8 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    suspend fun addUser(name: String): Int {
-        val user = User(userName = name)
+    suspend fun addUser(name: String,language: String): Int {
+        val user = User(userName = name, voiceLanguage = language)
         val userId = userRepository.insertUser(user).toInt()
 
         // Update UI state after adding a new user

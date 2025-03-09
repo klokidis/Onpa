@@ -38,7 +38,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         Log.d(TAG, "VoiceToTextViewModel initialized")
     }
 
-    fun startListening(languageCode: String) {
+    fun startListening() {
         val context = getApplication<Application>().applicationContext
         _sttState.update { it.copy(isSpeaking = true) }
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
@@ -46,8 +46,8 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             recognizer.stopListening()
             Log.d(TAG, "not available")
         } else {
-            Log.d(TAG, "Starting recognition with language: $languageCode")
-            val intent = createRecognizerIntent(languageCode)
+            Log.d(TAG, "Starting recognition with language: ${sttState.value.language}")
+            val intent = createRecognizerIntent(sttState.value.language)
             recognizer.startListening(intent)
             _sttState.update {
                 it.copy(
@@ -114,7 +114,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         // Retry recognition for recoverable errors
         if (sttState.value.isSpeaking && isRecoverableError(error)) {
             Log.d(TAG, "Retrying recognition...")
-            startListening(sttState.value.language)
+            startListening()
         } else {
             _sttState.update { it.copy(isSpeaking = false) }
         }
@@ -176,7 +176,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
             }
         }
         if (sttState.value.isSpeaking) {
-            startListening(sttState.value.language) // Restart listening
+            startListening() // Restart listening
         }
     }
 

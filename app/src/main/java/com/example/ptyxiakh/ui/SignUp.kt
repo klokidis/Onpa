@@ -1,7 +1,8 @@
 package com.example.ptyxiakh.ui
 
-
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,9 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -49,6 +53,9 @@ fun SignUp(
     var name by rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var isDropDownMenuClicked by remember { mutableStateOf(false) }
+    val availableLanguages = listOf<String>("en", "el-GR")
+    var selectedLanguage by rememberSaveable { mutableStateOf(availableLanguages[0]) }
 
     Column(
         modifier = Modifier
@@ -104,16 +111,6 @@ fun SignUp(
                 .padding(start = 25.dp, end = 25.dp),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (name.trim().isNotEmpty()) {
-                        coroutineScope.launch {
-                            userViewModel.addUser(name.trim())
-                        }
-                        navigate()
-                    }
-                }
-            ),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
@@ -123,6 +120,60 @@ fun SignUp(
             shape = RoundedCornerShape(20.dp)
         )
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp, start = 30.dp, end = 30.dp, bottom = 5.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.select_language),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(modifier = Modifier.clickable {
+                isDropDownMenuClicked = true
+            }) {
+                Text(
+                    if (selectedLanguage == "en") {
+                        stringResource(R.string.eng)
+                    } else {
+                        stringResource(R.string.gr)
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                DropdownMenu(
+                    expanded = isDropDownMenuClicked,
+                    modifier = Modifier.wrapContentSize(),
+                    onDismissRequest = { isDropDownMenuClicked = false }
+                ) {
+                    Row {
+                        Column {
+                            availableLanguages.forEach { language ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectedLanguage = language
+                                        isDropDownMenuClicked = false
+                                    },
+                                    text = {
+                                        Text(
+                                            if (language == "en") {
+                                                stringResource(R.string.eng)
+                                            } else {
+                                                stringResource(R.string.gr)
+                                            },
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         Row(modifier = Modifier.padding(20.dp)) {
@@ -131,7 +182,7 @@ fun SignUp(
                 onClick = {
                     if (name.trim().isNotEmpty()) {
                         coroutineScope.launch {
-                            userViewModel.addUser(name.trim())
+                            userViewModel.addUser(name.trim(), selectedLanguage)
                         }
                     }
                 },

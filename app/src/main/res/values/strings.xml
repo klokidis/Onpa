@@ -26,4 +26,7 @@
     <string name="create_account">Create account</string>
     <string name="category">Category</string>
     <string name="value">Value</string>
+    <string name="select_language">Select voice language</string>
+    <string name="eng">English</string>
+    <string name="gr">Greek</string>
 </resources>

@@ -76,6 +76,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.model.ResponseState
+import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
@@ -87,7 +88,8 @@ fun MainScreen(
     navigateSettings: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
-    userData: List<UserData>
+    userData: List<UserData>,
+    selectedUser: User?
 ) {
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
@@ -101,6 +103,14 @@ fun MainScreen(
             canRecord = isGranted
         }
     )
+
+
+    LaunchedEffect(selectedUser?.voiceLanguage) {
+        if (selectedUser?.voiceLanguage != null) {
+            Log.d("changed", selectedUser.voiceLanguage.toString())
+            voiceToTextViewModel.changeLanguage(selectedUser.voiceLanguage)
+        }
+    }
 
     LaunchedEffect(recordAudioLauncher) {
         recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -156,7 +166,6 @@ fun MainScreen(
         TextFieldUpperButtons(
             geminiViewModel::sendPrompt,
             userData = userData,
-            changeLanguage = voiceToTextViewModel::changeLanguage,
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
@@ -176,7 +185,7 @@ fun ResultsLazyList(
     uiState: ResponseState,
     modifier: Modifier,
     answersList: List<String>,
-    startListening: (String) -> Unit,
+    startListening: () -> Unit,
     stopListening: () -> Unit,
     weightModifier: Modifier,
     isListening: Boolean,
@@ -188,7 +197,7 @@ fun ResultsLazyList(
         onFinished = {
             coroutineScope.launch {
                 changeCanRunAgain(true)
-                startListening("el-GR")
+                startListening()
             }
         }
     )
@@ -419,8 +428,7 @@ fun TopButtons(navigateSettings: () -> Unit) {
 @Composable
 fun TextFieldUpperButtons(
     sendPrompt: (String, List<UserData>) -> Unit,
-    startListening: (String) -> Unit,
-    changeLanguage: (String) -> Unit,
+    startListening: () -> Unit,
     stopListening: () -> Unit,
     isListening: Boolean,
     isEnabled: Boolean,
@@ -439,7 +447,6 @@ fun TextFieldUpperButtons(
                 stopListening = stopListening,
                 isListening = isListening,
                 isEnabled = isEnabled,
-                changeLanguage = changeLanguage,
             )
             Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(
@@ -458,7 +465,6 @@ fun TextFieldUpperButtons(
             TextFieldWithInsideIcon(
                 stopListening = stopListening,
                 startListening = startListening,
-                changeLanguage = changeLanguage,
                 isListening = isListening,
                 changeCanRunAgain = changeCanRunAgain,
                 modifier = Modifier
@@ -503,9 +509,8 @@ fun OutlinedCustomButton(
 
 @Composable
 fun OutlinedCustomIconButton(
-    startListening: (String) -> Unit,
+    startListening: () -> Unit,
     stopListening: () -> Unit,
-    changeLanguage: (String) -> Unit,
     isListening: Boolean,
     isEnabled: Boolean,
 ) {
@@ -518,8 +523,7 @@ fun OutlinedCustomIconButton(
                 }
 
                 else -> {
-                    changeLanguage("el-GR")
-                    startListening("el-GR")
+                    startListening()
                 }
             }
         },
@@ -547,8 +551,7 @@ fun OutlinedCustomIconButton(
 fun TextFieldWithInsideIcon(
     modifier: Modifier = Modifier,
     stopListening: () -> Unit,
-    startListening: (String) -> Unit,
-    changeLanguage: (String) -> Unit,
+    startListening: () -> Unit,
     isListening: Boolean,
     changeCanRunAgain: (Boolean) -> Unit
 ) {
@@ -561,8 +564,7 @@ fun TextFieldWithInsideIcon(
         onFinished = {
             coroutineScope.launch {
                 changeCanRunAgain(true)
-                changeLanguage("el-GR")
-                startListening("el-GR")
+                startListening()
             }
         }
     )
