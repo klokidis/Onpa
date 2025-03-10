@@ -134,7 +134,7 @@ fun UserDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.padding(start = 140.dp))
+            Spacer(modifier = Modifier.padding(start = 115.dp))
             Text(
                 text = stringResource(R.string.value),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
@@ -195,7 +195,7 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 39.dp, end = 39.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = 30.dp, end = 30.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -204,7 +204,7 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
                 minusLast()
             },
             modifier = Modifier
-                .width(130.dp),
+                .weight(1f),
             contentPadding = PaddingValues(0.dp),
         ) {
             Icon(
@@ -212,13 +212,13 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
                 contentDescription = stringResource(R.string.remove),
             )
         }
-        Spacer(modifier = Modifier.padding(start = 65.dp))
+        Spacer(modifier = Modifier.padding(start = 60.dp))
         Button(
             onClick = {
                 addLine()
             },
             modifier = Modifier
-                .width(130.dp),
+                .weight(1f),
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
@@ -260,14 +260,12 @@ fun NewUserData(
             singleLine = true,
             shape = RoundedCornerShape(20.dp)
         )
-        Spacer(modifier = Modifier.padding(5.dp))
         Icon(
             modifier = Modifier
                 .size(50.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
             contentDescription = stringResource(R.string.arrow),
         )
-        Spacer(modifier = Modifier.padding(5.dp))
         OutlinedTextField(
             value = value.value,
             onValueChange = {
@@ -302,14 +300,12 @@ fun UserData(
             horizontalArrangement = Arrangement.Center
         ) {
             OneData(thisData.category)
-            Spacer(modifier = Modifier.padding(5.dp))
             Icon(
                 modifier = Modifier
                     .size(50.dp),
                 imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
                 contentDescription = stringResource(R.string.arrow),
             )
-            Spacer(modifier = Modifier.padding(5.dp))
             OneData(thisData.value)
         }
     }

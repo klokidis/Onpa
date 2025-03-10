@@ -50,7 +50,7 @@ class GeminiViewModel : ViewModel() {
                         text(
                             "Question: \"$prompt\"\n\n" +
                                     "Respond as if you are this person: $userContext\n\n" +
-                                    "With three distinct responses with different moods. Number each response (1, 2, 3). Avoid emojis and unnecessary phrasing."
+                                    "With three simple responses with different moods. Number each response (1, 2, 3). Avoid emojis and unnecessary phrasing."
                         )
                     }
                 )
