@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -123,7 +124,7 @@ fun SignUp(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, start = 30.dp, end = 30.dp, bottom = 5.dp)
+                .padding(top = 30.dp, start = 35.dp, end = 35.dp, bottom = 5.dp)
         ) {
             Text(
                 text = stringResource(R.string.select_language),
@@ -141,6 +142,7 @@ fun SignUp(
                     } else {
                         stringResource(R.string.gr)
                     },
+                    color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 DropdownMenu(
@@ -162,6 +164,11 @@ fun SignUp(
                                                 stringResource(R.string.eng)
                                             } else {
                                                 stringResource(R.string.gr)
+                                            },
+                                            color = if (selectedLanguage == language) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                Color.Gray
                                             },
                                             style = MaterialTheme.typography.bodyMedium
                                         )

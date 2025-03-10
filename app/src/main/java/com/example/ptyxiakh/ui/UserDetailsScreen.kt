@@ -100,11 +100,11 @@ fun UserDetailsScreen(
                 .padding(
                     start = 10.dp,
                     end = 10.dp,
-                    bottom = 5.dp
+                    bottom = 10.dp //5
                 ),
             textAlign = TextAlign.Center
         )
-
+/*
         Text(
             text = stringResource(R.string.for_user) + user?.userName + ":",
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
@@ -117,7 +117,7 @@ fun UserDetailsScreen(
                 ),
             textAlign = TextAlign.Center
         )
-
+*/
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,9 +146,9 @@ fun UserDetailsScreen(
             UserData(firstList)
         }
 
-        UserData(userData)
+        UserData(userData) //saved data
 
-        userDetailsUiState.newUserDetails.forEachIndexed { index, pair ->
+        userDetailsUiState.newUserDetails.forEachIndexed { index, pair -> //new data before saving
             NewUserData(index, userDetailsViewModel::editValuesBasedOnLength)
         }
 
@@ -204,7 +204,7 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
                 minusLast()
             },
             modifier = Modifier
-                .weight(1f),
+                .width(130.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Icon(
@@ -212,13 +212,13 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
                 contentDescription = stringResource(R.string.remove),
             )
         }
-        Spacer(modifier = Modifier.padding(start = 55.dp))
+        Spacer(modifier = Modifier.padding(start = 65.dp))
         Button(
             onClick = {
                 addLine()
             },
             modifier = Modifier
-                .weight(1f),
+                .width(130.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
