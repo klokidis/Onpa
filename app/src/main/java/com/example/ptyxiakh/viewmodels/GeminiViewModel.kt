@@ -31,7 +31,7 @@ class GeminiViewModel : ViewModel() {
     val resultUiState: StateFlow<ResultUiState> = _resultUiState.asStateFlow()
 
     private val generativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash",
+        modelName = "gemini-2.0-flash",
         apiKey = BuildConfig.apiKey
     )
 
@@ -40,7 +40,7 @@ class GeminiViewModel : ViewModel() {
         userData: List<UserData>
     ) {
         _responseState.value = ResponseState.Loading
-
+        Log.d("prompt", prompt)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val userContext = userData.joinToString(", ") { "${it.category}: ${it.value}" }
@@ -48,9 +48,9 @@ class GeminiViewModel : ViewModel() {
                 val response = generativeModel.generateContent(
                     content {
                         text(
-                            "Prompt: \"$prompt\"\n\n" +
-                                    "User context: $userContext\n" +
-                                    "Generate three distinct responses with different moods as if you were the user. Number them (1, 2, 3). Avoid emojis and unnecessary phrasing."
+                            "Question: \"$prompt\"\n\n" +
+                                    "Respond as if you are this person: $userContext\n\n" +
+                                    "With three distinct responses with different moods. Number each response (1, 2, 3). Avoid emojis and unnecessary phrasing."
                         )
                     }
                 )
