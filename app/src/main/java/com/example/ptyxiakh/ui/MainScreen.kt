@@ -319,9 +319,8 @@ fun SpeechToTextUi(
     val scrollState = rememberScrollState()
     val combinedText = listOfSpokenText + listOfSpokenEarlyText
     val fullText = combinedText.joinToString(" ")
-        .removePrefix(" ") //removes the first " "
+        .removePrefix(" ")
         .replace(Regex(" +"), " ") // Replace multiple spaces with a single space
-
 
     LaunchedEffect(combinedText.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
@@ -338,50 +337,50 @@ fun SpeechToTextUi(
             containerColor = Color.Transparent,
         )
     ) {
-        Text(
-            modifier = Modifier
-                .padding(10.dp)
-                .verticalScroll(scrollState),
-            text = buildAnnotatedString {
-                // Ensure the indices are correct for take and drop operations
-                val grayText = fullText.take(spokenTextUsed) // Gray-colored text
-                val defaultText = fullText.drop(spokenTextUsed) // Default-colored text
-
-                // Add the gray text
-                append(grayText)
-                addStyle(
-                    style = SpanStyle(color = Color.Gray),
-                    start = 0,
-                    end = grayText.length
-                )
-
-                // Add the default text
-                append(defaultText)
-                addStyle(
-                    style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
-                    start = grayText.length,
-                    end = grayText.length + defaultText.length
-                )
-            },
-            style = TextStyle(
-                textAlign = TextAlign.Start,
-                fontSize = 26.sp,
-            )
-        )
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp)
+            ) {
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState),
+                    text = buildAnnotatedString {
+                        val grayText = fullText.take(spokenTextUsed)
+                        val defaultText = fullText.drop(spokenTextUsed)
+
+                        append(grayText)
+                        addStyle(
+                            style = SpanStyle(color = Color.Gray),
+                            start = 0,
+                            end = grayText.length
+                        )
+
+                        append(defaultText)
+                        addStyle(
+                            style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
+                            start = grayText.length,
+                            end = grayText.length + defaultText.length
+                        )
+                    },
+                    style = TextStyle(
+                        textAlign = TextAlign.Start,
+                        fontSize = 26.sp,
+                    )
+                )
+            }
             IconButton(
-                onClick = {
-                    clearText()
-                },
+                onClick = { clearText() },
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(5.dp)
             ) {
                 Icon(
-                    modifier = Modifier
-                        .size(27.dp),
+                    modifier = Modifier.size(27.dp),
                     painter = painterResource(R.drawable.mop_24px),
                     contentDescription = stringResource(R.string.clear_text),
                 )
