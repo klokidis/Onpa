@@ -2,6 +2,9 @@ package com.example.ptyxiakh.viewmodels
 
 import android.app.Application
 import android.content.Intent
+import android.media.audiofx.AcousticEchoCanceler
+import android.media.audiofx.AutomaticGainControl
+import android.media.audiofx.NoiseSuppressor
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -31,11 +34,17 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     private val _sttState = MutableStateFlow(VoiceToTextState())
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
 
+    private var noiseSuppressor: NoiseSuppressor? = null //reduce noise
+    private var echoCanceler: AcousticEchoCanceler? = null //remove echo from audio input
+    private var gainControl: AutomaticGainControl? = null //It boosts or reduces the microphone's input gain (volume) dynamically.
+
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(application.applicationContext)
 
     init {
         recognizer.setRecognitionListener(this)
         Log.d(TAG, "VoiceToTextViewModel initialized")
+        // Apply noise reduction
+        enableNoiseReduction()
     }
 
     fun startListening() {
@@ -76,7 +85,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         _sttState.update { it.copy(isSpeaking = false) }
     }
 
-    fun clearTexts(){
+    fun clearTexts() {
         _sttState.update {
             it.copy(
                 fullTranscripts = emptyList(),
@@ -203,6 +212,28 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    private fun enableNoiseReduction() {
+        val audioSessionId = 0 // Default session (let Android decide)
+
+        if (NoiseSuppressor.isAvailable()) {
+            noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+            noiseSuppressor?.enabled = true
+            Log.d(TAG, "NoiseSuppressor enabled")
+        }
+
+        if (AcousticEchoCanceler.isAvailable()) {
+            echoCanceler = AcousticEchoCanceler.create(audioSessionId)
+            echoCanceler?.enabled = true
+            Log.d(TAG, "AcousticEchoCanceler enabled")
+        }
+
+        if (AutomaticGainControl.isAvailable()) {
+            gainControl = AutomaticGainControl.create(audioSessionId)
+            gainControl?.enabled = true
+            Log.d(TAG, "AutomaticGainControl enabled")
+        }
+    }
+
     fun changeLanguage(newLanguage: String) {
         _sttState.update { state ->
             state.copy(
@@ -242,6 +273,9 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         super.onCleared()
         Log.d(TAG, "Clearing resources")
         recognizer.destroy()
+        noiseSuppressor?.release()
+        echoCanceler?.release()
+        gainControl?.release()
     }
 
     companion object {
