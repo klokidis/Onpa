@@ -30,4 +30,9 @@
     <string name="eng">English</string>
     <string name="gr">Greek</string>
     <string name="audio_event_classifier">Detect and classify sounds</string>
+    <string name="sound_recognition">Sound Recognition</string>
+    <string name="sound_recognition_meaning">Press Play to let AI recognize and identify the sounds around you.</string>
+    <string name="stop_sound">Stop Sound Detection</string>
+    <string name="start_sound">Start Sound Detection</string>
+    <string name="sound_detected">Detected sound:</string>
 </resources>

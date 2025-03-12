@@ -234,6 +234,28 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun disableNoiseReduction() {
+        noiseSuppressor?.let {
+            it.enabled = false
+            it.release()
+        }
+        echoCanceler?.let {
+            it.enabled = false
+            it.release()
+        }
+        gainControl?.let {
+            it.enabled = false
+            it.release()
+        }
+
+        noiseSuppressor = null
+        echoCanceler = null
+        gainControl = null
+
+        Log.d(TAG, "Noise reduction disabled and resources released")
+    }
+
+
     fun changeLanguage(newLanguage: String) {
         _sttState.update { state ->
             state.copy(

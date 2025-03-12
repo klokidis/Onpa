@@ -86,10 +86,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     navigateSettings: () -> Unit,
+    navigateSoundDetect: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
     userData: List<UserData>,
-    selectedUser: User?
+    selectedUser: User?,
 ) {
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
@@ -140,7 +141,7 @@ fun MainScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TopButtons(navigateSettings)
+        TopButtons(navigateSettings, navigateSoundDetect)
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
@@ -390,20 +391,20 @@ fun SpeechToTextUi(
 }
 
 @Composable
-fun TopButtons(navigateSettings: () -> Unit) {
+fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit) {
     Row(
         modifier = Modifier
             .wrapContentSize()
     ) {
         IconButton(
-            onClick = { },
+            onClick = { navigateSoundDetect() },
             modifier = Modifier
                 .padding(start = 5.dp)
         ) {
             Icon(
                 modifier = Modifier
                     .size(30.dp),
-                painter = painterResource(R.drawable.spatial_audio_24px),
+                painter = painterResource(R.drawable.noise_aware_24px),
                 contentDescription = stringResource(R.string.audio_event_classifier),
             )
         }
@@ -418,7 +419,7 @@ fun TopButtons(navigateSettings: () -> Unit) {
                 modifier = Modifier
                     .size(30.dp),
                 painter = painterResource(R.drawable.settings_24px),
-                contentDescription = stringResource(R.string.settings   ),
+                contentDescription = stringResource(R.string.settings),
             )
         }
     }
@@ -633,6 +634,6 @@ fun TextFieldWithInsideIcon(
 @Composable
 fun PreviewTopButtons() {
     Column {
-        TopButtons(navigateSettings = {})
+        TopButtons(navigateSettings = {}, navigateSoundDetect = {})
     }
 }

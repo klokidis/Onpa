@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 // UI State to hold detected sound
 data class SoundDetectionUiState(
-    val detectedPrimarySound: String = "",
+    val detectedPrimarySound: String = "...",
     val detectedSecondarySound: String = "",
     val isListening: Boolean = false
 )
@@ -209,7 +209,7 @@ class SoundDetectionViewModel @Inject constructor(
             52 -> "Stomach rumble"
             53 -> "Burping eructation"
             54 -> "Hiccup"
-            55 -> "Fart"
+            55 -> "Digestive noise"
             56 -> "Hands"
             57 -> "Finger snapping"
             58 -> "Clapping"

@@ -27,6 +27,7 @@ enum class AppScreens {
     SignUp,
     UserDetails,
     Main,
+    SoundDetect,
     Settings
 }
 
@@ -42,7 +43,7 @@ fun NavigationScreen(
     LaunchedEffect(userUiState.selectedUser?.userId) { //load the userdata based on the selected id
         if (userUiState.selectedUser?.userId != null) {
             userDataViewModel.loadUserData(userUiState.selectedUser!!.userId)
-        }else{
+        } else {
             userDataViewModel.loadAllUserData()
         }
     }
@@ -100,7 +101,17 @@ fun NavigationScreen(
                 MainScreen(
                     selectedUser = userUiState.selectedUser,
                     navigateSettings = { navController.navigate(AppScreens.Settings.name) },
+                    navigateSoundDetect = { navController.navigate(AppScreens.SoundDetect.name) },
                     userData = userDataUiState.userData,
+                )
+            }
+            composable(
+                route = AppScreens.SoundDetect.name
+            ) {
+                SoundDetectionScreen(
+                    navigate = {
+                        navController.popBackStack()
+                    }
                 )
             }
             composable(
