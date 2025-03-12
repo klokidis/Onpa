@@ -100,7 +100,7 @@ fun UserDetailsScreen(
                 .padding(
                     start = 10.dp,
                     end = 10.dp,
-                    bottom = 10.dp //5
+                    bottom = 20.dp //5
                 ),
             textAlign = TextAlign.Center
         )

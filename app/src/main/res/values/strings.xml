@@ -29,4 +29,5 @@
     <string name="select_language">Select voice language:</string>
     <string name="eng">English</string>
     <string name="gr">Greek</string>
+    <string name="audio_event_classifier">Detect and classify sounds</string>
 </resources>

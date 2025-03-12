@@ -403,8 +403,8 @@ fun TopButtons(navigateSettings: () -> Unit) {
             Icon(
                 modifier = Modifier
                     .size(30.dp),
-                painter = painterResource(R.drawable.menu_24px),
-                contentDescription = "",
+                painter = painterResource(R.drawable.spatial_audio_24px),
+                contentDescription = stringResource(R.string.audio_event_classifier),
             )
         }
 
@@ -418,7 +418,7 @@ fun TopButtons(navigateSettings: () -> Unit) {
                 modifier = Modifier
                     .size(30.dp),
                 painter = painterResource(R.drawable.settings_24px),
-                contentDescription = "",
+                contentDescription = stringResource(R.string.settings   ),
             )
         }
     }
@@ -563,6 +563,7 @@ fun TextFieldWithInsideIcon(
         onFinished = {
             coroutineScope.launch {
                 changeCanRunAgain(true)
+                prompt = "" //empty prompt after saying it
                 startListening()
             }
         }
