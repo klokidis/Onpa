@@ -96,7 +96,20 @@ fun NavigationScreen(
             }
             composable(
                 route = AppScreens.Main.name,
-                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) } // Slide out to the left
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        AppScreens.SoundDetect.name -> slideInHorizontally(initialOffsetX = { it }) // Slide right
+                        AppScreens.Settings.name -> slideInHorizontally(initialOffsetX = { -it }) // Slide left
+                        else -> { fadeIn(animationSpec = tween(0)) }
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        AppScreens.SoundDetect.name -> slideOutHorizontally(targetOffsetX = { it }) // Slide right
+                        AppScreens.Settings.name -> slideOutHorizontally(targetOffsetX = { -it }) // Slide left
+                        else -> null
+                    }
+                }
             ) {
                 MainScreen(
                     selectedUser = userUiState.selectedUser,
@@ -106,7 +119,9 @@ fun NavigationScreen(
                 )
             }
             composable(
-                route = AppScreens.SoundDetect.name
+                route = AppScreens.SoundDetect.name,
+                enterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Slide in from the left
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
             ) {
                 SoundDetectionScreen(
                     navigate = {
@@ -117,6 +132,7 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.Settings.name,
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) }, // Slide in from the right
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
             ) {
                 SettingsScreen(
                     navigateMainScreen = {
