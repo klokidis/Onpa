@@ -141,7 +141,7 @@ fun MainScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TopButtons(navigateSettings, navigateSoundDetect)
+        TopButtons(navigateSettings, navigateSoundDetect,voiceToTextViewModel::stopListening)
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
@@ -391,13 +391,16 @@ fun SpeechToTextUi(
 }
 
 @Composable
-fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit) {
+fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit, stopListening: () -> Unit) {
     Row(
         modifier = Modifier
             .wrapContentSize()
     ) {
         IconButton(
-            onClick = { navigateSoundDetect() },
+            onClick = {
+                stopListening()
+                navigateSoundDetect()
+                      },
             modifier = Modifier
                 .padding(start = 5.dp)
         ) {
@@ -411,7 +414,10 @@ fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
-            onClick = { navigateSettings() },
+            onClick = {
+                stopListening()
+                navigateSettings()
+                      },
             modifier = Modifier
                 .padding(end = 5.dp)
         ) {
@@ -634,6 +640,10 @@ fun TextFieldWithInsideIcon(
 @Composable
 fun PreviewTopButtons() {
     Column {
-        TopButtons(navigateSettings = {}, navigateSoundDetect = {})
+        TopButtons(
+            navigateSettings = {},
+            navigateSoundDetect = {},
+            stopListening = {}
+        )
     }
 }

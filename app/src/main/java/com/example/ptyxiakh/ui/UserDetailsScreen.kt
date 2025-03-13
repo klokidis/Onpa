@@ -61,8 +61,17 @@ fun UserDetailsScreen(
             userId = user?.userId ?: 0,
             category = stringResource(R.string.name),
             value = user?.userName ?: "name"
+        ),
+        UserData(
+            userId = user?.userId ?: 0,
+            category = stringResource(R.string.language),
+            value = if (user?.voiceLanguage == "en") {
+                stringResource(R.string.eng)
+            } else {
+                stringResource(R.string.gr)
+            }
+        ),
         )
-    )
 
     Column(
         modifier = Modifier
@@ -104,20 +113,20 @@ fun UserDetailsScreen(
                 ),
             textAlign = TextAlign.Center
         )
-/*
-        Text(
-            text = stringResource(R.string.for_user) + user?.userName + ":",
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 10.dp,
-                    end = 10.dp,
-                    bottom = 10.dp
-                ),
-            textAlign = TextAlign.Center
-        )
-*/
+        /*
+                Text(
+                    text = stringResource(R.string.for_user) + user?.userName + ":",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 10.dp,
+                            end = 10.dp,
+                            bottom = 10.dp
+                        ),
+                    textAlign = TextAlign.Center
+                )
+        */
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,6 +171,11 @@ fun UserDetailsScreen(
                     user?.userId ?: 0,
                     firstList.first().category,
                     firstList.first().value
+                )
+                addOneUserData(
+                    user?.userId ?: 0,
+                    firstList[1].category,
+                    firstList[1].value
                 )
                 if (user?.userId != null && userDetailsUiState.newUserDetails.isNotEmpty()) {
                     userDetailsUiState.newUserDetails.forEachIndexed { index, pair ->

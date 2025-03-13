@@ -140,16 +140,12 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     fun stopListening() {
+        _soundDetectorState.update {
+            it.copy(isListening = false)
+        }
         audioRecord?.stop()
         audioRecord?.release()
         audioRecord = null
-
-        // Update UI state to reflect that listening has stopped
-        _soundDetectorState.update {
-            it.copy(
-                isListening = false
-            )
-        }
     }
 
     fun getSoundDetected(inputIndex: Int): String {

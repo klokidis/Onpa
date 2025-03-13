@@ -89,9 +89,12 @@ fun SoundDetectionScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(modifier = Modifier.fillMaxWidth()){
+        Row(modifier = Modifier.fillMaxWidth()) {
             IconButton(
-                onClick = { navigate() },
+                onClick = {
+                    soundDetectionViewModel.stopListening()
+                    navigate()
+                },
                 modifier = Modifier
                     .padding(start = 5.dp),
             ) {
@@ -146,10 +149,16 @@ fun SoundDetectionScreen(
                     .fillMaxWidth()
                     .padding(
                         top = 50.dp,
-                        bottom = 40.dp
                     ),
                 textAlign = TextAlign.Center
             )
+           /* Text(
+                text = stringResource(R.string.or) + "\n" + soundDetectorState.detectedSecondarySound,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )*/
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
