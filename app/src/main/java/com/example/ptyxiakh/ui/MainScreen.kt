@@ -1,6 +1,11 @@
 package com.example.ptyxiakh.ui
 
 import android.Manifest
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
@@ -192,11 +197,13 @@ fun ResultsLazyList(
     isListening: Boolean,
     changeCanRunAgain: (Boolean) -> Unit
 ) {
+    val context = LocalContext.current
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val tts = rememberTextToSpeech(
         onFinished = {
             coroutineScope.launch {
+                triggerVibration(context = context, milliseconds = 10)
                 changeCanRunAgain(true)
                 startListening()
             }
@@ -264,6 +271,7 @@ fun ResultCard(
     isListening: Boolean,
     canRecordFun: () -> Unit,
 ) {
+    val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -278,6 +286,7 @@ fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
+            triggerVibration(context = context, milliseconds = 10)
             if (isListening) {
                 stopListening()
             }
@@ -565,10 +574,12 @@ fun TextFieldWithInsideIcon(
     var isFocused by rememberSaveable { mutableStateOf(false) }
     var prompt by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val tts = rememberTextToSpeech(
         onFinished = {
             coroutineScope.launch {
+                triggerVibration(context = context, milliseconds = 10)
                 changeCanRunAgain(true)
                 prompt = "" //empty prompt after saying it
                 startListening()
@@ -604,6 +615,7 @@ fun TextFieldWithInsideIcon(
                         if (isListening) {
                             stopListening()
                         }
+                        triggerVibration(context = context, milliseconds = 10)
                         changeCanRunAgain(false)
                         tts.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
@@ -634,6 +646,18 @@ fun TextFieldWithInsideIcon(
             }
         }
     )
+}
+
+fun triggerVibration(context: Context,milliseconds: Long) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        manager.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
 }
 
 @Preview(showBackground = true)
