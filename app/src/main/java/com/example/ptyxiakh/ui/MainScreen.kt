@@ -77,6 +77,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
@@ -85,6 +86,7 @@ import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
+import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
 import kotlinx.coroutines.launch
 
 
@@ -94,12 +96,15 @@ fun MainScreen(
     navigateSoundDetect: () -> Unit,
     geminiViewModel: GeminiViewModel = viewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
+    dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     userData: List<UserData>,
     selectedUser: User?,
 ) {
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
+    val dataPrefUiState by dataStorePrefViewModel.uiState.collectAsState()
+
     val context = LocalContext.current
     var canRecord by remember { mutableStateOf(false) }
 
@@ -142,11 +147,10 @@ fun MainScreen(
             ).show()
         }
     }
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TopButtons(navigateSettings, navigateSoundDetect,voiceToTextViewModel::stopListening)
+        TopButtons(navigateSettings, navigateSoundDetect, voiceToTextViewModel::stopListening)
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
@@ -161,7 +165,10 @@ fun MainScreen(
             stopListening = voiceToTextViewModel::stopListening,
             startListening = voiceToTextViewModel::startListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
-            weightModifier = Modifier.weight(1f)
+            weightModifier = Modifier.weight(1f),
+            vibrate = dataPrefUiState.vibration,
+            autoMic = dataPrefUiState.autoMic,
+            isLoading = dataPrefUiState.isLoading
         )
 
     }
@@ -177,6 +184,9 @@ fun MainScreen(
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
             isEnabled = sttState.canRunAgain,
             isListening = sttState.isSpeaking,
+            vibrate = dataPrefUiState.vibration,
+            autoMic = dataPrefUiState.autoMic,
+            isLoading = dataPrefUiState.isLoading,
             prompt = {
                 (sttState.fullTranscripts + sttState.partialTranscripts)
                     .joinToString().drop(sttState.spokenPromptText.length)
@@ -195,20 +205,30 @@ fun ResultsLazyList(
     stopListening: () -> Unit,
     weightModifier: Modifier,
     isListening: Boolean,
-    changeCanRunAgain: (Boolean) -> Unit
+    changeCanRunAgain: (Boolean) -> Unit,
+    vibrate: Boolean,
+    autoMic: Boolean,
+    isLoading: Boolean
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val tts = rememberTextToSpeech(
-        onFinished = {
-            coroutineScope.launch {
-                triggerVibration(context = context, milliseconds = 10)
-                changeCanRunAgain(true)
-                startListening()
-            }
+
+    val tts =
+        if (!isLoading) { //since remember wont update the autoMic we initialize the tts after the data is loaded
+            rememberTextToSpeech(
+                onFinished = {
+                    coroutineScope.launch {
+                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                        changeCanRunAgain(true)
+                        if (autoMic) startListening()
+                    }
+                }
+            )
+        } else {
+            null
         }
-    )
+
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
         if (answersList.isNotEmpty()) {
@@ -226,7 +246,11 @@ fun ResultsLazyList(
         if (uiState != ResponseState.Initial) {
             items(answersList) { answer ->
                 ResultCard(
-                    answer, tts, stopListening, isListening
+                    result = answer,
+                    tts = tts,
+                    stopListening = stopListening,
+                    isListening = isListening,
+                    vibrate = vibrate
                 ) { changeCanRunAgain(false) }
             }
         }
@@ -266,10 +290,11 @@ fun ResultsLazyList(
 @Composable
 fun ResultCard(
     result: String,
-    tts: MutableState<TextToSpeech?>,
+    tts: MutableState<TextToSpeech?>?,
     stopListening: () -> Unit,
     isListening: Boolean,
-    canRecordFun: () -> Unit,
+    vibrate: Boolean,
+    canRecordFun: () -> Unit
 ) {
     val context = LocalContext.current
     Card(
@@ -286,12 +311,12 @@ fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
-            triggerVibration(context = context, milliseconds = 10)
+            triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
             if (isListening) {
                 stopListening()
             }
             canRecordFun()
-            tts.value?.speak(
+            tts?.value?.speak(
                 result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
         }
@@ -400,7 +425,11 @@ fun SpeechToTextUi(
 }
 
 @Composable
-fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit, stopListening: () -> Unit) {
+fun TopButtons(
+    navigateSettings: () -> Unit,
+    navigateSoundDetect: () -> Unit,
+    stopListening: () -> Unit
+) {
     Row(
         modifier = Modifier
             .wrapContentSize()
@@ -409,7 +438,7 @@ fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit, st
             onClick = {
                 stopListening()
                 navigateSoundDetect()
-                      },
+            },
             modifier = Modifier
                 .padding(start = 5.dp)
         ) {
@@ -426,7 +455,7 @@ fun TopButtons(navigateSettings: () -> Unit, navigateSoundDetect: () -> Unit, st
             onClick = {
                 stopListening()
                 navigateSettings()
-                      },
+            },
             modifier = Modifier
                 .padding(end = 5.dp)
         ) {
@@ -451,6 +480,9 @@ fun TextFieldUpperButtons(
     changeSpokenPromptText: () -> Unit,
     userData: List<UserData>,
     changeCanRunAgain: (Boolean) -> Unit,
+    vibrate: Boolean,
+    autoMic: Boolean,
+    isLoading: Boolean,
 ) {
     Column {
         Row(
@@ -484,7 +516,10 @@ fun TextFieldUpperButtons(
                 changeCanRunAgain = changeCanRunAgain,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
+                autoMic = autoMic,
+                vibrate = vibrate,
+                isLoading = isLoading
             )
         }
     }
@@ -529,7 +564,6 @@ fun OutlinedCustomIconButton(
     isListening: Boolean,
     isEnabled: Boolean,
 ) {
-    Log.d("klok", isListening.toString())
     OutlinedButton(
         onClick = {
             when {
@@ -568,7 +602,10 @@ fun TextFieldWithInsideIcon(
     stopListening: () -> Unit,
     startListening: () -> Unit,
     isListening: Boolean,
-    changeCanRunAgain: (Boolean) -> Unit
+    changeCanRunAgain: (Boolean) -> Unit,
+    vibrate: Boolean,
+    autoMic: Boolean,
+    isLoading: Boolean
 ) {
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
@@ -576,16 +613,21 @@ fun TextFieldWithInsideIcon(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val tts = rememberTextToSpeech(
-        onFinished = {
-            coroutineScope.launch {
-                triggerVibration(context = context, milliseconds = 10)
-                changeCanRunAgain(true)
-                prompt = "" //empty prompt after saying it
-                startListening()
-            }
+    val tts =
+        if (!isLoading) { //since remember wont update the autoMic we initialize the tts after the data is loaded
+            rememberTextToSpeech(
+                onFinished = {
+                    coroutineScope.launch {
+                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                        changeCanRunAgain(true)
+                        prompt = "" //empty prompt after saying it
+                        if (autoMic) startListening()
+                    }
+                }
+            )
+        } else {
+            null
         }
-    )
 
     OutlinedTextField(
         value = prompt,
@@ -615,9 +657,9 @@ fun TextFieldWithInsideIcon(
                         if (isListening) {
                             stopListening()
                         }
-                        triggerVibration(context = context, milliseconds = 10)
+                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
                         changeCanRunAgain(false)
-                        tts.value?.speak(
+                        tts?.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
                         )
                     },
@@ -648,16 +690,24 @@ fun TextFieldWithInsideIcon(
     )
 }
 
-fun triggerVibration(context: Context,milliseconds: Long) {
-    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        manager.defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
+fun triggerVibration(canVibrate: Boolean, context: Context, milliseconds: Long) {
+    if (canVibrate) {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val manager =
+                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            manager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
 
-    vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+        vibrator.vibrate(
+            VibrationEffect.createOneShot(
+                milliseconds,
+                VibrationEffect.DEFAULT_AMPLITUDE
+            )
+        )
+    }
 }
 
 @Preview(showBackground = true)

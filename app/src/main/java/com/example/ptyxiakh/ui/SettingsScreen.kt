@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,10 +24,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
 
 @Composable
-fun SettingsScreen(navigateMainScreen: () -> Unit) {
+fun SettingsScreen(
+    navigateMainScreen: () -> Unit,
+    dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
+) {
 
     val scrollState = rememberScrollState()
 
@@ -40,7 +46,7 @@ fun SettingsScreen(navigateMainScreen: () -> Unit) {
                 .padding(start = 5.dp)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Use the appropriate icon
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(id = R.string.back),
                 modifier = Modifier.size(30.dp)
             )
@@ -66,7 +72,7 @@ fun SettingsScreen(navigateMainScreen: () -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-
+            Button(onClick = { dataStorePrefViewModel.toggleVibration(true) }) {Text(text = "change val on vibrate") }
         }
     }
 }
@@ -74,5 +80,5 @@ fun SettingsScreen(navigateMainScreen: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen {  }
+    SettingsScreen({ })
 }
