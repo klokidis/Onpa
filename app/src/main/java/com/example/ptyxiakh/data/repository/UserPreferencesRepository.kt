@@ -35,8 +35,8 @@ class UserPreferencesRepository @Inject constructor(
         }
         .map { preferences ->
             UserPreferencesUiState(
-                vibration = preferences[VIBRATION] ?: false,
-                autoMic = preferences[AUTO_MIC] ?: false,
+                vibration = preferences[VIBRATION] ?: true,
+                autoMic = preferences[AUTO_MIC] ?: true,
                 isLoading = true
             )
         }
