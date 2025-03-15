@@ -20,7 +20,8 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
     DisposableEffect(context) {
         val textToSpeech = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts.value?.language = Locale.US
+                tts.value?.language = Locale.getDefault()
+                Log.d("availableLanguages",Locale.getDefault().toString())//follows phone language
                 tts.value?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
                         Log.d("availableLanguages", tts.value?.availableLanguages.toString())
@@ -54,6 +55,16 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
         }
     }
     return tts
+}
+
+fun getAvailableLanguages(tts: TextToSpeech?): Set<Locale>? {
+    return tts?.availableLanguages
+}
+
+fun getLanguageName(languageCode: String): String {
+    val parts = languageCode.split("_")
+    val locale = if (parts.size > 1) Locale(parts[0], parts[1]) else Locale(parts[0])
+    return locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() }
 }
 
 /*
