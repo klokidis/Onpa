@@ -56,7 +56,6 @@ fun SoundDetectionScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var isShowDescription by rememberSaveable { mutableStateOf(true) }
-
     // Track permission state
     var hasPermission by remember { mutableStateOf(false) }
 
@@ -152,13 +151,13 @@ fun SoundDetectionScreen(
                     ),
                 textAlign = TextAlign.Center
             )
-           /* Text(
-                text = stringResource(R.string.or) + "\n" + soundDetectorState.detectedSecondarySound,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )*/
+            /* Text(
+                 text = stringResource(R.string.or) + "\n" + soundDetectorState.detectedSecondarySound,
+                 style = MaterialTheme.typography.bodyMedium,
+                 modifier = Modifier
+                     .fillMaxWidth(),
+                 textAlign = TextAlign.Center
+             )*/
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -176,6 +175,8 @@ fun SoundDetectionScreen(
                     isShowDescription = true
                     soundDetectionViewModel.stopListening()
                 }
+                      // val intent = Intent(context, SoundDetectionService::class.java)
+                //context.startService(intent)
             },
             shape = CircleShape,
             modifier = Modifier

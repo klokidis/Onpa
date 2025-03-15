@@ -1,21 +1,19 @@
-package com.example.ptyxiakh.viewmodels
+package com.example.ptyxiakh.service
 
 import android.Manifest
-import android.content.Context
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import com.example.ptyxiakh.R
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.Interpreter
@@ -23,32 +21,75 @@ import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
-import javax.inject.Inject
 
-// UI State to hold detected sound
-data class SoundDetectionUiState(
-    val detectedPrimarySound: String = "...",
-    val detectedSecondarySound: String = "",
-    val isListening: Boolean = false
-)
+class SoundDetectionService : LifecycleService() {
 
-@HiltViewModel
-class SoundDetectionViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
-) : ViewModel() {
-
-    private val _soundDetectorState = MutableStateFlow(SoundDetectionUiState())
-    val soundDetectorState: StateFlow<SoundDetectionUiState> = _soundDetectorState.asStateFlow()
-
-    private var interpreter: Interpreter? = null
-    private var audioRecord: AudioRecord? = null
-
-    init {
-        interpreter = Interpreter(loadModelFile())
+    companion object {
+        private const val CHANNEL_ID = "SoundDetectionServiceChannel"
+        private const val NOTIFICATION_ID = 1
+        private const val ACTION_STOP_SERVICE = "com.example.ptyxiakh.STOP_SERVICE"
     }
 
+
+    private var isListening = false
+    private var audioRecord: AudioRecord? = null
+    private var interpreter: Interpreter? = null
+
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    fun startListening() {
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+        startForegroundService()
+
+        interpreter = Interpreter(loadModelFile())
+
+        startListening()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        if (intent?.action == ACTION_STOP_SERVICE) {
+            stopForegroundService()
+            return START_NOT_STICKY
+        }
+        return START_STICKY
+    }
+
+    private fun createNotificationChannel() {
+        val name = "Sound Detection Service"
+        val descriptionText = "Notification for sound detection"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun startForegroundService() {
+        val stopIntent = Intent(this, SoundDetectionService::class.java).apply {
+            action = ACTION_STOP_SERVICE
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Sound Detection")
+            .setContentText("Listening for important sounds...")
+            .setSmallIcon(R.drawable.noise_aware_24px)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .addAction(R.drawable.spatial_audio_24px, "Stop", stopPendingIntent) // Stop Button
+            .build()
+
+        startForeground(NOTIFICATION_ID, notification)
+    }
+
+
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+    private fun startListening() {
         val sampleRate = 16000
         val inputSize = 15600
 
@@ -65,41 +106,26 @@ class SoundDetectionViewModel @Inject constructor(
         )
 
         audioRecord?.startRecording()
-        _soundDetectorState.update {
-            it.copy(
-                isListening = true
-            )
-        }
+
+        isListening = true
+
         val accumulatedSamples = mutableListOf<Float>()
 
-        viewModelScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             val buffer = ShortArray(bufferSize)
-            while (soundDetectorState.value.isListening) {
+            while (isListening) {
                 val readSize = audioRecord?.read(buffer, 0, bufferSize) ?: break
-                // Only process if we read some data
                 if (readSize > 0) {
-                    // Convert and accumulate audio data
                     accumulatedSamples.addAll(
-                        buffer.take(readSize).map { it.toFloat() / Short.MAX_VALUE }
-                    )
-
-                    // Check if we have enough samples
+                        buffer.take(readSize).map { it.toFloat() / Short.MAX_VALUE })
                     while (accumulatedSamples.size >= inputSize) {
-                        // Take the required number of samples for processing
                         val floatBuffer = FloatArray(inputSize)
                         for (i in 0 until inputSize) {
-                            floatBuffer[i] =
-                                accumulatedSamples.removeAt(0) // Remove the first sample
+                            floatBuffer[i] = accumulatedSamples.removeAt(0)
                         }
-                        // Run inference using TensorFlow Lite model
                         val (primary, secondary) = classifySound(floatBuffer)
                         withContext(Dispatchers.Main) {
-                            _soundDetectorState.update {
-                                it.copy(
-                                    detectedPrimarySound = primary,
-                                    detectedSecondarySound = secondary
-                                )
-                            }
+                            //here add the alarm
                         }
                     }
                 }
@@ -108,45 +134,20 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     private fun classifySound(audioData: FloatArray): Pair<String, String> {
-        val input =
-            ByteBuffer.allocateDirect(audioData.size * 4).order(ByteOrder.nativeOrder())
+        val input = ByteBuffer.allocateDirect(audioData.size * 4).order(ByteOrder.nativeOrder())
         input.asFloatBuffer().put(audioData)
 
         val output = Array(1) { FloatArray(521) }
         interpreter?.run(input, output)
 
-        // Get top 2 labels with highest confidence
         val sortedIndices = output[0].indices.sortedByDescending { output[0][it] }
         val primaryLabelIndex = sortedIndices.getOrNull(0) ?: -1
         val secondaryLabelIndex = sortedIndices.getOrNull(1) ?: -1
-
-        Log.d("Sound Detection", "Primary: $primaryLabelIndex, Secondary: $secondaryLabelIndex")
 
         return Pair(
             getSoundDetected(primaryLabelIndex),
             getSoundDetected(secondaryLabelIndex)
         )
-    }
-
-    private fun loadModelFile(): ByteBuffer {
-        val assetFileDescriptor = context.assets.openFd("1.tflite")
-        val fileInputStream = FileInputStream(assetFileDescriptor.fileDescriptor)
-        val fileChannel = fileInputStream.channel
-        return fileChannel.map(
-            FileChannel.MapMode.READ_ONLY,
-            assetFileDescriptor.startOffset,
-            assetFileDescriptor.declaredLength
-        )
-    }
-
-    fun stopListening() {
-        _soundDetectorState.update {
-            it.copy(isListening = false)
-        }
-        audioRecord?.stop()
-        audioRecord?.release()
-        audioRecord = null
-        interpreter = null
     }
 
     fun getSoundDetected(inputIndex: Int): String {
@@ -676,13 +677,39 @@ class SoundDetectionViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        interpreter?.close()
+    private fun loadModelFile(): ByteBuffer {
+        val assetFileDescriptor = assets.openFd("1.tflite")
+        val fileInputStream = FileInputStream(assetFileDescriptor.fileDescriptor)
+        val fileChannel = fileInputStream.channel
+        return fileChannel.map(
+            FileChannel.MapMode.READ_ONLY,
+            assetFileDescriptor.startOffset,
+            assetFileDescriptor.declaredLength
+        )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopListening()
+        isListening = false
         audioRecord?.stop()
         audioRecord?.release()
-        interpreter = null
         audioRecord = null
+        interpreter = null
+    }
+
+    private fun stopListening() {
+        isListening = false
+        audioRecord?.stop()
+        audioRecord?.release()
+        audioRecord = null
+        interpreter = null
+    }
+
+    private fun stopForegroundService() {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopListening()
+        stopSelf()
     }
 
 }

@@ -81,4 +81,7 @@ dependencies {
 
     //tensorflow
     implementation(libs.tensorflow.lite)
+
+    //service
+    implementation(libs.androidx.lifecycle.service)
 }
