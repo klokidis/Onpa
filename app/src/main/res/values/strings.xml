@@ -37,4 +37,6 @@
     <string name="sound_detected">Detected sound:</string>
     <string name="or">or</string>
     <string name="language">Language</string>
+    <string name="detect_now">Detect sound now</string>
+    <string name="detect_background">Alarm on background</string>
 </resources>

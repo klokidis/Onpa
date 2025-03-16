@@ -1,6 +1,7 @@
 package com.example.ptyxiakh.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,9 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,19 +47,27 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
+import com.example.ptyxiakh.service.SoundDetectionService
 import com.example.ptyxiakh.viewmodels.SoundDetectionViewModel
 
 @Composable
 fun SoundDetectionScreen(
     navigate: () -> Unit,
     soundDetectionViewModel: SoundDetectionViewModel = hiltViewModel(),
+    viewModel: SoundDetectionServiceViewModel = hiltViewModel()
 ) {
     val soundDetectorState by soundDetectionViewModel.soundDetectorState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var isShowDescription by rememberSaveable { mutableStateOf(true) }
+    var isRecording by rememberSaveable { mutableStateOf(false) }
     // Track permission state
     var hasPermission by remember { mutableStateOf(false) }
+
+    val intent = Intent(context, SoundDetectionService::class.java)
+    // Observe the service state from the singleton
+    val isServiceRunning by viewModel.isServiceRunning.collectAsState()
 
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -160,39 +170,83 @@ fun SoundDetectionScreen(
              )*/
         }
         Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = {
-                if (!soundDetectorState.isListening) {
+        if (!isRecording && !isServiceRunning) {
+            Button(
+                onClick = {
                     if (hasPermission) {
                         isShowDescription = false
+                        isRecording = true
                         // If permission is granted, start listening
                         soundDetectionViewModel.startListening()
                     } else {
                         // Request permission if not granted
                         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                     }
-                } else {
-                    isShowDescription = true
-                    soundDetectionViewModel.stopListening()
-                }
-                      // val intent = Intent(context, SoundDetectionService::class.java)
-                //context.startService(intent)
-            },
-            shape = CircleShape,
-            modifier = Modifier
-                .size(80.dp),
-            contentPadding = PaddingValues(2.dp)
-        ) {
-            Icon(
-                imageVector = if (soundDetectorState.isListening) Icons.Default.Stop else Icons.Default.PlayArrow,
-                contentDescription = if (soundDetectorState.isListening) stringResource(R.string.stop_sound) else stringResource(
-                    R.string.start_sound
-                ),
-                modifier = Modifier.fillMaxSize()
+                    // val intent = Intent(context, SoundDetectionService::class.java)
+                    //context.startService(intent)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.detect_now),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Text(
+                text = stringResource(R.string.or),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                textAlign = TextAlign.Center,
             )
+            Button(
+                onClick = {
+                    if (hasPermission) {
+                        context.startService(intent)
+                        isRecording = true
+                    } else {
+                        // Request permission if not granted
+                        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+
+                },
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.detect_background),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            Button(
+                onClick = {
+                    isShowDescription = true
+                    isRecording = false
+                    if (soundDetectorState.isListening && !isServiceRunning) {
+                        soundDetectionViewModel.stopListening()
+                    } else {
+                        context.stopService(intent)
+                    }
+                },
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(80.dp),
+                contentPadding = PaddingValues(2.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Stop,
+                    contentDescription = stringResource(R.string.stop_sound),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
+
         Spacer(modifier = Modifier.padding(bottom = 40.dp))
     }
-
 }
-

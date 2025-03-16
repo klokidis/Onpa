@@ -13,6 +13,8 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.data.repository.ServiceStateRepository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,8 +23,14 @@ import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SoundDetectionService : LifecycleService() {
+
+    @Inject
+    lateinit var serviceStateManager: ServiceStateRepository
 
     companion object {
         private const val CHANNEL_ID = "SoundDetectionServiceChannel"
@@ -31,13 +39,14 @@ class SoundDetectionService : LifecycleService() {
     }
 
 
-    private var isListening = false
+    private val isListening = AtomicBoolean(false)
     private var audioRecord: AudioRecord? = null
     private var interpreter: Interpreter? = null
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onCreate() {
         super.onCreate()
+        serviceStateManager.setServiceRunning(true)
         createNotificationChannel()
         startForegroundService()
 
@@ -56,15 +65,16 @@ class SoundDetectionService : LifecycleService() {
     }
 
     private fun createNotificationChannel() {
-        val name = "Sound Detection Service"
-        val descriptionText = "Notification for sound detection"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-            description = descriptionText
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+            val name = "Sound Detection Service"
+            val descriptionText = "Notification for sound detection"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        val notificationManager: NotificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
     }
 
     private fun startForegroundService() {
@@ -81,7 +91,7 @@ class SoundDetectionService : LifecycleService() {
             .setSmallIcon(R.drawable.noise_aware_24px)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .addAction(R.drawable.spatial_audio_24px, "Stop", stopPendingIntent) // Stop Button
+            .addAction(R.drawable.stop_24px, "Stop", stopPendingIntent)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -107,13 +117,13 @@ class SoundDetectionService : LifecycleService() {
 
         audioRecord?.startRecording()
 
-        isListening = true
+        isListening.set(true)
 
         val accumulatedSamples = mutableListOf<Float>()
 
         lifecycleScope.launch(Dispatchers.IO) {
             val buffer = ShortArray(bufferSize)
-            while (isListening) {
+            while (isListening.get()) {
                 val readSize = audioRecord?.read(buffer, 0, bufferSize) ?: break
                 if (readSize > 0) {
                     accumulatedSamples.addAll(
@@ -679,27 +689,24 @@ class SoundDetectionService : LifecycleService() {
 
     private fun loadModelFile(): ByteBuffer {
         val assetFileDescriptor = assets.openFd("1.tflite")
-        val fileInputStream = FileInputStream(assetFileDescriptor.fileDescriptor)
-        val fileChannel = fileInputStream.channel
-        return fileChannel.map(
-            FileChannel.MapMode.READ_ONLY,
-            assetFileDescriptor.startOffset,
-            assetFileDescriptor.declaredLength
-        )
+        return FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
+            val fileChannel = fileInputStream.channel
+            fileChannel.map(
+                FileChannel.MapMode.READ_ONLY,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         stopListening()
-        isListening = false
-        audioRecord?.stop()
-        audioRecord?.release()
-        audioRecord = null
-        interpreter = null
     }
 
     private fun stopListening() {
-        isListening = false
+        serviceStateManager.setServiceRunning(false)
+        isListening.set(false)
         audioRecord?.stop()
         audioRecord?.release()
         audioRecord = null
