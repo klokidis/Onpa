@@ -52,6 +52,11 @@ class SoundDetectionViewModel @Inject constructor(
         val sampleRate = 16000
         val inputSize = 15600
 
+        if (interpreter == null) {
+            interpreter = Interpreter(loadModelFile())
+        }
+
+
         val bufferSize = AudioRecord.getMinBufferSize(
             sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         )
