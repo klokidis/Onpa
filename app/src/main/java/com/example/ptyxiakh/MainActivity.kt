@@ -1,6 +1,9 @@
 package com.example.ptyxiakh
 
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
+import android.os.StrictMode.VmPolicy
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +19,24 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /*
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(
+                ThreadPolicy.Builder()
+                    .detectAll() // Detect all thread-related issues
+                    .penaltyLog() // Log violations to Logcat
+                    .build()
+            )
+
+            StrictMode.setVmPolicy(
+                VmPolicy.Builder()
+                    .detectAll() // Detect all VM-related issues
+                    .penaltyLog() // Log violations to Logcat
+                    .detectLeakedClosableObjects() // Detect unclosed Closeable objects
+                    .detectLeakedRegistrationObjects() // Detect unregistered receivers, services, etc.
+                    .build()
+            )
+        }*/
         enableEdgeToEdge()
         setContent {
             PtyxiakhTheme {

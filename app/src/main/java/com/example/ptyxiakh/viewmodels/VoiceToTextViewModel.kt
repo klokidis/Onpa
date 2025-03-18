@@ -11,10 +11,12 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 data class VoiceToTextState(
     val fullTranscripts: List<String> = emptyList(),
@@ -28,15 +30,19 @@ data class VoiceToTextState(
     val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
 )
 
-class VoiceToTextViewModel(application: Application) : AndroidViewModel(application),
-    RecognitionListener {
+@HiltViewModel
+class VoiceToTextViewModel @Inject constructor(
+    application: Application,
+    // Inject any other dependencies here if needed (e.g., a repository or a service)
+) : AndroidViewModel(application), RecognitionListener {
 
     private val _sttState = MutableStateFlow(VoiceToTextState())
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
 
     private var noiseSuppressor: NoiseSuppressor? = null //reduce noise
     private var echoCanceler: AcousticEchoCanceler? = null //remove echo from audio input
-    private var gainControl: AutomaticGainControl? = null //It boosts or reduces the microphone's input gain (volume) dynamically.
+    private var gainControl: AutomaticGainControl? =
+        null //It boosts or reduces the microphone's input gain (volume) dynamically.
 
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(application.applicationContext)
 
@@ -140,6 +146,7 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
                 _sttState.update { it.copy(offlineError = true) }
                 "Network error"
             }
+
             SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
             SpeechRecognizer.ERROR_SERVER -> "Server error"

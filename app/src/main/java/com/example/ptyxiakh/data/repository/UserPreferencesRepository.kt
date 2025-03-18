@@ -18,7 +18,7 @@ import javax.inject.Singleton
 class UserPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
-    private companion object {
+    private object PreferencesKeys {
         val VIBRATION = booleanPreferencesKey("vibration")
         val AUTO_MIC = booleanPreferencesKey("auto_mic")
         const val TAG = "UserPreferencesRepo"
@@ -27,7 +27,7 @@ class UserPreferencesRepository @Inject constructor(
     val userPreferencesFlow: Flow<UserPreferencesUiState> = dataStore.data
         .catch {
             if (it is IOException) {
-                Log.e(TAG, "Error reading preferences.", it)
+                Log.e(PreferencesKeys.TAG, "Error reading preferences.", it)
                 emit(emptyPreferences())
             } else {
                 throw it
@@ -35,21 +35,21 @@ class UserPreferencesRepository @Inject constructor(
         }
         .map { preferences ->
             UserPreferencesUiState(
-                vibration = preferences[VIBRATION] ?: true,
-                autoMic = preferences[AUTO_MIC] ?: true,
+                vibration = preferences[PreferencesKeys.VIBRATION] ?: true,
+                autoMic = preferences[PreferencesKeys.AUTO_MIC] ?: true,
                 isLoading = true
             )
         }
 
     suspend fun saveVibration(vibration: Boolean) {
         dataStore.edit { preferences ->
-            preferences[VIBRATION] = vibration
+            preferences[PreferencesKeys.VIBRATION] = vibration
         }
     }
 
     suspend fun saveAutoMic(autoMic: Boolean) {
         dataStore.edit { preferences ->
-            preferences[AUTO_MIC] = autoMic
+            preferences[PreferencesKeys.AUTO_MIC] = autoMic
         }
     }
 }

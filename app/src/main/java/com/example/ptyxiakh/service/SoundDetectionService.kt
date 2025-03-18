@@ -58,8 +58,9 @@ class SoundDetectionService : LifecycleService() {
         createNotificationChannel()
         startForegroundService()
 
-        interpreter = Interpreter(loadModelFile())
-
+        lifecycleScope.launch(Dispatchers.IO) {
+            interpreter = Interpreter(loadModelFile())
+        }
         startListening()
     }
 
@@ -732,7 +733,7 @@ class SoundDetectionService : LifecycleService() {
     }
 
     private fun loadModelFile(): ByteBuffer {
-        assets.openFd("1.tflite").use { assetFileDescriptor ->
+        assets.openFd("yamnet.tflite").use { assetFileDescriptor ->
             FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
                 val fileChannel = fileInputStream.channel
                 return fileChannel.map(
@@ -748,7 +749,16 @@ class SoundDetectionService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         stopListening()
+
+        audioRecord?.apply {
+            stop()
+            release()
+        }
+        audioRecord = null
+        interpreter?.close()
+        interpreter = null
     }
+
 
     private fun stopListening() {
         serviceStateManager.setServiceRunning(false)

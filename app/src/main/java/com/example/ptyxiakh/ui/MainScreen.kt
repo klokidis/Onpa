@@ -78,7 +78,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.model.ResponseState
@@ -94,8 +93,8 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navigateSettings: () -> Unit,
     navigateSoundDetect: () -> Unit,
-    geminiViewModel: GeminiViewModel = viewModel(),
-    voiceToTextViewModel: VoiceToTextViewModel = viewModel(),
+    geminiViewModel: GeminiViewModel = hiltViewModel(),
+    voiceToTextViewModel: VoiceToTextViewModel = hiltViewModel(),
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     userData: List<UserData>,
     selectedUser: User?,

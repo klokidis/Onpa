@@ -8,19 +8,21 @@ import com.example.ptyxiakh.model.ResponseState
 import com.example.ptyxiakh.model.UserData
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ResultUiState(
     val answersList: List<String> = listOf(),
 )
 
-
-class GeminiViewModel : ViewModel() {
+@HiltViewModel
+class GeminiViewModel @Inject constructor() : ViewModel() {
 
     private val _responseState: MutableStateFlow<ResponseState> =
         MutableStateFlow(ResponseState.Initial)
@@ -30,10 +32,16 @@ class GeminiViewModel : ViewModel() {
     private val _resultUiState = MutableStateFlow(ResultUiState())
     val resultUiState: StateFlow<ResultUiState> = _resultUiState.asStateFlow()
 
-    private val generativeModel = GenerativeModel(
-        modelName = "gemini-2.0-flash",
-        apiKey = BuildConfig.apiKey
-    )
+    private var generativeModel: GenerativeModel? = null
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            generativeModel = GenerativeModel(
+                modelName = "gemini-2.0-flash",
+                apiKey = BuildConfig.apiKey
+            )
+        }
+    }
 
     fun sendPrompt(
         prompt: String,
@@ -45,7 +53,7 @@ class GeminiViewModel : ViewModel() {
             try {
                 val userContext = userData.joinToString(", ") { "${it.category}: ${it.value}" }
 
-                val response = generativeModel.generateContent(
+                val response = generativeModel?.generateContent(
                     content {
                         text(
                             "Question: \"$prompt\"\n\n" +
@@ -54,7 +62,7 @@ class GeminiViewModel : ViewModel() {
                         )
                     }
                 )
-                response.text?.let { outputContent ->
+                response?.text?.let { outputContent ->
                     _responseState.value = ResponseState.Success
                     _resultUiState.update { currentState ->
                         currentState.copy(
@@ -62,7 +70,7 @@ class GeminiViewModel : ViewModel() {
                         )
                     }
                     Log.d("response", outputContent)
-                    Log.d("response edited", resultUiState.value.answersList.toString() )
+                    Log.d("response edited", resultUiState.value.answersList.toString())
                     Log.d("user", userContext)
                 }
             } catch (e: Exception) {
@@ -84,10 +92,16 @@ class GeminiViewModel : ViewModel() {
             .replace("*", "") // Remove bold markers
             .replace("...", "") // Remove ellipses
             .replace(emojiRegex, "") // Remove emojis
-            .replace(Regex(" - .*?(?=\n|$)"), "") // Remove text after " - " until the end of the line
+            .replace(
+                Regex(" - .*?(?=\n|$)"),
+                ""
+            ) // Remove text after " - " until the end of the line
             .replace(Regex("\\(.*?\\)"), "") // Remove (..)
 
-        val regex = Regex("(?:^|\\n)\\s*\\d+\\.\\s*(.*?)(?=\\s*(?:\\n\\s*\\d+\\.|$))", RegexOption.DOT_MATCHES_ALL)
+        val regex = Regex(
+            "(?:^|\\n)\\s*\\d+\\.\\s*(.*?)(?=\\s*(?:\\n\\s*\\d+\\.|$))",
+            RegexOption.DOT_MATCHES_ALL
+        )
         return regex.findAll(cleanedAnswer)
             .map { it.groupValues[1].trim() } // Extract the matched text and trim whitespace
             .toList()

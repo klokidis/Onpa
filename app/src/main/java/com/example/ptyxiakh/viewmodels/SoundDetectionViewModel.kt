@@ -46,7 +46,9 @@ class SoundDetectionViewModel @Inject constructor(
 
     init {
         try {
-            interpreter = Interpreter(loadModelFile())
+            viewModelScope.launch(Dispatchers.IO) {
+                interpreter = Interpreter(loadModelFile())
+            }
         } catch (e: IOException) {
             Log.e("SoundDetectionViewModel", "Failed to load model file", e)
         }
@@ -58,7 +60,9 @@ class SoundDetectionViewModel @Inject constructor(
         val inputSize = 15600
 
         if (interpreter == null) {
-            interpreter = Interpreter(loadModelFile())
+            viewModelScope.launch(Dispatchers.IO) {
+                interpreter = Interpreter(loadModelFile())
+            }
         }
 
 
@@ -139,7 +143,7 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     private fun loadModelFile(): ByteBuffer {
-        context.assets.openFd("1.tflite").use { assetFileDescriptor ->
+        context.assets.openFd("yamnet.tflite").use { assetFileDescriptor ->
             FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
                 val fileChannel = fileInputStream.channel
                 return fileChannel.map(
@@ -156,11 +160,21 @@ class SoundDetectionViewModel @Inject constructor(
         _soundDetectorState.update {
             it.copy(isListening = false)
         }
-        interpreter?.close()
-        interpreter = null
-        audioRecord?.stop()
-        audioRecord?.release()
-        audioRecord = null
+
+        try {
+            interpreter?.close()
+            interpreter = null
+        } catch (e: Exception) {
+            Log.e("SoundDetectionViewModel", "Error closing interpreter", e)
+        }
+
+        try {
+            audioRecord?.stop()
+            audioRecord?.release()
+            audioRecord = null
+        } catch (e: Exception) {
+            Log.e("SoundDetectionViewModel", "Error stopping/releasing AudioRecord", e)
+        }
     }
 
 
@@ -693,11 +707,12 @@ class SoundDetectionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        interpreter?.close()
-        audioRecord?.stop()
-        audioRecord?.release()
-        interpreter = null
-        audioRecord = null
+
+        // Ensure to stop and release resources properly
+        stopListening()
+
+        // You can add additional cleanup if needed
+        Log.d("SoundDetectionViewModel", "onCleared called: Resources released.")
     }
 
 }
