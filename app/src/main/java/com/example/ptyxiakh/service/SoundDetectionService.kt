@@ -8,6 +8,12 @@ import android.content.Intent
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -42,6 +48,8 @@ class SoundDetectionService : LifecycleService() {
     private val isListening = AtomicBoolean(false)
     private var audioRecord: AudioRecord? = null
     private var interpreter: Interpreter? = null
+    private var alertingSounds: List<Int> =
+        listOf(20, 317, 318, 319, 390, 391, 353, 340, 195, 349, 348, 394, 292)
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onCreate() {
@@ -72,9 +80,27 @@ class SoundDetectionService : LifecycleService() {
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 1000, 500, 1000)
             }
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun triggerAlarmNotification(soundDetected: String) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Sound Detected!")
+            .setContentText("Detected sound: $soundDetected")
+            .setSmallIcon(R.drawable.noise_aware_24px)
+            .setPriority(NotificationCompat.PRIORITY_MAX) // Highest priority
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setSound(Settings.System.DEFAULT_ALARM_ALERT_URI)
+            .setVibrate(longArrayOf(0, 500, 250, 500))
+            .build()
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID + 2, notification)
     }
 
     private fun startForegroundService() {
@@ -91,6 +117,7 @@ class SoundDetectionService : LifecycleService() {
             .setSmallIcon(R.drawable.noise_aware_24px)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .addAction(R.drawable.stop_24px, "Stop", stopPendingIntent)
             .build()
 
@@ -102,6 +129,15 @@ class SoundDetectionService : LifecycleService() {
     private fun startListening() {
         val sampleRate = 16000
         val inputSize = 15600
+
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager =
+                getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(VIBRATOR_SERVICE) as Vibrator
+        }
 
         val bufferSize = AudioRecord.getMinBufferSize(
             sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -133,9 +169,21 @@ class SoundDetectionService : LifecycleService() {
                         for (i in 0 until inputSize) {
                             floatBuffer[i] = accumulatedSamples.removeAt(0)
                         }
-                        val (primary, secondary) = classifySound(floatBuffer)
+                        val primary = classifySound(floatBuffer)
+                        Log.d("background detected", getSoundDetected(primary))
                         withContext(Dispatchers.Main) {
-                            //here add the alarm
+                            if (alertingSounds.contains(primary)) {
+                                triggerAlarmNotification(getSoundDetected(primary))
+
+                                if (vibrator.hasVibrator()) {
+                                    vibrator.vibrate(
+                                        VibrationEffect.createOneShot(
+                                            3000,
+                                            VibrationEffect.DEFAULT_AMPLITUDE
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -143,7 +191,7 @@ class SoundDetectionService : LifecycleService() {
         }
     }
 
-    private fun classifySound(audioData: FloatArray): Pair<String, String> {
+    private fun classifySound(audioData: FloatArray): Int {
         val input = ByteBuffer.allocateDirect(audioData.size * 4).order(ByteOrder.nativeOrder())
         input.asFloatBuffer().put(audioData)
 
@@ -152,12 +200,8 @@ class SoundDetectionService : LifecycleService() {
 
         val sortedIndices = output[0].indices.sortedByDescending { output[0][it] }
         val primaryLabelIndex = sortedIndices.getOrNull(0) ?: -1
-        val secondaryLabelIndex = sortedIndices.getOrNull(1) ?: -1
 
-        return Pair(
-            getSoundDetected(primaryLabelIndex),
-            getSoundDetected(secondaryLabelIndex)
-        )
+        return primaryLabelIndex
     }
 
     fun getSoundDetected(inputIndex: Int): String {

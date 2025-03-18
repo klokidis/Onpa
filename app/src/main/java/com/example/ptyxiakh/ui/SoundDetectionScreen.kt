@@ -182,8 +182,6 @@ fun SoundDetectionScreen(
                         // Request permission if not granted
                         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                     }
-                    // val intent = Intent(context, SoundDetectionService::class.java)
-                    //context.startService(intent)
                 },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = MaterialTheme.colorScheme.primary,
