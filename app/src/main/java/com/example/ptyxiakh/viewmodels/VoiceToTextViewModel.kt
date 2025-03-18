@@ -131,30 +131,26 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun mapError(error: Int): String {
         Log.e(TAG, "error: $error")
-        when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> return "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> return "Client error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> return "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> {
-                _sttState.update { it.copy(offlineError = true) }
-                return "Network error"
-            }
-
+        return when (error) {
+            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+            SpeechRecognizer.ERROR_CLIENT -> "Client error"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+            SpeechRecognizer.ERROR_NETWORK,
             SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> {
                 _sttState.update { it.copy(offlineError = true) }
-                return "Network error"
+                "Network error"
             }
-
-            SpeechRecognizer.ERROR_NO_MATCH -> return "No match found"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> return "Recognizer busy"
-            SpeechRecognizer.ERROR_SERVER -> return "Server error"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> return "Speech timeout"
+            SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
+            SpeechRecognizer.ERROR_SERVER -> "Server error"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
             else -> {
                 _sttState.update { it.copy(offlineError = true) }
-                return "Unknown error" //add unknow for offline error
+                "Unknown error"
             }
         }
     }
+
 
     private fun isRecoverableError(error: Int): Boolean {
         return error !in listOf(

@@ -71,6 +71,12 @@ class GeminiViewModel : ViewModel() {
         }
     }
 
+    fun clearAnswersList() {
+        _resultUiState.update { currentState ->
+            currentState.copy(answersList = emptyList())
+        }
+    }
+
     private fun editResults(answer: String): List<String> {
         val emojiRegex = Regex("[\\p{So}\\p{Cn}]") // Matches most emojis
         val cleanedAnswer = answer

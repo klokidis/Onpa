@@ -732,16 +732,18 @@ class SoundDetectionService : LifecycleService() {
     }
 
     private fun loadModelFile(): ByteBuffer {
-        val assetFileDescriptor = assets.openFd("1.tflite")
-        return FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
-            val fileChannel = fileInputStream.channel
-            fileChannel.map(
-                FileChannel.MapMode.READ_ONLY,
-                assetFileDescriptor.startOffset,
-                assetFileDescriptor.declaredLength
-            )
+        assets.openFd("1.tflite").use { assetFileDescriptor ->
+            FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
+                val fileChannel = fileInputStream.channel
+                return fileChannel.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    assetFileDescriptor.startOffset,
+                    assetFileDescriptor.declaredLength
+                )
+            }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
