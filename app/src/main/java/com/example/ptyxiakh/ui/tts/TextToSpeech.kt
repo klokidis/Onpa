@@ -52,6 +52,7 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
         onDispose {
             textToSpeech.stop()
             textToSpeech.shutdown()
+            tts.value = null
         }
     }
     return tts

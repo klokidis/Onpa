@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
@@ -44,7 +45,11 @@ class SoundDetectionViewModel @Inject constructor(
     private var audioRecord: AudioRecord? = null
 
     init {
-        interpreter = Interpreter(loadModelFile())
+        try {
+            interpreter = Interpreter(loadModelFile())
+        } catch (e: IOException) {
+            Log.e("SoundDetectionViewModel", "Failed to load model file", e)
+        }
     }
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
@@ -134,25 +139,30 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     private fun loadModelFile(): ByteBuffer {
-        val assetFileDescriptor = context.assets.openFd("1.tflite")
-        val fileInputStream = FileInputStream(assetFileDescriptor.fileDescriptor)
-        val fileChannel = fileInputStream.channel
-        return fileChannel.map(
-            FileChannel.MapMode.READ_ONLY,
-            assetFileDescriptor.startOffset,
-            assetFileDescriptor.declaredLength
-        )
+        context.assets.openFd("1.tflite").use { assetFileDescriptor ->
+            FileInputStream(assetFileDescriptor.fileDescriptor).use { fileInputStream ->
+                val fileChannel = fileInputStream.channel
+                return fileChannel.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    assetFileDescriptor.startOffset,
+                    assetFileDescriptor.declaredLength
+                )
+            }
+        }
     }
+
 
     fun stopListening() {
         _soundDetectorState.update {
             it.copy(isListening = false)
         }
+        interpreter?.close()
+        interpreter = null
         audioRecord?.stop()
         audioRecord?.release()
         audioRecord = null
-        interpreter = null
     }
+
 
     fun getSoundDetected(inputIndex: Int): String {
         return when (inputIndex) {

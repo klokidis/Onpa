@@ -214,20 +214,16 @@ fun ResultsLazyList(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val tts =
-        if (!isLoading) { //since remember wont update the autoMic we initialize the tts after the data is loaded
-            rememberTextToSpeech(
-                onFinished = {
-                    coroutineScope.launch {
-                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
-                        changeCanRunAgain(true)
-                        if (autoMic) startListening()
-                    }
-                }
-            )
-        } else {
-            null
+    val tts = rememberTextToSpeech(
+        onFinished = {
+            coroutineScope.launch {
+                triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                changeCanRunAgain(true)
+                if (autoMic) startListening()
+            }
         }
+    ).takeIf { !isLoading } //Ensures TTS is not held when not needed
+
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -613,21 +609,15 @@ fun TextFieldWithInsideIcon(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val tts =
-        if (!isLoading) { //since remember wont update the autoMic we initialize the tts after the data is loaded
-            rememberTextToSpeech(
-                onFinished = {
-                    coroutineScope.launch {
-                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
-                        changeCanRunAgain(true)
-                        prompt = "" //empty prompt after saying it
-                        if (autoMic) startListening()
-                    }
-                }
-            )
-        } else {
-            null
+    val tts = rememberTextToSpeech(
+        onFinished = {
+            coroutineScope.launch {
+                triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                changeCanRunAgain(true)
+                if (autoMic) startListening()
+            }
         }
+    ).takeIf { !isLoading } //Ensures TTS is not held when not needed
 
     OutlinedTextField(
         value = prompt,

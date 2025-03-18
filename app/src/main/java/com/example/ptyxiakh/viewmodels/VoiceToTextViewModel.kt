@@ -294,11 +294,19 @@ class VoiceToTextViewModel(application: Application) : AndroidViewModel(applicat
     override fun onCleared() {
         super.onCleared()
         Log.d(TAG, "Clearing resources")
-        recognizer.destroy()
+        disableNoiseReduction()
+        destroyRecognizer()
         noiseSuppressor?.release()
         echoCanceler?.release()
         gainControl?.release()
     }
+
+    fun destroyRecognizer() {
+        recognizer.stopListening()
+        recognizer.cancel()
+        recognizer.destroy()
+    }
+
 
     companion object {
         private const val TAG = "VoiceToTextViewModel"

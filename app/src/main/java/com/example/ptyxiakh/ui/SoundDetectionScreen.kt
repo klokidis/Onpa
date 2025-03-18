@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -82,6 +83,12 @@ fun SoundDetectionScreen(
             }
         }
     )
+
+    // Handle the back press
+    BackHandler {
+        soundDetectionViewModel.stopListening()
+        navigate()
+    }
 
     LaunchedEffect(recordAudioPermissionLauncher) {
         // Check if the permission is already granted when the screen is first loaded
