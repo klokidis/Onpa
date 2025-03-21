@@ -8,7 +8,6 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -56,7 +55,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -85,6 +83,8 @@ import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
+import com.example.ptyxiakh.utils.checkRecordPermission
+import com.example.ptyxiakh.utils.showToast
 import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
 import kotlinx.coroutines.launch
 
@@ -99,21 +99,21 @@ fun MainScreen(
     userData: List<UserData>,
     selectedUser: User?,
 ) {
+    val context = LocalContext.current
+
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
     val dataPrefUiState by dataStorePrefViewModel.uiState.collectAsState()
 
-    val context = LocalContext.current
-    var canRecord by remember { mutableStateOf(false) }
-
-    val recordAudioLauncher = rememberLauncherForActivityResult(
+    val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            canRecord = isGranted
-        }
+        onResult = {}
     )
 
+    LaunchedEffect(recordAudioPermissionLauncher) {
+        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
 
     LaunchedEffect(selectedUser?.voiceLanguage) {
         if (selectedUser?.voiceLanguage != null) {
@@ -122,30 +122,22 @@ fun MainScreen(
         }
     }
 
-    LaunchedEffect(recordAudioLauncher) {
-        recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
-    }
-
+    // Handle speech-to-text errors
     LaunchedEffect(sttState.offlineError) {
-        // Inform the user about the missing service
         if (sttState.offlineError) {
-            Toast.makeText(
-                context,
-                "Speech recognition is offline. Please enable Wi-Fi.",
-                Toast.LENGTH_LONG
-            ).show()
+            showToast(context, "Speech recognition is offline. Please enable Wi-Fi.")
         }
     }
 
-    LaunchedEffect(!sttState.availableSTT) {
+    LaunchedEffect(sttState.availableSTT) {
         if (!sttState.availableSTT) {
-            Toast.makeText(
+            showToast(
                 context,
-                "Speech recognition is not available. Please install or enable Google Speech Services.",
-                Toast.LENGTH_LONG
-            ).show()
+                "Speech recognition is not available. Please install or enable Google Speech Services."
+            )
         }
     }
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -167,7 +159,7 @@ fun MainScreen(
             weightModifier = Modifier.weight(1f),
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,
-            isLoading = dataPrefUiState.isLoading
+            isLoading = dataPrefUiState.isLoading,
         )
 
     }
@@ -207,7 +199,7 @@ fun ResultsLazyList(
     changeCanRunAgain: (Boolean) -> Unit,
     vibrate: Boolean,
     autoMic: Boolean,
-    isLoading: Boolean
+    isLoading: Boolean,
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -218,7 +210,7 @@ fun ResultsLazyList(
             coroutineScope.launch {
                 triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
                 changeCanRunAgain(true)
-                if (autoMic) startListening()
+                if (autoMic && checkRecordPermission(context)) startListening()
             }
         }
     ).takeIf { !isLoading } //Ensures TTS is not held when not needed
@@ -559,6 +551,8 @@ fun OutlinedCustomIconButton(
     isListening: Boolean,
     isEnabled: Boolean,
 ) {
+    val context = LocalContext.current
+
     OutlinedButton(
         onClick = {
             when {
@@ -567,7 +561,11 @@ fun OutlinedCustomIconButton(
                 }
 
                 else -> {
-                    startListening()
+                    if (checkRecordPermission(context)) { //checks on runtime
+                        startListening()
+                    } else {
+                        showToast(context, "Permission denied! Cannot record audio.")
+                    }
                 }
             }
         },
@@ -602,11 +600,12 @@ fun TextFieldWithInsideIcon(
     autoMic: Boolean,
     isLoading: Boolean
 ) {
+    val context = LocalContext.current
+
     // State to track the focus of the TextField
     var isFocused by rememberSaveable { mutableStateOf(false) }
     var prompt by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     val tts = rememberTextToSpeech(
         onFinished = {

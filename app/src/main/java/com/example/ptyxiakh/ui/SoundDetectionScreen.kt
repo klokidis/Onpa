@@ -2,8 +2,7 @@ package com.example.ptyxiakh.ui
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.widget.Toast
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,11 +43,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
 import com.example.ptyxiakh.service.SoundDetectionService
+import com.example.ptyxiakh.utils.checkNotificationPermission
+import com.example.ptyxiakh.utils.checkRecordPermission
+import com.example.ptyxiakh.utils.showToast
 import com.example.ptyxiakh.viewmodels.SoundDetectionViewModel
 
 @Composable
@@ -58,28 +58,30 @@ fun SoundDetectionScreen(
     soundDetectionViewModel: SoundDetectionViewModel = hiltViewModel(),
     viewModel: SoundDetectionServiceViewModel = hiltViewModel()
 ) {
-    val soundDetectorState by soundDetectionViewModel.soundDetectorState.collectAsState()
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
-    var isShowDescription by rememberSaveable { mutableStateOf(true) }
-    var isRecording by rememberSaveable { mutableStateOf(false) }
-    // Track permission state
-    var hasPermission by remember { mutableStateOf(false) }
 
     val intent = Intent(context, SoundDetectionService::class.java)
-    // Observe the service state from the singleton
+
+    var isShowDescription by rememberSaveable { mutableStateOf(true) }
+    var isRecording by rememberSaveable { mutableStateOf(false) }
+
     val isServiceRunning by viewModel.isServiceRunning.collectAsState()
+    val soundDetectorState by soundDetectionViewModel.soundDetectorState.collectAsState()
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (!isGranted) {
+                showToast(context, "Permission denied! Cannot send notifications.")
+            }
+        }
+    )
 
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
-            hasPermission = isGranted
             if (!isGranted) {
-                Toast.makeText(
-                    context,
-                    "Permission denied! Cannot record audio.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast(context, "Permission denied! Cannot record audio.")
             }
         }
     )
@@ -90,18 +92,18 @@ fun SoundDetectionScreen(
         navigate()
     }
 
-    LaunchedEffect(recordAudioPermissionLauncher) {
-        // Check if the permission is already granted when the screen is first loaded
-        hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
+    LaunchedEffect(notificationPermissionLauncher) {
+        if (!checkNotificationPermission(context)) { //if it doesn't have the permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -180,7 +182,7 @@ fun SoundDetectionScreen(
         if (!isRecording && !isServiceRunning) {
             Button(
                 onClick = {
-                    if (hasPermission) {
+                    if (checkRecordPermission(context)) {
                         isShowDescription = false
                         isRecording = true
                         // If permission is granted, start listening
@@ -208,12 +210,15 @@ fun SoundDetectionScreen(
             )
             Button(
                 onClick = {
-                    if (hasPermission) {
+                    if (checkNotificationPermission(context) && checkRecordPermission(context)) {
                         context.startService(intent)
                         isRecording = true
                     } else {
                         // Request permission if not granted
                         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
                     }
 
                 },
