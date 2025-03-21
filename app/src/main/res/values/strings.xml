@@ -39,4 +39,6 @@
     <string name="language">Language</string>
     <string name="detect_now">Detect sound now</string>
     <string name="detect_background">Alarm on background</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="auto_mic">Auto mic</string>
 </resources>

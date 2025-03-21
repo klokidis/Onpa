@@ -207,16 +207,19 @@ fun ResultsLazyList(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val tts = rememberTextToSpeech(
-        onFinished = {
-            coroutineScope.launch {
-                triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
-                changeCanRunAgain(true)
-                if (autoMic && checkRecordPermission(context)) startListening()
+    val tts = if (!isLoading) { //initialize after loaded so the onFinished is with the right values
+        rememberTextToSpeech(
+            onFinished = {
+                coroutineScope.launch {
+                    triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    changeCanRunAgain(true)
+                    if (autoMic && checkRecordPermission(context)) startListening()
+                }
             }
-        }
-    ).takeIf { !isLoading } //Ensures TTS is not held when not needed
-
+        )
+    } else {
+        null
+    }
 
     // Automatically scroll when the list updates
     LaunchedEffect(answersList) {
@@ -614,15 +617,21 @@ fun TextFieldWithInsideIcon(
     var prompt by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    val tts = rememberTextToSpeech(
-        onFinished = {
-            coroutineScope.launch {
-                triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
-                changeCanRunAgain(true)
-                if (autoMic) startListening()
+    val tts = if (!isLoading) { //initialize after loaded so the onFinished is with the right values
+        rememberTextToSpeech(
+            onFinished = {
+                coroutineScope.launch {
+                    triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    changeCanRunAgain(true)
+                    if (autoMic && checkRecordPermission(context)) {
+                        startListening()
+                    }
+                }
             }
-        }
-    ).takeIf { !isLoading } //Ensures TTS is not held when not needed
+        )
+    } else {
+        null
+    }
 
     OutlinedTextField(
         value = prompt,
