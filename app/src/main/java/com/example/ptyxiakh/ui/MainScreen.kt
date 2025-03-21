@@ -8,6 +8,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -111,10 +112,11 @@ fun MainScreen(
         onResult = {}
     )
 
-    LaunchedEffect(recordAudioPermissionLauncher) {
+    LaunchedEffect(recordAudioPermissionLauncher) { //ask the permission on launch
         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
+    //pass the user language to the voiceToTextViewModel
     LaunchedEffect(selectedUser?.voiceLanguage) {
         if (selectedUser?.voiceLanguage != null) {
             Log.d("changed", selectedUser.voiceLanguage.toString())
@@ -128,7 +130,6 @@ fun MainScreen(
             showToast(context, "Speech recognition is offline. Please enable Wi-Fi.")
         }
     }
-
     LaunchedEffect(sttState.availableSTT) {
         if (!sttState.availableSTT) {
             showToast(
@@ -183,6 +184,7 @@ fun MainScreen(
                     .joinToString().drop(sttState.spokenPromptText.length)
             },
             changeSpokenPromptText = voiceToTextViewModel::changeSpokenPromptText,
+            recordAudioPermissionLauncher = recordAudioPermissionLauncher
         )
     }
 }
@@ -470,6 +472,7 @@ fun TextFieldUpperButtons(
     vibrate: Boolean,
     autoMic: Boolean,
     isLoading: Boolean,
+    recordAudioPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
 ) {
     Column {
         Row(
@@ -481,6 +484,7 @@ fun TextFieldUpperButtons(
                 stopListening = stopListening,
                 isListening = isListening,
                 isEnabled = isEnabled,
+                recordAudioPermissionLauncher = recordAudioPermissionLauncher
             )
             Spacer(modifier = Modifier.padding(10.dp))
             OutlinedCustomButton(
@@ -550,6 +554,7 @@ fun OutlinedCustomIconButton(
     stopListening: () -> Unit,
     isListening: Boolean,
     isEnabled: Boolean,
+    recordAudioPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
 ) {
     val context = LocalContext.current
 
@@ -565,6 +570,8 @@ fun OutlinedCustomIconButton(
                         startListening()
                     } else {
                         showToast(context, "Permission denied! Cannot record audio.")
+                        // Request the permission
+                        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                     }
                 }
             }
