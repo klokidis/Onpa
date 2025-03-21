@@ -77,6 +77,13 @@ fun SoundDetectionScreen(
         }
     )
 
+    //if the service stops by the notification button the isRecording must stop too
+    LaunchedEffect(isServiceRunning) {
+        if (!isServiceRunning) {
+            isRecording = false
+        }
+    }
+
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->

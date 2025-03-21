@@ -113,20 +113,6 @@ fun UserDetailsScreen(
                 ),
             textAlign = TextAlign.Center
         )
-        /*
-                Text(
-                    text = stringResource(R.string.for_user) + user?.userName + ":",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            bottom = 10.dp
-                        ),
-                    textAlign = TextAlign.Center
-                )
-        */
         Row(
             modifier = Modifier
                 .fillMaxWidth()
