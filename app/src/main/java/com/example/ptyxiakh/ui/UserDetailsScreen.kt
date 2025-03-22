@@ -55,7 +55,8 @@ fun UserDetailsScreen(
 ) {
 
     val userDetailsUiState by userDetailsViewModel.userDetailsUiState.collectAsState()
-    val firstList: List<UserData> = listOf( //default values before saving user details
+    val firstList: List<UserData> = listOf(
+        //default values before saving user details
         UserData(
             userId = user?.userId ?: 0,
             category = stringResource(R.string.name),
@@ -186,7 +187,7 @@ fun UserDetailsScreen(
             enabled = user?.userId != null
         ) {
             Text(
-                text = stringResource(R.string.create_account),
+                text = stringResource(if (userData.isEmpty()) R.string.create_account else R.string.this_continue),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier,
                 textAlign = TextAlign.Center

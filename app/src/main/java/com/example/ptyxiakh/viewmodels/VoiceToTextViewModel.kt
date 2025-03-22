@@ -88,6 +88,7 @@ class VoiceToTextViewModel @Inject constructor(
     fun stopListening() {
         Log.d(TAG, "Stopping recognition")
         recognizer.stopListening()
+        recognizer.cancel()
         _sttState.update { it.copy(isSpeaking = false) }
     }
 
