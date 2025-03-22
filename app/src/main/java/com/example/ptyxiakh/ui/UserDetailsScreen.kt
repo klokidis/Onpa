@@ -55,7 +55,7 @@ fun UserDetailsScreen(
 ) {
 
     val userDetailsUiState by userDetailsViewModel.userDetailsUiState.collectAsState()
-    val firstList: List<UserData> = listOf(
+    val firstList: List<UserData> = listOf( //default values before saving user details
         UserData(
             userId = user?.userId ?: 0,
             category = stringResource(R.string.name),
@@ -136,11 +136,11 @@ fun UserDetailsScreen(
             )
         }
 
-        if (userData.isEmpty()) {//first data
+        if (userData.isEmpty()) {// before saving the user details
             UserData(firstList, null)
         }
 
-        UserData(userData, deleteOneData) //saved data
+        UserData(userData, deleteOneData) //saved data after saving the user details
 
         userDetailsUiState.newUserDetails.forEachIndexed { index, pair -> //new data before saving
             NewUserData(
