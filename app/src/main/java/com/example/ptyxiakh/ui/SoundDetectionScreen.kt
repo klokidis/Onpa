@@ -47,8 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
 import com.example.ptyxiakh.service.SoundDetectionService
-import com.example.ptyxiakh.utils.checkNotificationPermission
-import com.example.ptyxiakh.utils.checkRecordPermission
+import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
 import com.example.ptyxiakh.viewmodels.SoundDetectionViewModel
 
@@ -100,7 +99,7 @@ fun SoundDetectionScreen(
     }
 
     LaunchedEffect(notificationPermissionLauncher) {
-        if (!checkNotificationPermission(context)) { //if it doesn't have the permission
+        if (!PermissionUtils.checkNotificationPermission(context)) { //if it doesn't have the permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
@@ -189,7 +188,7 @@ fun SoundDetectionScreen(
         if (!isRecording && !isServiceRunning) {
             Button(
                 onClick = {
-                    if (checkRecordPermission(context)) {
+                    if (PermissionUtils.checkRecordPermission(context)) {
                         isShowDescription = false
                         isRecording = true
                         // If permission is granted, start listening
@@ -217,7 +216,7 @@ fun SoundDetectionScreen(
             )
             Button(
                 onClick = {
-                    if (checkNotificationPermission(context) && checkRecordPermission(context)) {
+                    if (PermissionUtils.checkNotificationPermission(context) && PermissionUtils.checkRecordPermission(context)) {
                         context.startService(intent)
                         isRecording = true
                     } else {

@@ -1,11 +1,6 @@
 package com.example.ptyxiakh.ui
 
 import android.Manifest
-import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -84,7 +79,8 @@ import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
-import com.example.ptyxiakh.utils.checkRecordPermission
+import com.example.ptyxiakh.utils.HapticUtils
+import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
 import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
 import kotlinx.coroutines.launch
@@ -211,9 +207,9 @@ fun ResultsLazyList(
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
-                    triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
                     changeCanRunAgain(true)
-                    if (autoMic && checkRecordPermission(context)) startListening()
+                    if (autoMic && PermissionUtils.checkRecordPermission(context)) startListening()
                 }
             }
         )
@@ -303,7 +299,7 @@ fun ResultCard(
                 shape = RoundedCornerShape(16.dp)
             ),
         onClick = {
-            triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+            HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
             if (isListening) {
                 stopListening()
             }
@@ -569,7 +565,7 @@ fun OutlinedCustomIconButton(
                 }
 
                 else -> {
-                    if (checkRecordPermission(context)) { //checks on runtime
+                    if (PermissionUtils.checkRecordPermission(context)) { //checks on runtime
                         startListening()
                     } else {
                         showToast(context, "Permission denied! Cannot record audio.")
@@ -621,9 +617,9 @@ fun TextFieldWithInsideIcon(
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
-                    triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
                     changeCanRunAgain(true)
-                    if (autoMic && checkRecordPermission(context)) {
+                    if (autoMic && PermissionUtils.checkRecordPermission(context)) {
                         startListening()
                     }
                 }
@@ -661,7 +657,7 @@ fun TextFieldWithInsideIcon(
                         if (isListening) {
                             stopListening()
                         }
-                        triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                        HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
                         changeCanRunAgain(false)
                         tts?.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
@@ -692,26 +688,6 @@ fun TextFieldWithInsideIcon(
             }
         }
     )
-}
-
-fun triggerVibration(canVibrate: Boolean, context: Context, milliseconds: Long) {
-    if (canVibrate) {
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager =
-                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            manager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
-        vibrator.vibrate(
-            VibrationEffect.createOneShot(
-                milliseconds,
-                VibrationEffect.DEFAULT_AMPLITUDE
-            )
-        )
-    }
 }
 
 @Preview(showBackground = true)
