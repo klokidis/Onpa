@@ -22,7 +22,6 @@ import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.nio.channels.FileChannel
 import javax.inject.Inject
 
@@ -59,60 +58,60 @@ class SoundDetectionViewModel @Inject constructor(
         val sampleRate = 16000
         val inputSize = 15600
 
-        if (interpreter == null) {
-            viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (interpreter == null) {
                 interpreter = Interpreter(loadModelFile())
             }
-        }
 
-
-        val bufferSize = AudioRecord.getMinBufferSize(
-            sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
-        )
-
-        audioRecord = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            sampleRate,
-            AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            bufferSize
-        )
-
-        audioRecord?.startRecording()
-        _soundDetectorState.update {
-            it.copy(
-                isListening = true
+            val bufferSize = AudioRecord.getMinBufferSize(
+                sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
             )
-        }
-        val accumulatedSamples = mutableListOf<Float>()
 
-        viewModelScope.launch(Dispatchers.IO) {
+            if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
+                Log.e("Sound Detection", "Invalid buffer size: $bufferSize")
+                return@launch
+            }
+
+            audioRecord = AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                sampleRate,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                bufferSize
+            )
+
+            if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
+                Log.e("Sound Detection", "AudioRecord initialization failed")
+                return@launch
+            }
+
+            audioRecord?.startRecording()
+            _soundDetectorState.update { it.copy(isListening = true) }
+
+            val accumulatedSamples = mutableListOf<Float>()
             val buffer = ShortArray(bufferSize)
+
             while (soundDetectorState.value.isListening) {
                 val readSize = audioRecord?.read(buffer, 0, bufferSize) ?: break
-                // Only process if we read some data
+
                 if (readSize > 0) {
-                    // Convert and accumulate audio data
+                    // Normalize to [-1, 1] float32 range
                     accumulatedSamples.addAll(
                         buffer.take(readSize).map { it.toFloat() / Short.MAX_VALUE }
                     )
-
                     // Check if we have enough samples
                     while (accumulatedSamples.size >= inputSize) {
-                        // Take the required number of samples for processing
                         val floatBuffer = FloatArray(inputSize)
                         for (i in 0 until inputSize) {
-                            floatBuffer[i] =
-                                accumulatedSamples.removeAt(0) // Remove the first sample
+                            floatBuffer[i] = accumulatedSamples.removeAt(0) // Remove the first sample
                         }
-                        // Run inference using TensorFlow Lite model
+
+                        // Run TensorFlow Lite inference
                         val (primary, secondary) = classifySound(floatBuffer)
+
                         withContext(Dispatchers.Main) {
                             _soundDetectorState.update {
-                                it.copy(
-                                    detectedPrimarySound = primary,
-                                    detectedSecondarySound = secondary
-                                )
+                                it.copy(detectedPrimarySound = primary, detectedSecondarySound = secondary)
                             }
                         }
                     }
@@ -122,24 +121,21 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     private fun classifySound(audioData: FloatArray): Pair<String, String> {
-        val input =
-            ByteBuffer.allocateDirect(audioData.size * 4).order(ByteOrder.nativeOrder())
-        input.asFloatBuffer().put(audioData)
+        if (interpreter == null) {
+            Log.e("Sound Detection", "Interpreter is null")
+            return Pair("...", "...")
+        }
 
-        val output = Array(1) { FloatArray(521) }
-        interpreter?.run(input, output)
+        val output = Array(1) { FloatArray(521) }  // YAMNet outputs (N, 521)
+        interpreter?.run(arrayOf(audioData), output)
 
-        // Get top 2 labels with highest confidence
         val sortedIndices = output[0].indices.sortedByDescending { output[0][it] }
         val primaryLabelIndex = sortedIndices.getOrNull(0) ?: -1
         val secondaryLabelIndex = sortedIndices.getOrNull(1) ?: -1
 
         Log.d("Sound Detection", "Primary: $primaryLabelIndex, Secondary: $secondaryLabelIndex")
 
-        return Pair(
-            getSoundDetected(primaryLabelIndex),
-            getSoundDetected(secondaryLabelIndex)
-        )
+        return Pair(getSoundDetected(primaryLabelIndex), getSoundDetected(secondaryLabelIndex))
     }
 
     private fun loadModelFile(): ByteBuffer {
