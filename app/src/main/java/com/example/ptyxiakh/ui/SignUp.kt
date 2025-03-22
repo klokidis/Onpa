@@ -48,7 +48,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignUp(
-    navigate: () -> Unit,
     userViewModel: UserViewModel = hiltViewModel(),
 ) {
     var name by rememberSaveable { mutableStateOf("") }

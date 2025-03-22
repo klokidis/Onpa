@@ -14,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,6 +41,7 @@ import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
 fun SettingsScreen(
     navigateMainScreen: () -> Unit,
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
+    navigateUserDetails: () -> Unit,
 ) {
     val uiState by dataStorePrefViewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
@@ -89,16 +95,17 @@ fun SettingsScreen(
                 value = uiState.autoMic
             )
             Spacer(modifier = Modifier.padding(5.dp))
+            OneSettingSimple(stringResource(R.string.edit_user_data),navigateUserDetails)
         }
     }
 }
 
 @Composable
-fun OneSettingSimple(text: String, onClick: (Boolean) -> Unit) {
+fun OneSettingSimple(text: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(true) }
+            .clickable { onClick() }
             .size(60.dp)
             .padding(start = 15.dp, end = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -161,8 +168,36 @@ fun SettingSwitchWithExplain(text: String, onClick: (Boolean) -> Unit, value: Bo
     }
 }
 
+@Composable
+fun SettingDropDownMenu(text: String, onClick: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(60.dp)
+            .padding(start = 15.dp, end = 15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        var expanded by remember { mutableStateOf(false) }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Option 2") },
+                onClick = { /* Do something... */ }
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen({ })
+    SettingsScreen({ }, navigateUserDetails = { })
 }

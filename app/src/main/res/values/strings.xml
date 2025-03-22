@@ -41,4 +41,5 @@
     <string name="detect_background">Alarm on background</string>
     <string name="vibrate">Vibrate</string>
     <string name="auto_mic">Auto mic</string>
+    <string name="edit_user_data">Edit user data</string>
 </resources>

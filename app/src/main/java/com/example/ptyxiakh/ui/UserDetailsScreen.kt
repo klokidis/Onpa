@@ -18,19 +18,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -50,12 +49,12 @@ fun UserDetailsScreen(
     user: User?,
     userData: List<UserData>,
     navigate: () -> Unit,
-    userDetailsViewModel: UserDetailsViewModel = viewModel(),
     addOneUserData: (Int, String, String) -> Unit,
+    deleteOneData: (Int) -> Unit,
+    userDetailsViewModel: UserDetailsViewModel = viewModel(),
 ) {
 
     val userDetailsUiState by userDetailsViewModel.userDetailsUiState.collectAsState()
-    val scrollState = rememberScrollState()
     val firstList: List<UserData> = listOf(
         UserData(
             userId = user?.userId ?: 0,
@@ -71,12 +70,12 @@ fun UserDetailsScreen(
                 stringResource(R.string.gr)
             }
         ),
-        )
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -138,40 +137,46 @@ fun UserDetailsScreen(
         }
 
         if (userData.isEmpty()) {//first data
-            UserData(firstList)
+            UserData(firstList, null)
         }
 
-        UserData(userData) //saved data
+        UserData(userData, deleteOneData) //saved data
 
         userDetailsUiState.newUserDetails.forEachIndexed { index, pair -> //new data before saving
-            NewUserData(index, userDetailsViewModel::editValuesBasedOnLength)
+            NewUserData(
+                pair,
+                index,
+                userDetailsViewModel::editValuesBasedOnLength,
+                userDetailsViewModel::minusLine
+            )
         }
 
-        ListButtons(userDetailsViewModel::addLine, userDetailsViewModel::minusLine)
+        ListButtons(userDetailsViewModel::addLine)
 
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = {
-                addOneUserData(
-                    user?.userId ?: 0,
-                    firstList.first().category,
-                    firstList.first().value
-                )
-                addOneUserData(
-                    user?.userId ?: 0,
-                    firstList[1].category,
-                    firstList[1].value
-                )
+                if (userData.isEmpty()) { //if this is the first initialize add the basic data
+                    addOneUserData(
+                        user?.userId ?: 0,
+                        firstList.first().category,
+                        firstList.first().value
+                    )
+                    addOneUserData(
+                        user?.userId ?: 0,
+                        firstList[1].category,
+                        firstList[1].value
+                    )
+                }
                 if (user?.userId != null && userDetailsUiState.newUserDetails.isNotEmpty()) {
                     userDetailsUiState.newUserDetails.forEachIndexed { index, pair ->
                         if (pair.first.trim().isNotEmpty() && pair.second.trim().isNotEmpty()) {
                             addOneUserData(user.userId, pair.first, pair.second)
                         }
                     }
-                } else {
-                    navigate()
                 }
+                navigate()
                 userDetailsViewModel.emptyList() //deletes after passing them to data
             },
             modifier = Modifier
@@ -191,7 +196,7 @@ fun UserDetailsScreen(
 }
 
 @Composable
-private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
+private fun ListButtons(addLine: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,20 +204,6 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Button(
-            onClick = {
-                minusLast()
-            },
-            modifier = Modifier
-                .weight(1f),
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.Remove,
-                contentDescription = stringResource(R.string.remove),
-            )
-        }
-        Spacer(modifier = Modifier.padding(start = 60.dp))
         Button(
             onClick = {
                 addLine()
@@ -231,21 +222,20 @@ private fun ListButtons(addLine: () -> Unit, minusLast: () -> Unit) {
 
 @Composable
 fun NewUserData(
+    pair: Pair<String, String>,
     index: Int,
-    editValuesBasedOnLength: (Int, String, String) -> Unit
+    editValuesBasedOnLength: (Int, String, String) -> Unit,
+    remove: (Int) -> Unit
 ) {
-    val category = rememberSaveable { mutableStateOf("") }
-    val value = rememberSaveable { mutableStateOf("") }
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         OutlinedTextField(
-            value = category.value,
+            value = pair.first,
             onValueChange = {
-                category.value = it
-                editValuesBasedOnLength(index, category.value, value.value)
+                editValuesBasedOnLength(index, it, pair.second)
             },
             textStyle = MaterialTheme.typography.bodyMedium,
             label = {
@@ -267,10 +257,9 @@ fun NewUserData(
             contentDescription = stringResource(R.string.arrow),
         )
         OutlinedTextField(
-            value = value.value,
+            value = pair.second,
             onValueChange = {
-                value.value = it
-                editValuesBasedOnLength(index, category.value, value.value)
+                editValuesBasedOnLength(index, pair.first, it)
             },
             textStyle = MaterialTheme.typography.bodyMedium,
             label = {
@@ -286,12 +275,24 @@ fun NewUserData(
             singleLine = true,
             shape = RoundedCornerShape(20.dp)
         )
+        Spacer(modifier = Modifier.padding(start = 5.dp))
+        IconButton(
+            onClick = { remove(index) },
+            modifier = Modifier
+                .size(20.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.arrow),
+            )
+        }
     }
 }
 
 @Composable
 fun UserData(
     userData: List<UserData>,
+    deleteOneData: ((Int) -> Unit)?
 ) {
     userData.forEach { thisData ->
         Row(
@@ -307,6 +308,19 @@ fun UserData(
                 contentDescription = stringResource(R.string.arrow),
             )
             OneData(thisData.value)
+            Spacer(modifier = Modifier.padding(start = 5.dp))
+            if (deleteOneData != null && userData.size != 1) {
+                IconButton(
+                    onClick = { deleteOneData.invoke(thisData.id) },
+                    modifier = Modifier
+                        .size(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.arrow),
+                    )
+                }
+            }
         }
     }
 }

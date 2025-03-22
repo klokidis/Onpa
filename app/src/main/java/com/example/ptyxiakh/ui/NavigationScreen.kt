@@ -78,11 +78,7 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.SignUp.name
             ) {
-                SignUp(
-                    navigate = {
-                        navController.popBackStack()
-                    }
-                )
+                SignUp()
             }
             composable(
                 route = AppScreens.UserDetails.name
@@ -90,8 +86,15 @@ fun NavigationScreen(
                 UserDetailsScreen(
                     user = userUiState.selectedUser,
                     userData = userDataUiState.userData,
-                    navigate = { navController.navigate(AppScreens.Main.name) },
-                    addOneUserData = userDataViewModel::addFavorite
+                    navigate = {
+                        navController.navigate(AppScreens.Main.name) {
+                            popUpTo(AppScreens.Main.name) {
+                                inclusive = true
+                            } // Clear back stack
+                        }
+                    },
+                    addOneUserData = userDataViewModel::addFavorite,
+                    deleteOneData = userDataViewModel::deleteOneData
                 )
             }
             composable(
@@ -100,7 +103,9 @@ fun NavigationScreen(
                     when (initialState.destination.route) {
                         AppScreens.SoundDetect.name -> slideInHorizontally(initialOffsetX = { it }) // Slide right
                         AppScreens.Settings.name -> slideInHorizontally(initialOffsetX = { -it }) // Slide left
-                        else -> { fadeIn(animationSpec = tween(0)) }
+                        else -> {
+                            fadeIn(animationSpec = tween(0))
+                        }
                     }
                 },
                 exitTransition = {
@@ -141,6 +146,9 @@ fun NavigationScreen(
                                 inclusive = true
                             } // Clear back stack
                         }
+                    },
+                    navigateUserDetails = {
+                        navController.navigate(AppScreens.UserDetails.name)
                     }
                 )
             }

@@ -24,7 +24,7 @@ class UserDetailsViewModel() : ViewModel() {
         }
     }
 
-    fun emptyList(){
+    fun emptyList() {
         _userDetailsUiState.update { currentState ->
             currentState.copy(
                 newUserDetails = listOf()
@@ -32,13 +32,13 @@ class UserDetailsViewModel() : ViewModel() {
         }
     }
 
-    fun minusLine() {
-        _userDetailsUiState.update { currentState ->
-            currentState.copy(
-                newUserDetails = currentState.newUserDetails.dropLast(1)
-            )
-        }
+    fun minusLine(index: Int) {
+        _userDetailsUiState.value = _userDetailsUiState.value.copy(
+            newUserDetails = _userDetailsUiState.value.newUserDetails.toMutableList()
+                .also { it.removeAt(index) }
+        )
     }
+
 
     fun editValuesBasedOnLength(position: Int, newValueOne: String, newValueTwo: String) {
         _userDetailsUiState.update { currentState ->
@@ -49,5 +49,4 @@ class UserDetailsViewModel() : ViewModel() {
             )
         }
     }
-
 }
