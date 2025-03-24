@@ -306,8 +306,8 @@ class VoiceToTextViewModel @Inject constructor(
     }
 
     fun destroyRecognizer() {
-        recognizer.stopListening()
         recognizer.cancel()
+        recognizer.stopListening()
         recognizer.destroy()
     }
 

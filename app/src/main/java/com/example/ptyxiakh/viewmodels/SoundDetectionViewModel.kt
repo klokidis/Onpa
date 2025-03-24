@@ -703,12 +703,7 @@ class SoundDetectionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-
-        // Ensure to stop and release resources properly
         stopListening()
-
-        // You can add additional cleanup if needed
-        Log.d("SoundDetectionViewModel", "onCleared called: Resources released.")
     }
 
 }

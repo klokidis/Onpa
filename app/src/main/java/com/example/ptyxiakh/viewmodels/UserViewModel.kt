@@ -5,7 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -62,9 +66,5 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.deleteAllUser()
         }
-    }
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
     }
 }
