@@ -1,9 +1,6 @@
 package com.example.ptyxiakh
 
 import android.os.Bundle
-import android.os.StrictMode
-import android.os.StrictMode.ThreadPolicy
-import android.os.StrictMode.VmPolicy
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge

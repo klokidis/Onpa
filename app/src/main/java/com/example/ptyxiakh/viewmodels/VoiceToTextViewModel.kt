@@ -177,7 +177,7 @@ class VoiceToTextViewModel @Inject constructor(
                     " "
                 ).length
             ) {
-                changeSpokenPromptText() //if the final result is smaller than the Partial Result
+                fixSpokenPromptText() //if the final result is smaller than the Partial Result
             }
             Log.d(TAG, "Final result: $it")
             _sttState.update { state ->
@@ -197,19 +197,17 @@ class VoiceToTextViewModel @Inject constructor(
         val partialText =
             partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         partialText?.let { text ->
-            // Remove commas and split into words
             val cleanedText = text.replace(",", "").trim()
-            val existingWords = _sttState.value.partialTranscripts.flatMap { it.split(" ") }.toSet()
+            val previousTranscript = _sttState.value.partialTranscripts.joinToString(" ")
 
-            // Add only new unique words
-            val uniqueWords = cleanedText.split(" ").filterNot { existingWords.contains(it) }
+            // Extract only new portion of the text
+            val newPortion = cleanedText.removePrefix(previousTranscript).trim()
 
-            if (uniqueWords.isNotEmpty()) {
-                val updatedText = uniqueWords.joinToString(" ")
-                Log.d(TAG, "Filtered partial result: $updatedText")
+            if (newPortion.isNotEmpty()) {
+                Log.d(TAG, "Filtered partial result: $newPortion")
                 _sttState.update { state ->
                     state.copy(
-                        partialTranscripts = state.partialTranscripts + updatedText
+                        partialTranscripts = state.partialTranscripts + newPortion
                     )
                 }
             }
@@ -281,6 +279,21 @@ class VoiceToTextViewModel @Inject constructor(
             state.copy(
                 aiClicked = true,
                 spokenPromptText = (state.fullTranscripts + state.partialTranscripts)
+                    .joinToString(" ")
+                    .replaceFirst("\" ", "\"") // Converts list to a string with spaces
+                    .replace(",", "") // Removes commas
+                    .replace(Regex("\\s+"), " ") // Replaces multiple spaces with a single space
+                    .trim() // Ensures no leading/trailing spaces
+            )
+        }
+        Log.d(TAG, sttState.value.spokenPromptText)
+    }
+
+    fun fixSpokenPromptText() {
+        _sttState.update { state ->
+            state.copy(
+                aiClicked = true,
+                spokenPromptText = (state.fullTranscripts)
                     .joinToString(" ")
                     .replaceFirst("\" ", "\"") // Converts list to a string with spaces
                     .replace(",", "") // Removes commas

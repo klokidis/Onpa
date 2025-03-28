@@ -207,7 +207,11 @@ fun ResultsLazyList(
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
-                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    HapticUtils.triggerVibration(
+                        canVibrate = vibrate,
+                        context = context,
+                        milliseconds = 10
+                    )
                     changeCanRunAgain(true)
                     if (autoMic && PermissionUtils.checkRecordPermission(context)) startListening()
                 }
@@ -617,7 +621,11 @@ fun TextFieldWithInsideIcon(
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
-                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    HapticUtils.triggerVibration(
+                        canVibrate = vibrate,
+                        context = context,
+                        milliseconds = 10
+                    )
                     changeCanRunAgain(true)
                     if (autoMic && PermissionUtils.checkRecordPermission(context)) {
                         startListening()
@@ -657,7 +665,11 @@ fun TextFieldWithInsideIcon(
                         if (isListening) {
                             stopListening()
                         }
-                        HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                        HapticUtils.triggerVibration(
+                            canVibrate = vibrate,
+                            context = context,
+                            milliseconds = 10
+                        )
                         changeCanRunAgain(false)
                         tts?.value?.speak(
                             prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
