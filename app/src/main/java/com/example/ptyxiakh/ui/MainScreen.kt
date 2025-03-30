@@ -553,9 +553,14 @@ fun OutlinedCustomButton(
         shape = CircleShape, // Ensure the button's shape is circular
         contentPadding = PaddingValues(0.dp) //remove extra padding
     ) {
-        Text(
-            text = stringResource(R.string.ai),
-            color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
+        Icon(
+            modifier = Modifier
+                .size(30.dp),
+            painter = if (isEnabled) painterResource(R.drawable.lightbulb_filled_24px) else painterResource(
+                R.drawable.lightbulb_24px
+            ),
+            tint = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray,
+            contentDescription = stringResource(R.string.suggested_resp),
         )
     }
 }
