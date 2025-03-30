@@ -115,16 +115,17 @@ fun SettingsScreen(
                 titleText = stringResource(R.string.tts_language_title),
                 bodyText = stringResource(R.string.tts_language_description),
                 onClick = {
-                    val intent = Intent().apply {
-                        action = try {
+                    Intent().apply {
+                        try {
                             // Try opening the TTS_SETTINGS Settings first
-                            "com.android.settings.TTS_SETTINGS"
+                            action = "com.android.settings.TTS_SETTINGS"
+                            context.startActivity(this)
                         } catch (_: ActivityNotFoundException) {
                             // If the above fails, fallback to Accessibility Settings
-                            Settings.ACTION_ACCESSIBILITY_SETTINGS
+                            action = Settings.ACTION_ACCESSIBILITY_SETTINGS
+                            context.startActivity(this)
                         }
                     }
-                    context.startActivity(intent)
                 },
             )
         }
