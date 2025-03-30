@@ -1,5 +1,8 @@
 package com.example.ptyxiakh.ui
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,6 +54,7 @@ fun SettingsScreen(
 ) {
     val uiState by dataStorePrefViewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier,
@@ -109,6 +114,18 @@ fun SettingsScreen(
                 text = stringResource(R.string.tts_language_title),
                 titleText = stringResource(R.string.tts_language_title),
                 bodyText = stringResource(R.string.tts_language_description),
+                onClick = {
+                    val intent = Intent().apply {
+                        action = try {
+                            // Try opening the TTS_SETTINGS Settings first
+                            "com.android.settings.TTS_SETTINGS"
+                        } catch (_: ActivityNotFoundException) {
+                            // If the above fails, fallback to Accessibility Settings
+                            Settings.ACTION_ACCESSIBILITY_SETTINGS
+                        }
+                    }
+                    context.startActivity(intent)
+                },
             )
         }
     }
@@ -118,7 +135,8 @@ fun SettingsScreen(
 fun OneSettingSimpleDialog(
     text: String,
     titleText: String,
-    bodyText: String
+    bodyText: String,
+    onClick: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     Row(
@@ -149,6 +167,19 @@ fun OneSettingSimpleDialog(
                 }
             },
             confirmButton = {
+                TextButton(onClick = {
+                    onClick()
+                    showDialog = false
+                }) {
+                    Text(
+                        stringResource(R.string.go_to_Settings),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
                     Text(
                         stringResource(R.string.ok),
@@ -157,7 +188,7 @@ fun OneSettingSimpleDialog(
                         )
                     )
                 }
-            },
+            }
         )
     }
 }

@@ -47,11 +47,13 @@
     <string name="explain">Explain</string>
     <string name="tts_language_title">Change TTS Language</string>
     <string name="tts_language_description">
-    To change the Text-to-Speech language: \n \n
-    1. Open your device Settings.\n \n
-    2. Navigate to Accessibility > Text-to-Speech output.\n \n
-    3. Select your preferred language.
+        To change the Text-to-Speech language: \n \n
+        1. Open your device Settings.\n \n
+        2. Navigate to Accessibility > Text-to-Speech output.\n \n
+        3. Select your preferred language. \n \n
+        4. Restart the app
     </string>
     <string name="ok">OK</string>
     <string name="auto_mic_meaning">Auto Mic enables Speech To Text after Text To Speech automaticaly</string>
+    <string name="go_to_Settings">Go to settings</string>
 </resources>
