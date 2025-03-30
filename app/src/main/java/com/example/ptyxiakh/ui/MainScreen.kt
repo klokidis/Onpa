@@ -454,7 +454,7 @@ fun TopButtons(
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
             onClick = {
-                stopListening()
+                if (isListening) stopListening()
                 navigateSettings()
             },
             modifier = Modifier
