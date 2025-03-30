@@ -83,6 +83,7 @@ import com.example.ptyxiakh.utils.HapticUtils
 import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
 import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
+import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
 import kotlinx.coroutines.launch
 
 
@@ -93,11 +94,13 @@ fun MainScreen(
     geminiViewModel: GeminiViewModel = hiltViewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = hiltViewModel(),
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
+    soundDetectionServiceViewModel: SoundDetectionServiceViewModel = hiltViewModel(),
     userData: List<UserData>,
     selectedUser: User?,
 ) {
     val context = LocalContext.current
 
+    val isServiceRunning by soundDetectionServiceViewModel.isServiceRunning.collectAsState()
     val responseUiState by geminiViewModel.responseState.collectAsState()
     val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
@@ -175,7 +178,7 @@ fun MainScreen(
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
-            isEnabled = sttState.canRunAgain,
+            isEnabled = (sttState.canRunAgain && !isServiceRunning),
             isListening = sttState.isSpeaking,
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,
