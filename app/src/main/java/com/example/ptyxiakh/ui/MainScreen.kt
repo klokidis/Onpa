@@ -138,7 +138,12 @@ fun MainScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TopButtons(navigateSettings, navigateSoundDetect, voiceToTextViewModel::stopListening)
+        TopButtons(
+            navigateSettings,
+            navigateSoundDetect,
+            voiceToTextViewModel::stopListening,
+            isListening = sttState.isSpeaking,
+        )
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
@@ -420,7 +425,8 @@ fun SpeechToTextUi(
 fun TopButtons(
     navigateSettings: () -> Unit,
     navigateSoundDetect: () -> Unit,
-    stopListening: () -> Unit
+    stopListening: () -> Unit,
+    isListening: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -428,7 +434,7 @@ fun TopButtons(
     ) {
         IconButton(
             onClick = {
-                stopListening()
+                if (isListening) stopListening()
                 navigateSoundDetect()
             },
             modifier = Modifier
@@ -709,7 +715,8 @@ fun PreviewTopButtons() {
         TopButtons(
             navigateSettings = {},
             navigateSoundDetect = {},
-            stopListening = {}
+            stopListening = {},
+            isListening = false
         )
     }
 }
