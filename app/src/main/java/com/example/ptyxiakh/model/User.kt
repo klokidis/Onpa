@@ -7,5 +7,5 @@ import androidx.room.PrimaryKey
 data class User(
     @PrimaryKey(autoGenerate = true) val userId: Int = 0,
     val userName: String = "",
-    val voiceLanguage: String = "en"
+    val voiceLanguage: Int = 0
 )

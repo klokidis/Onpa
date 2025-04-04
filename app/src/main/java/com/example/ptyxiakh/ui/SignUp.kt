@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,18 +45,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.viewmodels.UserViewModel
+import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignUp(
     userViewModel: UserViewModel = hiltViewModel(),
+    voiceToTextViewModel: VoiceToTextViewModel = hiltViewModel(),
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     var isDropDownMenuClicked by remember { mutableStateOf(false) }
-    val availableLanguages = listOf<String>("en", "el-GR")
-    var selectedLanguage by rememberSaveable { mutableStateOf(availableLanguages[0]) }
+    var selectedLanguage by rememberSaveable { mutableStateOf(voiceToTextViewModel.displayLanguages[0]) }
+    var selectedLanguageCode by rememberSaveable { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -136,11 +139,7 @@ fun SignUp(
                 isDropDownMenuClicked = true
             }) {
                 Text(
-                    if (selectedLanguage == "en") {
-                        stringResource(R.string.eng)
-                    } else {
-                        stringResource(R.string.gr)
-                    },
+                    text = selectedLanguage,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -151,19 +150,16 @@ fun SignUp(
                 ) {
                     Row {
                         Column {
-                            availableLanguages.forEach { language ->
+                            voiceToTextViewModel.displayLanguages.forEachIndexed { index, language ->
                                 DropdownMenuItem(
                                     onClick = {
                                         selectedLanguage = language
+                                        selectedLanguageCode = index
                                         isDropDownMenuClicked = false
                                     },
                                     text = {
                                         Text(
-                                            if (language == "en") {
-                                                stringResource(R.string.eng)
-                                            } else {
-                                                stringResource(R.string.gr)
-                                            },
+                                            text = language,
                                             color = if (selectedLanguage == language) {
                                                 MaterialTheme.colorScheme.primary
                                             } else {
@@ -188,7 +184,7 @@ fun SignUp(
                 onClick = {
                     if (name.trim().isNotEmpty()) {
                         coroutineScope.launch {
-                            userViewModel.addUser(name.trim(), selectedLanguage)
+                            userViewModel.addUser(name.trim(), selectedLanguageCode)
                         }
                     }
                 },

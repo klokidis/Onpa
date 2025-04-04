@@ -16,27 +16,25 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
     val context = LocalContext.current
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
 
-
     DisposableEffect(context) {
         val textToSpeech = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts.value?.language = Locale.getDefault()
-                Log.d("availableLanguages",Locale.getDefault().toString())//follows phone language
+                // Get the default TTS locale from the system settings
+                val defaultTtsLocale = tts.value?.voice?.locale ?: Locale.getDefault()
+                tts.value?.language = defaultTtsLocale
+
+                Log.d("TTS", "Using language: ${defaultTtsLocale.displayLanguage}")
+                Log.d("TTS", "Available languages: ${tts.value?.availableLanguages?.joinToString()}")
+
                 tts.value?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
-                        Log.d("availableLanguages", tts.value?.availableLanguages.toString())
+                        Log.d("TTS", "Started speaking")
                     }
 
                     override fun onDone(utteranceId: String?) {
                         onFinished()
                     }
 
-                    @Deprecated(
-                        "Deprecated in Java", ReplaceWith(
-                            "Log.e(\"TTS\", \"Error occurred during speech.\")",
-                            "android.util.Log"
-                        )
-                    )
                     override fun onError(utteranceId: String?) {
                         Log.e("TTS", "Error occurred during speech.")
                     }
@@ -57,41 +55,3 @@ fun rememberTextToSpeech(onFinished: () -> Unit): MutableState<TextToSpeech?> {
     }
     return tts
 }
-
-fun getAvailableLanguages(tts: TextToSpeech?): Set<Locale>? {
-    return tts?.availableLanguages
-}
-
-fun getLanguageName(languageCode: String): String {
-    val parts = languageCode.split("_")
-    val locale = if (parts.size > 1) Locale(parts[0], parts[1]) else Locale(parts[0])
-    return locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() }
-}
-
-/*
-fun checkLanguages() {
-val textToSpeech = TextToSpeech(context) { status ->
-    if (status == TextToSpeech.SUCCESS) {
-        val locale = Locale("es", "ES") // Spanish (Spain)
-
-        // Check if the language is available
-        val langAvailable = tts.value?.isLanguageAvailable(locale) == TextToSpeech.LANG_AVAILABLE
-
-        if (langAvailable) {
-            // Set Spanish as the language
-            tts.value?.language = locale
-        } else {
-            // Prompt the user to install the language data if it's not available
-            val installStatus = tts.value?.setLanguage(locale)
-            if (installStatus == TextToSpeech.LANG_MISSING_DATA || installStatus == TextToSpeech.LANG_NOT_SUPPORTED) {
-                // Direct the user to install language data via settings
-                val intent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
-                context.startActivity(intent)
-            }
-        }
-    }
-    Log.d("Voice", tts.value?.availableLanguages.toString())
-}
-tts.value = textToSpeech
-}
-*/

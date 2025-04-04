@@ -62,15 +62,6 @@ fun UserDetailsScreen(
             category = stringResource(R.string.name),
             value = user?.userName ?: "name"
         ),
-        UserData(
-            userId = user?.userId ?: 0,
-            category = stringResource(R.string.language),
-            value = if (user?.voiceLanguage == "en") {
-                stringResource(R.string.eng)
-            } else {
-                stringResource(R.string.gr)
-            }
-        ),
     )
 
     Column(
@@ -163,11 +154,6 @@ fun UserDetailsScreen(
                         user?.userId ?: 0,
                         firstList.first().category,
                         firstList.first().value
-                    )
-                    addOneUserData(
-                        user?.userId ?: 0,
-                        firstList[1].category,
-                        firstList[1].value
                     )
                 }
                 if (user?.userId != null && userDetailsUiState.newUserDetails.isNotEmpty()) {
