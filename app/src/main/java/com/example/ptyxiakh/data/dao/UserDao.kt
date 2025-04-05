@@ -17,10 +17,10 @@ interface UserDao {
     suspend fun insertUser(user: User): Long  // Returns the inserted user ID
 
     @Query("UPDATE users SET userName = :newName WHERE userId = :userId")
-    suspend fun updateUserName(userId: Int, newName: String)
+    suspend fun updateUserName(userId: Int, newName: Int)
 
     @Query("UPDATE users SET voiceLanguage = :newLanguage WHERE userId = :userId")
-    suspend fun updateUserLanguage(userId: Int, newLanguage: String)
+    suspend fun updateUserLanguage(userId: Int, newLanguage: Int)
 
     @Query("SELECT * FROM users")
     fun getAllUsers(): Flow<List<User>>

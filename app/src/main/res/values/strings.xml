@@ -56,4 +56,5 @@
     <string name="ok">OK</string>
     <string name="auto_mic_meaning">Auto Mic enables Speech To Text after Text To Speech automaticaly</string>
     <string name="go_to_Settings">Go to settings</string>
+    <string name="select_Stt_Language">Change STT Language</string>
 </resources>

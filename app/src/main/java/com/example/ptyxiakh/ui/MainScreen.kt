@@ -178,7 +178,7 @@ fun MainScreen(
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
-            isEnabled = (sttState.canRunAgain && !isServiceRunning),
+            isEnabled = (sttState.canRunAgain && !isServiceRunning && sttState.isSttInitialized),
             isListening = sttState.isSpeaking,
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,

@@ -62,6 +62,13 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    fun ChangeLanguage(userId:Int,language: Int){
+        viewModelScope.launch {
+            val user = userRepository.getUserById(userId).firstOrNull()
+            user?.let { userRepository.updateVoiceLanguage(userId,language) }
+        }
+    }
+
     fun deleteAllUser() {
         viewModelScope.launch {
             userRepository.deleteAllUser()

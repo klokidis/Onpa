@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.Locale
 import javax.inject.Inject
 
 data class VoiceToTextState(
@@ -29,6 +28,7 @@ data class VoiceToTextState(
     val aiClicked: Boolean = false,
     val language: String = "en",
     val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
+    val isSttInitialized: Boolean = false
 )
 
 @HiltViewModel
@@ -192,11 +192,6 @@ class VoiceToTextViewModel @Inject constructor(
         "zu-ZA"  // Zulu
     )
 
-    val displayLanguages = supportedSpeechRecognitionLanguages.map { code ->
-        val locale = Locale.forLanguageTag(code)
-        "${locale.displayLanguage} (${locale.country})"
-    }// Shows: "English (US)", "Spanish (Spain)", etc.
-
     private var noiseSuppressor: NoiseSuppressor? = null //reduce noise
     private var echoCanceler: AcousticEchoCanceler? = null //remove echo from audio input
     private var gainControl: AutomaticGainControl? =
@@ -205,10 +200,14 @@ class VoiceToTextViewModel @Inject constructor(
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(application.applicationContext)
 
     init {
+        Log.d(TAG, "isSttInitialized false")
+        _sttState.update { it.copy(isSttInitialized = false) }
         recognizer.setRecognitionListener(this)
         Log.d(TAG, "VoiceToTextViewModel initialized")
         // Apply noise reduction
         enableNoiseReduction()
+        _sttState.update { it.copy(isSttInitialized = true) }
+        Log.d(TAG, "isSttInitialized true")
     }
 
     fun startListening() {

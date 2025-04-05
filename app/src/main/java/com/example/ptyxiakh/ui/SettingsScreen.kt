@@ -29,32 +29,55 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.utils.SttLanguages
 import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
+import com.example.ptyxiakh.viewmodels.UserViewModel
 
 @Composable
 fun SettingsScreen(
     navigateMainScreen: () -> Unit,
-    dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     navigateUserDetails: () -> Unit,
+    dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
 ) {
     val uiState by dataStorePrefViewModel.uiState.collectAsState()
+    val userUiState by userViewModel.userUiState.collectAsState()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    var selectedLanguageCode by rememberSaveable {
+        mutableIntStateOf(userUiState.selectedUser?.voiceLanguage ?: 0)
+    }
+
+    var selectedLanguage by rememberSaveable {
+        mutableStateOf(SttLanguages().displayLanguages[userUiState.selectedUser?.voiceLanguage ?: 0])
+    }
+
+    LaunchedEffect(userUiState.selectedUser?.voiceLanguage) {
+        // Update selectedLanguageCode when the voiceLanguage changes
+        selectedLanguageCode = userUiState.selectedUser?.voiceLanguage ?: 0
+        // Update selectedLanguage based on the new selectedLanguageCode
+        selectedLanguage = SttLanguages().displayLanguages[selectedLanguageCode]
+    }
 
     Box(
         modifier = Modifier,
@@ -128,6 +151,16 @@ fun SettingsScreen(
                     }
                 },
             )
+            Spacer(modifier = Modifier.padding(5.dp))
+            SettingDropDownMenu(
+                title = stringResource(R.string.select_Stt_Language),
+                selectedLanguage = selectedLanguage,
+                onClick = { index, language ->
+                    selectedLanguage = language
+                    selectedLanguageCode = index
+                    userViewModel.ChangeLanguage(userUiState.selectedUser?.userId ?: 0, index)
+                },
+            )
         }
     }
 }
@@ -151,7 +184,9 @@ fun OneSettingSimpleDialog(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 21.sp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
     if (showDialog) {
@@ -207,7 +242,7 @@ fun OneSettingSimple(text: String, onClick: () -> Unit) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 21.sp)
         )
     }
 }
@@ -225,7 +260,7 @@ fun SettingSwitch(text: String, onClick: (Boolean) -> Unit, value: Boolean) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 21.sp)
         )
         Spacer(modifier = Modifier.weight(1f))
         Switch(
@@ -258,7 +293,7 @@ fun SettingSwitchWithExplain(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 21.sp)
         )
         Spacer(modifier = Modifier.padding(5.dp))
         IconButton(
@@ -303,32 +338,66 @@ fun SettingSwitchWithExplain(
 }
 
 @Composable
-fun SettingDropDownMenu(text: String, onClick: (String) -> Unit) {
-    Row(
+fun SettingDropDownMenu(
+    title: String,
+    selectedLanguage: String,
+    onClick: (index: Int, language: String) -> Unit
+) {
+    var isDropDownMenuClicked by remember { mutableStateOf(false) }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .size(60.dp)
-            .padding(start = 15.dp, end = 15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+            .padding(horizontal = 15.dp)
     ) {
-        var expanded by remember { mutableStateOf(false) }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = 25.sp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(60.dp)
+                .clickable { isDropDownMenuClicked = true },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            DropdownMenuItem(
-                text = { Text("Option 2") },
-                onClick = { /* Do something... */ }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 21.sp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Text(
+                text = selectedLanguage,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.clickable { isDropDownMenuClicked = true }
+            )
+        }
+
+        DropdownMenu(
+            expanded = isDropDownMenuClicked,
+            onDismissRequest = { isDropDownMenuClicked = false },
+        ) {
+            SttLanguages().displayLanguages.forEachIndexed { index, language ->
+                DropdownMenuItem(
+                    onClick = {
+                        onClick(index, language)
+                        isDropDownMenuClicked = false
+                    },
+                    text = {
+                        Text(
+                            text = language,
+                            color = if (selectedLanguage == language) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                Color.Gray
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

@@ -18,11 +18,11 @@ class UserRepository @Inject constructor(
         return userDao.insertUser(user)
     }
 
-    suspend fun updateUserName(userId: Int, newName: String) {
+    suspend fun updateUserName(userId: Int, newName: Int) {
         userDao.updateUserName(userId, newName)
     }
 
-    suspend fun updateVoiceLanguage(userId: Int, newLanguage: String) {
+    suspend fun updateVoiceLanguage(userId: Int, newLanguage: Int) {
         userDao.updateUserLanguage(userId, newLanguage)
     }
 
