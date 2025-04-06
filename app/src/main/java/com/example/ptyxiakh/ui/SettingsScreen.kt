@@ -326,7 +326,7 @@ fun SettingSwitchWithExplain(
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
                     Text(
-                        stringResource(R.string.ok),
+                        stringResource(R.string.ok ),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold
                         )
