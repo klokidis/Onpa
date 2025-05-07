@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ResultUiState(
-    val answersList: List<String> = listOf(),
+    val aiSuggestedResponses: List<String> = listOf(),
 )
 
 @HiltViewModel
@@ -66,11 +66,11 @@ class GeminiViewModel @Inject constructor() : ViewModel() {
                     _responseState.value = ResponseState.Success
                     _resultUiState.update { currentState ->
                         currentState.copy(
-                            answersList = currentState.answersList + editResults(outputContent)
+                            aiSuggestedResponses = currentState.aiSuggestedResponses + removeUnwantedCharacters(outputContent)
                         )
                     }
                     Log.d("response", outputContent)
-                    Log.d("response edited", resultUiState.value.answersList.toString())
+                    Log.d("response edited", resultUiState.value.aiSuggestedResponses.toString())
                     Log.d("user", userContext)
                 }
             } catch (e: Exception) {
@@ -81,11 +81,11 @@ class GeminiViewModel @Inject constructor() : ViewModel() {
 
     fun clearAnswersList() {
         _resultUiState.update { currentState ->
-            currentState.copy(answersList = emptyList())
+            currentState.copy(aiSuggestedResponses = emptyList())
         }
     }
 
-    private fun editResults(answer: String): List<String> {
+    private fun removeUnwantedCharacters(answer: String): List<String> {
         val emojiRegex = Regex("[\\p{So}\\p{Cn}]") // Matches most emojis
         val cleanedAnswer = answer
             .replace("**", "") // Remove bold markers

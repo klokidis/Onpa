@@ -157,7 +157,7 @@ fun MainScreen(
             uiState = responseUiState,
             isListening = sttState.isSpeaking,
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            answersList = resultUiState.answersList,
+            answersList = resultUiState.aiSuggestedResponses,
             stopListening = voiceToTextViewModel::stopListening,
             startListening = voiceToTextViewModel::startListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
