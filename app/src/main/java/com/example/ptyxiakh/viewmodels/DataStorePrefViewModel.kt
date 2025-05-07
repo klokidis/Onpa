@@ -37,13 +37,13 @@ class DataStorePrefViewModel @Inject constructor(
             initialValue = UserPreferencesUiState()
         )
 
-    fun toggleVibration(enabled: Boolean) {
+    fun setVibration(enabled: Boolean) {
         viewModelScope.launch {
             repository.saveVibration(enabled)
         }
     }
 
-    fun toggleAutoMic(enabled: Boolean) {
+    fun setAutoMic(enabled: Boolean) {
         viewModelScope.launch {
             repository.saveAutoMic(enabled)
         }

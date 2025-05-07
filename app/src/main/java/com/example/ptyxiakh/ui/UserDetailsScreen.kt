@@ -138,7 +138,7 @@ fun UserDetailsScreen(
             NewUserData(
                 pair,
                 index,
-                userDetailsViewModel::editValuesBasedOnLength,
+                userDetailsViewModel::setValuesBasedOnLength,
                 userDetailsViewModel::minusNewUserDetailsLine
             )
         }

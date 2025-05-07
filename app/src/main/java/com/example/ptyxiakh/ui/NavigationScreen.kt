@@ -42,9 +42,9 @@ fun NavigationScreen(
 
     LaunchedEffect(userUiState.selectedUser?.userId) { //load the userdata based on the selected id
         if (userUiState.selectedUser?.userId != null) {
-            userDataViewModel.loadUserData(userUiState.selectedUser!!.userId)
+            userDataViewModel.getUserData(userUiState.selectedUser!!.userId)
         } else {
-            userDataViewModel.loadAllUserData()
+            userDataViewModel.getAllUserData()
         }
     }
 

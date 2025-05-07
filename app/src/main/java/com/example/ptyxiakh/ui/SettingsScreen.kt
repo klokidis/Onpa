@@ -119,13 +119,13 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.padding(5.dp))
             SettingSwitch(
                 text = stringResource(R.string.vibrate),
-                onClick = dataStorePrefViewModel::toggleVibration,
+                onClick = dataStorePrefViewModel::setVibration,
                 value = uiState.vibration
             )
             Spacer(modifier = Modifier.padding(5.dp))
             SettingSwitchWithExplain(
                 text = stringResource(R.string.auto_mic),
-                onClick = dataStorePrefViewModel::toggleAutoMic,
+                onClick = dataStorePrefViewModel::setAutoMic,
                 value = uiState.autoMic,
                 titleText = stringResource(R.string.auto_mic),
                 bodyText = stringResource(R.string.auto_mic_meaning)

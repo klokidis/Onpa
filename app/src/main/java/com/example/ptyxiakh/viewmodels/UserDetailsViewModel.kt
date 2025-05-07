@@ -40,7 +40,7 @@ class UserDetailsViewModel() : ViewModel() {
     }
 
 
-    fun editValuesBasedOnLength(position: Int, newValueOne: String, newValueTwo: String) {
+    fun setValuesBasedOnLength(position: Int, newValueOne: String, newValueTwo: String) {
         _userDetailsUiState.update { currentState ->
             currentState.copy(
                 newUserDetails = currentState.newUserDetails.mapIndexed { index, userData ->

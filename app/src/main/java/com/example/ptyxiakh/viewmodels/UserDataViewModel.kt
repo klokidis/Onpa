@@ -34,7 +34,7 @@ class UserDataViewModel @Inject constructor(
             initialValue = UserDataUiState(isLoading = true)
         )
 
-    fun loadUserData(userId: Int) {
+    fun getUserData(userId: Int) {
         viewModelScope.launch {
             repository.getAllUserDataById(userId).collect { data ->
                 _userDataUiState.update { currentState ->
@@ -47,7 +47,7 @@ class UserDataViewModel @Inject constructor(
         }
     }
 
-    fun loadAllUserData() {
+    fun getAllUserData() {
         viewModelScope.launch {
             repository.getAllUserData().collect { data ->
                 _userDataUiState.update { currentState ->
