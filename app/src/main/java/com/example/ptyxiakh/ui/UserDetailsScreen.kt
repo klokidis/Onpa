@@ -139,7 +139,7 @@ fun UserDetailsScreen(
                 pair,
                 index,
                 userDetailsViewModel::editValuesBasedOnLength,
-                userDetailsViewModel::minusLine
+                userDetailsViewModel::minusNewUserDetailsLine
             )
         }
 
@@ -164,7 +164,7 @@ fun UserDetailsScreen(
                     }
                 }
                 navigate()
-                userDetailsViewModel.emptyList() //deletes after passing them to data
+                userDetailsViewModel.emptyNewUserDetailsList() //deletes after passing them to data
             },
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp, bottom = 10.dp)

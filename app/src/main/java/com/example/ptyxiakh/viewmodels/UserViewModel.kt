@@ -62,7 +62,7 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun ChangeLanguage(userId:Int,language: Int){
+    fun changeLanguage(userId:Int, language: Int){
         viewModelScope.launch {
             val user = userRepository.getUserById(userId).firstOrNull()
             user?.let { userRepository.updateVoiceLanguage(userId,language) }

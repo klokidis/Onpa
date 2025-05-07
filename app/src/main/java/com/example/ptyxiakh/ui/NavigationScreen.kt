@@ -93,7 +93,7 @@ fun NavigationScreen(
                             } // Clear back stack
                         }
                     },
-                    addOneUserData = userDataViewModel::addFavorite,
+                    addOneUserData = userDataViewModel::addOneUserData,
                     deleteOneData = userDataViewModel::deleteOneData
                 )
             }

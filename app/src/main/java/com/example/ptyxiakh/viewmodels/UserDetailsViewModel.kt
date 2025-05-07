@@ -24,7 +24,7 @@ class UserDetailsViewModel() : ViewModel() {
         }
     }
 
-    fun emptyList() {
+    fun emptyNewUserDetailsList() {
         _userDetailsUiState.update { currentState ->
             currentState.copy(
                 newUserDetails = listOf()
@@ -32,7 +32,7 @@ class UserDetailsViewModel() : ViewModel() {
         }
     }
 
-    fun minusLine(index: Int) {
+    fun minusNewUserDetailsLine(index: Int) {
         _userDetailsUiState.value = _userDetailsUiState.value.copy(
             newUserDetails = _userDetailsUiState.value.newUserDetails.toMutableList()
                 .also { it.removeAt(index) }

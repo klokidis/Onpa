@@ -60,7 +60,7 @@ class UserDataViewModel @Inject constructor(
         }
     }
 
-    fun addFavorite(userId: Int, category: String, value: String) {
+    fun addOneUserData(userId: Int, category: String, value: String) {
         viewModelScope.launch {
             repository.insertUserData(
                 UserData(
