@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.settings
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.utils.SttLanguages
-import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
-import com.example.ptyxiakh.viewmodels.UserViewModel
+import com.example.ptyxiakh.features.userdata.DataStorePrefViewModel
+import com.example.ptyxiakh.features.userdata.UserViewModel
 
 @Composable
 fun SettingsScreen(

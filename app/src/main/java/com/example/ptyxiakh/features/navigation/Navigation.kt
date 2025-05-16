@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -18,8 +18,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.ptyxiakh.viewmodels.UserDataViewModel
-import com.example.ptyxiakh.viewmodels.UserViewModel
+import com.example.ptyxiakh.features.loading.LoadingScreen
+import com.example.ptyxiakh.features.main.MainScreen
+import com.example.ptyxiakh.features.settings.SettingsScreen
+import com.example.ptyxiakh.features.signup.SignUpScreen
+import com.example.ptyxiakh.features.sounddetection.SoundDetectionScreen
+import com.example.ptyxiakh.features.userdata.UserDataScreen
+import com.example.ptyxiakh.features.signup.WelcomeScreen
+import com.example.ptyxiakh.features.userdata.UserDataViewModel
+import com.example.ptyxiakh.features.userdata.UserViewModel
 
 enum class AppScreens {
     Loading,
@@ -32,7 +39,7 @@ enum class AppScreens {
 }
 
 @Composable
-fun NavigationScreen(
+fun Navigation(
     userViewModel: UserViewModel = hiltViewModel(),
     userDataViewModel: UserDataViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController()
@@ -71,19 +78,19 @@ fun NavigationScreen(
             composable(
                 route = AppScreens.Welcome.name
             ) {
-                Welcome(
+                WelcomeScreen(
                     navigateSetUp = { navController.navigate(AppScreens.SignUp.name) }
                 )
             }
             composable(
                 route = AppScreens.SignUp.name
             ) {
-                SignUp()
+                SignUpScreen()
             }
             composable(
                 route = AppScreens.UserDetails.name
             ) {
-                UserDetailsScreen(
+                UserDataScreen(
                     user = userUiState.selectedUser,
                     userData = userDataUiState.userData,
                     navigate = {

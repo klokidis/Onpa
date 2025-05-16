@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.viewmodels
+package com.example.ptyxiakh.features.gemini
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

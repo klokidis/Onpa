@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.userdata
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,10 +42,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
-import com.example.ptyxiakh.viewmodels.UserDetailsViewModel
 
 @Composable
-fun UserDetailsScreen(
+fun UserDataScreen(
     user: User?,
     userData: List<UserData>,
     navigate: () -> Unit,

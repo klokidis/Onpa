@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.signup
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -33,11 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.viewmodels.UserViewModel
+import com.example.ptyxiakh.features.userdata.UserViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Welcome(
+fun WelcomeScreen(
     navigateSetUp: () -> Unit,
     userViewModel: UserViewModel = hiltViewModel(),
 ) {

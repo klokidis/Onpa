@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.viewmodels
+package com.example.ptyxiakh.features.sounddetection
 
 import androidx.lifecycle.ViewModel
 import com.example.ptyxiakh.data.repository.ServiceStateRepository

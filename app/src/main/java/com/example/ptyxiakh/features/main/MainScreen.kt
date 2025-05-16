@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.main
 
 import android.Manifest
 import android.speech.tts.TextToSpeech
@@ -72,18 +72,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.ptyxiakh.viewmodels.GeminiViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.features.gemini.GeminiViewModel
 import com.example.ptyxiakh.model.ResponseState
 import com.example.ptyxiakh.model.User
 import com.example.ptyxiakh.model.UserData
-import com.example.ptyxiakh.viewmodels.VoiceToTextViewModel
-import com.example.ptyxiakh.ui.tts.rememberTextToSpeech
+import com.example.ptyxiakh.features.tts.rememberTextToSpeech
 import com.example.ptyxiakh.utils.HapticUtils
 import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
-import com.example.ptyxiakh.viewmodels.DataStorePrefViewModel
-import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
+import com.example.ptyxiakh.features.userdata.DataStorePrefViewModel
+import com.example.ptyxiakh.features.sounddetection.SoundDetectionServiceViewModel
+import com.example.ptyxiakh.features.stt.VoiceToTextViewModel
 import kotlinx.coroutines.launch
 
 

@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.ui
+package com.example.ptyxiakh.features.sounddetection
 
 import android.Manifest
 import android.content.Intent
@@ -45,11 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.viewmodels.SoundDetectionServiceViewModel
 import com.example.ptyxiakh.service.SoundDetectionService
 import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
-import com.example.ptyxiakh.viewmodels.SoundDetectionViewModel
 
 @Composable
 fun SoundDetectionScreen(

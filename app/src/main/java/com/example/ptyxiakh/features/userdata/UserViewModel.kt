@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.viewmodels
+package com.example.ptyxiakh.features.userdata
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

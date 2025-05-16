@@ -1,4 +1,4 @@
-package com.example.ptyxiakh.viewmodels
+package com.example.ptyxiakh.features.sounddetection
 
 import android.Manifest
 import android.content.Context
