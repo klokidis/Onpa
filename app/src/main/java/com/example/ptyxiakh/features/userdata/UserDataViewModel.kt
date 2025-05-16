@@ -2,8 +2,8 @@ package com.example.ptyxiakh.features.userdata
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ptyxiakh.model.UserData
-import com.example.ptyxiakh.data.repository.UserDataRepository
+import com.example.domain.models.usecases.UserDataUseCases
+import com.example.domain.models.userdata.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +21,7 @@ data class UserDataUiState(
 
 @HiltViewModel
 class UserDataViewModel @Inject constructor(
-    private val repository: UserDataRepository
+    private val userDataUseCases: UserDataUseCases
 ) : ViewModel() {
 
     private val _userDataUiState = MutableStateFlow(UserDataUiState(isLoading = true))
@@ -36,7 +36,7 @@ class UserDataViewModel @Inject constructor(
 
     fun getUserData(userId: Int) {
         viewModelScope.launch {
-            repository.getAllUserDataById(userId).collect { data ->
+            userDataUseCases.getAllUserDataById(userId).collect { data ->
                 _userDataUiState.update { currentState ->
                     currentState.copy(
                         userData = data,
@@ -49,7 +49,7 @@ class UserDataViewModel @Inject constructor(
 
     fun getAllUserData() {
         viewModelScope.launch {
-            repository.getAllUserData().collect { data ->
+            userDataUseCases.getAllUserData().collect { data ->
                 _userDataUiState.update { currentState ->
                     currentState.copy(
                         userData = data,
@@ -62,7 +62,7 @@ class UserDataViewModel @Inject constructor(
 
     fun addOneUserData(userId: Int, category: String, value: String) {
         viewModelScope.launch {
-            repository.insertUserData(
+            userDataUseCases.insertUserData(
                 UserData(
                     userId = userId,
                     category = category,
@@ -74,13 +74,13 @@ class UserDataViewModel @Inject constructor(
 
     fun deleteOneData(userDataId: Int) {
         viewModelScope.launch {
-            repository.deleteOneUserData(userDataId)
+            userDataUseCases.deleteOneUserData(userDataId)
         }
     }
 
     fun deleteAllUserData(userId: Int) {
         viewModelScope.launch {
-            repository.deleteAllUserDataForUser(userId)
+            userDataUseCases.deleteAllUserDataForUser(userId)
         }
     }
 

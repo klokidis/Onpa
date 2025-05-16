@@ -3,9 +3,9 @@ package com.example.ptyxiakh.features.gemini
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.models.response.ResponseState
+import com.example.domain.models.userdata.UserData
 import com.example.ptyxiakh.BuildConfig
-import com.example.ptyxiakh.model.ResponseState
-import com.example.ptyxiakh.model.UserData
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import dagger.hilt.android.lifecycle.HiltViewModel

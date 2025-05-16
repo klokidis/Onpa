@@ -2,8 +2,8 @@ package com.example.ptyxiakh.features.userdata
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ptyxiakh.model.User
-import com.example.ptyxiakh.data.repository.UserRepository
+import com.example.domain.models.usecases.UserUseCases
+import com.example.domain.models.users.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ data class UserUiState(
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userUseCases: UserUseCases
 ) : ViewModel() {
 
     private val _userUiState = MutableStateFlow(UserUiState(isLoading = true))
@@ -29,7 +29,7 @@ class UserViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userRepository.getAllUsers()
+            userUseCases.getAllUsers()
                 .collect { users ->
                     _userUiState.value = UserUiState(
                         users = users,
@@ -42,10 +42,10 @@ class UserViewModel @Inject constructor(
 
     suspend fun addUser(name: String,language: Int): Int {
         val user = User(userName = name, voiceLanguage = language)
-        val userId = userRepository.insertUser(user).toInt()
+        val userId = userUseCases.insertUser(user).toInt()
 
         // Update UI state after adding a new user
-        val updatedUsers = userRepository.getAllUsers().first()
+        val updatedUsers = userUseCases.getAllUsers().first()
         _userUiState.value = _userUiState.value.copy(
             users = updatedUsers,
             selectedUser = _userUiState.value.selectedUser ?: updatedUsers.firstOrNull()
@@ -57,21 +57,21 @@ class UserViewModel @Inject constructor(
 
     fun deleteUser(userId: Int) {
         viewModelScope.launch {
-            val user = userRepository.getUserById(userId).firstOrNull()
-            user?.let { userRepository.deleteUser(it.userId) }
+            val user = userUseCases.getUserById(userId).firstOrNull()
+            user?.let { userUseCases.deleteUser(it.userId) }
         }
     }
 
     fun changeLanguage(userId:Int, language: Int){
         viewModelScope.launch {
-            val user = userRepository.getUserById(userId).firstOrNull()
-            user?.let { userRepository.updateVoiceLanguage(userId,language) }
+            val user = userUseCases.getUserById(userId).firstOrNull()
+            user?.let { userUseCases.updateVoiceLanguage(userId,language) }
         }
     }
 
     fun deleteAllUser() {
         viewModelScope.launch {
-            userRepository.deleteAllUser()
+            userUseCases.deleteAllUsers()
         }
     }
 }

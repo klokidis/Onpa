@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Ptyxiakh"
 include(":app")
+include(":domain")
+include(":data")

@@ -18,8 +18,8 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.example.domain.models.usecases.ServiceStateUseCases
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.data.repository.ServiceStateRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +36,7 @@ import javax.inject.Inject
 class SoundDetectionService : LifecycleService() {
 
     @Inject
-    lateinit var serviceStateManager: ServiceStateRepository
+    lateinit var serviceStateUseCases: ServiceStateUseCases
 
     companion object {
         private const val CHANNEL_ID = "SoundDetectionServiceChannel"
@@ -54,7 +54,7 @@ class SoundDetectionService : LifecycleService() {
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onCreate() {
         super.onCreate()
-        serviceStateManager.setServiceRunning(true)
+        serviceStateUseCases.setServiceState(true)
         createNotificationChannel()
         startForegroundService()
 
@@ -761,7 +761,7 @@ class SoundDetectionService : LifecycleService() {
 
 
     private fun stopListening() {
-        serviceStateManager.setServiceRunning(false)
+        serviceStateUseCases.setServiceState(false)
         isListening.set(false)
         audioRecord?.stop()
         audioRecord?.release()

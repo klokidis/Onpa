@@ -39,9 +39,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.domain.models.userdata.UserData
+import com.example.domain.models.users.User
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.model.User
-import com.example.ptyxiakh.model.UserData
 
 @Composable
 fun UserDataScreen(

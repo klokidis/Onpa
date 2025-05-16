@@ -72,11 +72,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.domain.models.response.ResponseState
+import com.example.domain.models.userdata.UserData
+import com.example.domain.models.users.User
 import com.example.ptyxiakh.R
 import com.example.ptyxiakh.features.gemini.GeminiViewModel
-import com.example.ptyxiakh.model.ResponseState
-import com.example.ptyxiakh.model.User
-import com.example.ptyxiakh.model.UserData
 import com.example.ptyxiakh.features.tts.rememberTextToSpeech
 import com.example.ptyxiakh.utils.HapticUtils
 import com.example.ptyxiakh.utils.PermissionUtils
