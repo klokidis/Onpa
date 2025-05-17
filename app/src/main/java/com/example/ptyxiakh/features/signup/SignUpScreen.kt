@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.utils.SttLanguages
+import com.example.ptyxiakh.utils.SttLanguagesProvider
 import com.example.ptyxiakh.features.userdata.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -56,7 +56,7 @@ fun SignUpScreen(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     var isDropDownMenuClicked by remember { mutableStateOf(false) }
-    var selectedLanguage by rememberSaveable { mutableStateOf(SttLanguages().displayLanguages[0]) }
+    var selectedLanguage by rememberSaveable { mutableStateOf(SttLanguagesProvider.displayLanguages[0]) }
     var selectedLanguageCode by rememberSaveable { mutableIntStateOf(0) }
 
     Column(
@@ -149,7 +149,7 @@ fun SignUpScreen(
                 ) {
                     Row {
                         Column {
-                            SttLanguages().displayLanguages.forEachIndexed { index, language ->
+                            SttLanguagesProvider.displayLanguages.forEachIndexed { index, language ->
                                 DropdownMenuItem(
                                     onClick = {
                                         selectedLanguage = language

@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
-import com.example.ptyxiakh.utils.SttLanguages
+import com.example.ptyxiakh.utils.SttLanguagesProvider
 import com.example.ptyxiakh.features.userdata.DataStorePrefViewModel
 import com.example.ptyxiakh.features.userdata.UserViewModel
 
@@ -69,14 +69,14 @@ fun SettingsScreen(
     }
 
     var selectedLanguage by rememberSaveable {
-        mutableStateOf(SttLanguages().displayLanguages[userUiState.selectedUser?.voiceLanguage ?: 0])
+        mutableStateOf(SttLanguagesProvider.displayLanguages[userUiState.selectedUser?.voiceLanguage ?: 0])
     }
 
     LaunchedEffect(userUiState.selectedUser?.voiceLanguage) {
         // Update selectedLanguageCode when the voiceLanguage changes
         selectedLanguageCode = userUiState.selectedUser?.voiceLanguage ?: 0
         // Update selectedLanguage based on the new selectedLanguageCode
-        selectedLanguage = SttLanguages().displayLanguages[selectedLanguageCode]
+        selectedLanguage = SttLanguagesProvider.displayLanguages[selectedLanguageCode]
     }
 
     Box(
@@ -376,7 +376,7 @@ fun SettingDropDownMenu(
             expanded = isDropDownMenuClicked,
             onDismissRequest = { isDropDownMenuClicked = false },
         ) {
-            SttLanguages().displayLanguages.forEachIndexed { index, language ->
+            SttLanguagesProvider.displayLanguages.forEachIndexed { index, language ->
                 DropdownMenuItem(
                     onClick = {
                         onClick(index, language)
