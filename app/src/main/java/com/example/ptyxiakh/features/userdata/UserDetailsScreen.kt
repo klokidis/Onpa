@@ -44,7 +44,7 @@ import com.example.domain.models.users.User
 import com.example.ptyxiakh.R
 
 @Composable
-fun UserDataScreen(
+fun UserDetailsScreen(
     user: User?,
     userData: List<UserData>,
     navigate: () -> Unit,

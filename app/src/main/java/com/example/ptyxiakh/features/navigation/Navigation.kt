@@ -23,7 +23,7 @@ import com.example.ptyxiakh.features.main.MainScreen
 import com.example.ptyxiakh.features.settings.SettingsScreen
 import com.example.ptyxiakh.features.signup.SignUpScreen
 import com.example.ptyxiakh.features.sounddetection.SoundDetectionScreen
-import com.example.ptyxiakh.features.userdata.UserDataScreen
+import com.example.ptyxiakh.features.userdata.UserDetailsScreen
 import com.example.ptyxiakh.features.signup.WelcomeScreen
 import com.example.ptyxiakh.features.userdata.UserDataViewModel
 import com.example.ptyxiakh.features.userdata.UserViewModel
@@ -90,7 +90,7 @@ fun Navigation(
             composable(
                 route = AppScreens.UserDetails.name
             ) {
-                UserDataScreen(
+                UserDetailsScreen(
                     user = userUiState.selectedUser,
                     userData = userDataUiState.userData,
                     navigate = {
