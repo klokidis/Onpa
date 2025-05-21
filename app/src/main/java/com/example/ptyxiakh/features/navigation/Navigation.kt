@@ -49,7 +49,7 @@ fun Navigation(
 
     LaunchedEffect(userUiState.selectedUser?.userId) { //load the userdata based on the selected id
         if (userUiState.selectedUser?.userId != null) {
-            userDataViewModel.getUserData(userUiState.selectedUser!!.userId)
+            userDataViewModel.getOneUserData(userUiState.selectedUser!!.userId)
         } else {
             userDataViewModel.getAllUserData()
         }

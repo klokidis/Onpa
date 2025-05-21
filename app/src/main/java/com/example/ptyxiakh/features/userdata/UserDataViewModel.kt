@@ -34,7 +34,7 @@ class UserDataViewModel @Inject constructor(
             initialValue = UserDataUiState(isLoading = true)
         )
 
-    fun getUserData(userId: Int) {
+    fun getOneUserData(userId: Int) {
         viewModelScope.launch {
             userDataUseCases.getAllUserDataById(userId).collect { data ->
                 _userDataUiState.update { currentState ->

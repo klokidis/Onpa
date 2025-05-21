@@ -24,6 +24,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
@@ -83,6 +86,3 @@ abstract class DataModule {
         }
     }
 }
-
-// Extension property MUST be outside the DataModule class!
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")

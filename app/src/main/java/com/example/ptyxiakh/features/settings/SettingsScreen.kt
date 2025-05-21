@@ -158,7 +158,7 @@ fun SettingsScreen(
                 onClick = { index, language ->
                     selectedLanguage = language
                     selectedLanguageCode = index
-                    userViewModel.changeLanguage(userUiState.selectedUser?.userId ?: 0, index)
+                    userViewModel.changeUserLanguage(userUiState.selectedUser?.userId ?: 0, index)
                 },
             )
         }
