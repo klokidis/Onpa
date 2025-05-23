@@ -155,10 +155,10 @@ class SoundDetectionService : LifecycleService() {
 
         isListening.set(true)
 
-        val accumulatedSamples = mutableListOf<Float>()
+        val accumulatedSamples = ArrayDeque<Float>() //arraydeque is optimized for adding/removing
+        val buffer = ShortArray(bufferSize)
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val buffer = ShortArray(bufferSize)
             while (isListening.get()) {
                 val readSize = audioRecord?.read(buffer, 0, bufferSize) ?: break
                 if (readSize > 0) {
@@ -170,7 +170,7 @@ class SoundDetectionService : LifecycleService() {
                     while (accumulatedSamples.size >= inputSize) {
                         val floatBuffer = FloatArray(inputSize)
                         for (i in 0 until inputSize) {
-                            floatBuffer[i] = accumulatedSamples.removeAt(0)// Remove the first sample
+                            floatBuffer[i] = accumulatedSamples.removeFirst()// Remove the first sample
                         }
                         // Run TensorFlow Lite inference
                         val primary = classifySound(floatBuffer)

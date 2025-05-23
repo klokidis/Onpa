@@ -58,7 +58,9 @@ class SoundDetectionViewModel @Inject constructor(
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startListening(canVibrate: Boolean) {
+        //16 kHz
         val sampleRate = 16000
+        //audio (15600 samples)
         val inputSize = 15600
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -91,7 +93,7 @@ class SoundDetectionViewModel @Inject constructor(
             audioRecord?.startRecording()
             _soundDetectorState.update { it.copy(isListening = true) }
 
-            val accumulatedSamples = mutableListOf<Float>()
+            val accumulatedSamples = ArrayDeque<Float>() //arraydeque is optimized for adding/removing
             val buffer = ShortArray(bufferSize)
 
             while (soundDetectorState.value.isListening) {
@@ -106,8 +108,7 @@ class SoundDetectionViewModel @Inject constructor(
                     while (accumulatedSamples.size >= inputSize) {
                         val floatBuffer = FloatArray(inputSize)
                         for (i in 0 until inputSize) {
-                            floatBuffer[i] =
-                                accumulatedSamples.removeAt(0) // Remove the first sample
+                            floatBuffer[i] = accumulatedSamples.removeFirst() // Removes and assigns sequentially
                         }
 
                         // Run TensorFlow Lite inference
