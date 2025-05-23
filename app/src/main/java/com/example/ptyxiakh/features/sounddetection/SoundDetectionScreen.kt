@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.features.userdata.DataStorePrefViewModel
 import com.example.ptyxiakh.service.SoundDetectionService
 import com.example.ptyxiakh.utils.PermissionUtils
 import com.example.ptyxiakh.utils.showToast
@@ -53,7 +54,8 @@ import com.example.ptyxiakh.utils.showToast
 fun SoundDetectionScreen(
     navigate: () -> Unit,
     soundDetectionViewModel: SoundDetectionViewModel = hiltViewModel(),
-    viewModel: SoundDetectionServiceViewModel = hiltViewModel()
+    viewModel: SoundDetectionServiceViewModel = hiltViewModel(),
+    dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
 
@@ -64,6 +66,7 @@ fun SoundDetectionScreen(
 
     val isServiceRunning by viewModel.isServiceRunning.collectAsState()
     val soundDetectorState by soundDetectionViewModel.soundDetectorState.collectAsState()
+    val dataPrefUiState by dataStorePrefViewModel.uiState.collectAsState()
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -190,7 +193,7 @@ fun SoundDetectionScreen(
                         isShowDescription = false
                         isRecording = true
                         // If permission is granted, start listening
-                        soundDetectionViewModel.startListening()
+                        soundDetectionViewModel.startListening(dataPrefUiState.vibration)
                     } else {
                         // Request permission if not granted
                         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -199,7 +202,8 @@ fun SoundDetectionScreen(
                 colors = ButtonDefaults.buttonColors(
                     contentColor = MaterialTheme.colorScheme.primary,
                     containerColor = Color.Transparent
-                )
+                ),
+                enabled = !dataPrefUiState.isLoading
             ) {
                 Text(
                     text = stringResource(R.string.detect_now),

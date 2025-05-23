@@ -13,13 +13,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.example.domain.models.usecases.ServiceStateUseCases
 import com.example.ptyxiakh.R
+import com.example.ptyxiakh.utils.AlertingSoundsProvider.Companion.alertingSounds
 import com.example.ptyxiakh.utils.SoundDetectionProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -49,8 +49,6 @@ class SoundDetectionService : LifecycleService() {
     private val isListening = AtomicBoolean(false)
     private var audioRecord: AudioRecord? = null
     private var interpreter: Interpreter? = null
-    private var alertingSounds: List<Int> =
-        listOf(20, 317, 318, 319, 390, 391, 353, 340, 195, 349, 348, 394, 292)
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onCreate() {
@@ -164,15 +162,19 @@ class SoundDetectionService : LifecycleService() {
             while (isListening.get()) {
                 val readSize = audioRecord?.read(buffer, 0, bufferSize) ?: break
                 if (readSize > 0) {
+                    // Normalize to [-1, 1] float32 range
                     accumulatedSamples.addAll(
-                        buffer.take(readSize).map { it.toFloat() / Short.MAX_VALUE })
+                        buffer.take(readSize).map { it.toFloat() / Short.MAX_VALUE }
+                    )
+                    // Check if we have enough samples
                     while (accumulatedSamples.size >= inputSize) {
                         val floatBuffer = FloatArray(inputSize)
                         for (i in 0 until inputSize) {
-                            floatBuffer[i] = accumulatedSamples.removeAt(0)
+                            floatBuffer[i] = accumulatedSamples.removeAt(0)// Remove the first sample
                         }
+                        // Run TensorFlow Lite inference
                         val primary = classifySound(floatBuffer)
-                        Log.d("background detected", SoundDetectionProvider.getSoundDetected(primary))
+
                         withContext(Dispatchers.Main) {
                             if (alertingSounds.contains(primary)) {
                                 triggerAlarmNotification(SoundDetectionProvider.getSoundDetected(primary))

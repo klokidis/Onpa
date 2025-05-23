@@ -9,6 +9,8 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ptyxiakh.utils.AlertingSoundsProvider.Companion.alertingSounds
+import com.example.ptyxiakh.utils.HapticUtils
 import com.example.ptyxiakh.utils.SoundDetectionProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -55,7 +57,7 @@ class SoundDetectionViewModel @Inject constructor(
     }
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    fun startListening() {
+    fun startListening(canVibrate: Boolean) {
         val sampleRate = 16000
         val inputSize = 15600
 
@@ -109,13 +111,23 @@ class SoundDetectionViewModel @Inject constructor(
                         }
 
                         // Run TensorFlow Lite inference
-                        val (primary, secondary) = classifySound(floatBuffer)
+                        val (primaryNumber, secondaryNumber) = classifySound(floatBuffer)
+                        val primaryString = SoundDetectionProvider.getSoundDetected(primaryNumber)
+                        val secondaryString = SoundDetectionProvider.getSoundDetected(secondaryNumber)
+
 
                         withContext(Dispatchers.Main) {
+                            if (alertingSounds.contains(primaryNumber)) {
+                                HapticUtils.triggerVibration(
+                                    canVibrate = canVibrate,
+                                    context = context,
+                                    milliseconds = 100
+                                )
+                            }
                             _soundDetectorState.update {
                                 it.copy(
-                                    detectedPrimarySound = primary,
-                                    detectedSecondarySound = secondary
+                                    detectedPrimarySound = primaryString,
+                                    detectedSecondarySound = secondaryString
                                 )
                             }
                         }
@@ -125,10 +137,10 @@ class SoundDetectionViewModel @Inject constructor(
         }
     }
 
-    private fun classifySound(audioData: FloatArray): Pair<String, String> {
+    private fun classifySound(audioData: FloatArray): Pair<Int, Int> {
         if (interpreter == null) {
             Log.e("Sound Detection", "Interpreter is null")
-            return Pair("...", "...")
+            return Pair(0, 0)
         }
 
         val output = Array(1) { FloatArray(521) }  // YAMNet outputs (N, 521)
@@ -141,8 +153,8 @@ class SoundDetectionViewModel @Inject constructor(
         Log.d("Sound Detection", "Primary: $primaryLabelIndex, Secondary: $secondaryLabelIndex")
 
         return Pair(
-            SoundDetectionProvider.getSoundDetected(primaryLabelIndex),
-            SoundDetectionProvider.getSoundDetected(secondaryLabelIndex)
+            primaryLabelIndex,
+            secondaryLabelIndex
         )
     }
 
