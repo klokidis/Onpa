@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.onpa.features.licenses.LicensesScreen
 import com.example.onpa.features.loading.LoadingScreen
 import com.example.onpa.features.main.MainScreen
 import com.example.onpa.features.settings.SettingsScreen
@@ -35,7 +36,8 @@ enum class AppScreens {
     UserDetails,
     Main,
     SoundDetect,
-    Settings
+    Settings,
+    Licenses
 }
 
 @Composable
@@ -156,6 +158,18 @@ fun Navigation(
                     },
                     navigateUserDetails = {
                         navController.navigate(AppScreens.UserDetails.name)
+                    },
+                    navigateLicensesScreen = {
+                        navController.navigate(AppScreens.Licenses.name)
+                    }
+                )
+            }
+            composable(
+                route = AppScreens.Licenses.name,
+            ) {
+                LicensesScreen(
+                    navigateBack = {
+                        navController.popBackStack()
                     }
                 )
             }

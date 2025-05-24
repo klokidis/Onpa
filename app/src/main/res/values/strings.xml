@@ -57,4 +57,9 @@
     <string name="auto_mic_meaning">Auto Mic enables Speech To Text after Text To Speech automaticaly</string>
     <string name="go_to_Settings">Go to settings</string>
     <string name="select_Stt_Language">Change STT Language</string>
+    <string name="licenses">Open Source Licenses</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    <string name="close">Close</string>
+    <string name="error_read_lincenses">Failed to load license</string>
+    <string name="error_read_lincenses_files">Error: Failed to load license files</string>
 </resources>

@@ -59,6 +59,7 @@ fun SettingsScreen(
     navigateUserDetails: () -> Unit,
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
+    navigateLicensesScreen: () -> Unit,
 ) {
     val uiState by dataStorePrefViewModel.uiState.collectAsState()
     val userUiState by userViewModel.userUiState.collectAsState()
@@ -161,6 +162,8 @@ fun SettingsScreen(
                     userViewModel.changeUserLanguage(userUiState.selectedUser?.userId ?: 0, index)
                 },
             )
+            Spacer(modifier = Modifier.padding(5.dp))
+            OneSettingSimple(stringResource(R.string.licenses), navigateLicensesScreen)
         }
     }
 }
@@ -402,5 +405,7 @@ fun SettingDropDownMenu(
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen({ }, navigateUserDetails = { })
+    SettingsScreen({ }, navigateUserDetails = { }) {
+
+    }
 }
