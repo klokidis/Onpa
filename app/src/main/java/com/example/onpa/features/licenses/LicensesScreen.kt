@@ -84,12 +84,11 @@ fun LicensesScreen(navigateBack: () -> Boolean) {
                     .clickable {
                         // Load license content on click
                         selectedLicenseName = fileName
-                        selectedLicenseText = cleanLicenseTextKeepNewLines(
+                        selectedLicenseText =
                             loadLicenseText(
                                 context,
                                 "licenses/$fileName"
                             )
-                        )
                     }
                     .padding(16.dp),
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
@@ -143,14 +142,4 @@ private fun loadLicenseText(context: Context, path: String): String {
     } catch (_: Exception) {
         context.getString(R.string.error_read_lincenses)
     }
-}
-
-private fun cleanLicenseTextKeepNewLines(text: String): String {
-    return text
-        .lineSequence() // process line by line
-        .map { line ->
-            line.replace("\\s+".toRegex(), " ")
-                .trim() // replace multiple spaces/tabs with one space, trim spaces
-        }
-        .joinToString("\n") // join lines back with new lines
 }
