@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ptyxiakh"
+    namespace = "com.example.onpa"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.ptyxiakh"
+        applicationId = "com.example.onpa"
         minSdk = 27
         targetSdk = 35
         versionCode = 1
