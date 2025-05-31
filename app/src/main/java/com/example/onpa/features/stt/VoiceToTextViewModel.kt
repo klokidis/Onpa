@@ -26,7 +26,7 @@ data class VoiceToTextState(
     val canRunAgain: Boolean = true, //so it doesn't loop
     val offlineError: Boolean = false,
     val availableSTT: Boolean = true,
-    val aiClicked: Boolean = false,
+    val aiClickedBeforeFinalResults: Boolean = false,
     val language: String = "en",
     val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
     val isSttInitialized: Boolean = false
@@ -35,7 +35,6 @@ data class VoiceToTextState(
 @HiltViewModel
 class VoiceToTextViewModel @Inject constructor(
     application: Application,
-    // Inject any other dependencies here if needed (e.g., a repository or a service)
 ) : AndroidViewModel(application), RecognitionListener {
 
     private val _sttState = MutableStateFlow(VoiceToTextState())
@@ -180,7 +179,7 @@ class VoiceToTextViewModel @Inject constructor(
         val spokenText =
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         spokenText?.let {
-            if (sttState.value.aiClicked && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(
+            if (sttState.value.aiClickedBeforeFinalResults && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(
                     " "
                 ).length
             ) {
@@ -191,7 +190,7 @@ class VoiceToTextViewModel @Inject constructor(
                 state.copy(
                     fullTranscripts = state.fullTranscripts + it,
                     partialTranscripts = emptyList(),
-                    aiClicked = false,
+                    aiClickedBeforeFinalResults = false,
                 )
             }
         }
@@ -284,7 +283,7 @@ class VoiceToTextViewModel @Inject constructor(
     fun changeSpokenPromptText() {
         _sttState.update { state ->
             state.copy(
-                aiClicked = true,
+                aiClickedBeforeFinalResults = true,
                 spokenPromptText = (state.fullTranscripts + state.partialTranscripts)
                     .joinToString(" ")
                     .replaceFirst("\" ", "\"") // Converts list to a string with spaces
@@ -299,7 +298,7 @@ class VoiceToTextViewModel @Inject constructor(
     fun fixSpokenPromptText() {
         _sttState.update { state ->
             state.copy(
-                aiClicked = true,
+                aiClickedBeforeFinalResults = true,
                 spokenPromptText = (state.fullTranscripts)
                     .joinToString(" ")
                     .replaceFirst("\" ", "\"") // Converts list to a string with spaces
