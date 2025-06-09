@@ -145,8 +145,20 @@ fun Navigation(
             }
             composable(
                 route = AppScreens.Settings.name,
-                enterTransition = { slideInHorizontally(initialOffsetX = { it }) }, // Slide in from the right
-                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
+                enterTransition = {
+                    if (initialState.destination.route == AppScreens.Main.name) {
+                        slideInHorizontally(initialOffsetX = { it }) // From right
+                    } else {
+                        fadeIn(animationSpec = tween(0)) // No animation
+                    }
+                },
+                exitTransition = {
+                    if (targetState.destination.route == AppScreens.Main.name) {
+                        slideOutHorizontally(targetOffsetX = { it }) // To right
+                    } else {
+                        fadeOut(animationSpec = tween(0)) // No animation
+                    }
+                },
             ) {
                 SettingsScreen(
                     navigateMainScreen = {

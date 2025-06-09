@@ -159,7 +159,6 @@ class VoiceToTextViewModel @Inject constructor(
             SpeechRecognizer.ERROR_SERVER -> "Server error"
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
             else -> {
-                _sttState.update { it.copy(offlineError = true) }
                 "Unknown error"
             }
         }
