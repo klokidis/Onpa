@@ -5,8 +5,6 @@ plugins {
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    kotlin("kapt")
-    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -67,7 +65,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
-    implementation(libs.androidx.navigation.testing)
 
     implementation(libs.androidx.material.icons.extended)
 
@@ -82,8 +79,4 @@ dependencies {
 
     //service
     implementation(libs.androidx.lifecycle.service)
-
-    androidTestImplementation(libs.hilt.android.testing)
-    kapt(libs.hilt.android.compiler)
-    kaptAndroidTest(libs.dagger.hilt.android.compiler.v248)
 }
