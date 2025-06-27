@@ -115,6 +115,8 @@ fun MainScreen(
         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
+    //navigating to settings while tts is speaking blockes the stt
+    //this launch saves it
     LaunchedEffect(Unit){
         voiceToTextViewModel.changeCanRunAgain(true)
     }
