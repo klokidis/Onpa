@@ -115,9 +115,9 @@ fun MainScreen(
         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
-    //navigating to settings while tts is speaking blockes the stt
+    //navigating to settings while tts is speaking blocks the stt
     //this launch saves it
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         voiceToTextViewModel.changeCanRunAgain(true)
     }
 
@@ -135,6 +135,7 @@ fun MainScreen(
             showToast(context, "Speech recognition is offline. Please enable Wi-Fi.")
         }
     }
+
     LaunchedEffect(sttState.availableSTT) {
         if (!sttState.availableSTT) {
             showToast(
@@ -547,7 +548,7 @@ fun OutlinedCustomButton(
 
     OutlinedButton(
         onClick = {
-            Log.d("valuess2",prompt())
+            Log.d("valuess2", prompt())
             sendPrompt(prompt(), userData)
             changeSpokenPromptText()
         },
