@@ -115,6 +115,10 @@ fun MainScreen(
         recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
+    LaunchedEffect(Unit){
+        voiceToTextViewModel.changeCanRunAgain(true)
+    }
+
     //pass the user language to the voiceToTextViewModel
     LaunchedEffect(selectedUser?.voiceLanguage) {
         if (selectedUser?.voiceLanguage != null) {
@@ -179,7 +183,7 @@ fun MainScreen(
             stopListening = voiceToTextViewModel::stopListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
             isEnabled = (sttState.canRunAgain && !isServiceRunning && sttState.isSttInitialized),
-            isListening = sttState.isSpeaking,
+            isSpeaking = sttState.isSpeaking,
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,
             isLoading = dataPrefUiState.isLoading,
@@ -221,7 +225,9 @@ fun ResultsLazyList(
                         milliseconds = 10
                     )
                     changeCanRunAgain(true)
-                    if (autoMic && PermissionUtils.checkRecordPermission(context)) startListening()
+                    if (autoMic && PermissionUtils.checkRecordPermission(context)) {
+                        startListening()
+                    }
                 }
             }
         )
@@ -294,7 +300,7 @@ fun ResultCard(
     stopListening: () -> Unit,
     isListening: Boolean,
     vibrate: Boolean,
-    canRecordFun: () -> Unit
+    canRunAgainFalse: () -> Unit
 ) {
     val context = LocalContext.current
     Card(
@@ -315,7 +321,7 @@ fun ResultCard(
             if (isListening) {
                 stopListening()
             }
-            canRecordFun()
+            canRunAgainFalse()
             tts?.value?.speak(
                 result, TextToSpeech.QUEUE_FLUSH, null, ""
             )
@@ -475,7 +481,7 @@ fun TextFieldUpperButtons(
     sendPrompt: (String, List<UserData>) -> Unit,
     startListening: () -> Unit,
     stopListening: () -> Unit,
-    isListening: Boolean,
+    isSpeaking: Boolean,
     isEnabled: Boolean,
     prompt: () -> String,
     changeSpokenPromptText: () -> Unit,
@@ -494,7 +500,7 @@ fun TextFieldUpperButtons(
             OutlinedCustomIconButton(
                 startListening = startListening,
                 stopListening = stopListening,
-                isListening = isListening,
+                isSpeaking = isSpeaking,
                 isEnabled = isEnabled,
                 recordAudioPermissionLauncher = recordAudioPermissionLauncher
             )
@@ -515,7 +521,7 @@ fun TextFieldUpperButtons(
             TextFieldWithInsideIcon(
                 stopListening = stopListening,
                 startListening = startListening,
-                isListening = isListening,
+                isListening = isSpeaking,
                 changeCanRunAgain = changeCanRunAgain,
                 modifier = Modifier
                     .weight(1f)
@@ -570,7 +576,7 @@ fun OutlinedCustomButton(
 fun OutlinedCustomIconButton(
     startListening: () -> Unit,
     stopListening: () -> Unit,
-    isListening: Boolean,
+    isSpeaking: Boolean,
     isEnabled: Boolean,
     recordAudioPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
 ) {
@@ -579,7 +585,7 @@ fun OutlinedCustomIconButton(
     OutlinedButton(
         onClick = {
             when {
-                isListening -> {
+                isSpeaking -> {
                     stopListening()
                 }
 
@@ -608,7 +614,7 @@ fun OutlinedCustomIconButton(
         Icon(
             modifier = Modifier
                 .size(30.dp),
-            imageVector = if (isListening) Icons.Rounded.Mic else Icons.Rounded.MicOff,
+            imageVector = if (isSpeaking) Icons.Rounded.Mic else Icons.Rounded.MicOff,
             contentDescription = "",
         )
     }
