@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlin.text.replace
 
 data class VoiceToTextState(
     val fullTranscripts: List<String> = emptyList(),
@@ -39,7 +40,8 @@ class VoiceToTextViewModel @Inject constructor(
 
     private val _sttState = MutableStateFlow(VoiceToTextState())
     val sttState: StateFlow<VoiceToTextState> = _sttState.asStateFlow()
-    private val supportedSpeechRecognitionLanguages = SttLanguagesProvider.supportedSpeechRecognitionLanguages //all the available languages of the google api
+    private val supportedSpeechRecognitionLanguages =
+        SttLanguagesProvider.supportedSpeechRecognitionLanguages //all the available languages of the google api
 
     private var noiseSuppressor: NoiseSuppressor? = null //reduce noise
     private var echoCanceler: AcousticEchoCanceler? = null //remove echo from audio input

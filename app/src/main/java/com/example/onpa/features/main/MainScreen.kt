@@ -185,7 +185,7 @@ fun MainScreen(
             isLoading = dataPrefUiState.isLoading,
             prompt = {
                 (sttState.fullTranscripts + sttState.partialTranscripts)
-                    .joinToString().drop(sttState.spokenPromptText.length)
+                    .joinToString(" ").drop(sttState.spokenPromptText.length)
             },
             changeSpokenPromptText = voiceToTextViewModel::changeSpokenPromptText,
             recordAudioPermissionLauncher = recordAudioPermissionLauncher
@@ -539,6 +539,7 @@ fun OutlinedCustomButton(
 
     OutlinedButton(
         onClick = {
+            Log.d("valuess2",prompt())
             sendPrompt(prompt(), userData)
             changeSpokenPromptText()
         },
