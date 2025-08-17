@@ -489,10 +489,9 @@ fun TextFieldUpperButtons(
                     modifier = Modifier.size(28.dp),
                     painter = painterResource(R.drawable.add_24px),
                     contentDescription = stringResource(R.string.add_phr),
-                    tint = Color.Black
                 )
             }
-            Spacer(modifier = Modifier.width(25.dp))
+            Spacer(modifier = Modifier.width(20.dp))
             OutlinedCustomIconButton(
                 startListening = startListening,
                 stopListening = stopListening,

@@ -126,7 +126,7 @@ fun SoundDetectionScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Use the appropriate icon
                     contentDescription = stringResource(id = R.string.back),
-                    modifier = Modifier.size(35.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }
