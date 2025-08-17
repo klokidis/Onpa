@@ -34,9 +34,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,18 +72,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.domain.models.response.ResponseState
 import com.example.domain.models.userdata.UserData
 import com.example.domain.models.users.User
 import com.example.onpa.R
-import com.example.onpa.features.gemini.GeminiViewModel
+import com.example.onpa.features.sounddetection.SoundDetectionServiceViewModel
+import com.example.onpa.features.stt.VoiceToTextViewModel
 import com.example.onpa.features.tts.rememberTextToSpeech
+import com.example.onpa.features.userdata.DataStorePrefViewModel
+import com.example.onpa.features.userdata.UserDataViewModel
 import com.example.onpa.utils.HapticUtils
 import com.example.onpa.utils.PermissionUtils
 import com.example.onpa.utils.showToast
-import com.example.onpa.features.userdata.DataStorePrefViewModel
-import com.example.onpa.features.sounddetection.SoundDetectionServiceViewModel
-import com.example.onpa.features.stt.VoiceToTextViewModel
 import kotlinx.coroutines.launch
 
 
@@ -91,18 +90,17 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navigateSettings: () -> Unit,
     navigateSoundDetect: () -> Unit,
-    geminiViewModel: GeminiViewModel = hiltViewModel(),
     voiceToTextViewModel: VoiceToTextViewModel = hiltViewModel(),
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     soundDetectionServiceViewModel: SoundDetectionServiceViewModel = hiltViewModel(),
+    userDataViewModel: UserDataViewModel,
     userData: List<UserData>,
     selectedUser: User?,
 ) {
     val context = LocalContext.current
 
+    var showAddDataDialog by rememberSaveable { mutableStateOf(false) }
     val isServiceRunning by soundDetectionServiceViewModel.isServiceRunning.collectAsState()
-    val responseUiState by geminiViewModel.responseState.collectAsState()
-    val resultUiState by geminiViewModel.resultUiState.collectAsState()
     val sttState by voiceToTextViewModel.sttState.collectAsState()
     val dataPrefUiState by dataStorePrefViewModel.uiState.collectAsState()
 
@@ -160,15 +158,13 @@ fun MainScreen(
             sttState.spokenPromptText.length,
             clearText = voiceToTextViewModel::clearTexts,
         )
-        ResultsLazyList(
-            uiState = responseUiState,
+        DataLazyList(
+            modifier = Modifier.fillMaxSize(1f),
+            userData = userData,
             isListening = sttState.isSpeaking,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            answersList = resultUiState.aiSuggestedResponses,
             stopListening = voiceToTextViewModel::stopListening,
             startListening = voiceToTextViewModel::startListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
-            weightModifier = Modifier.weight(1f),
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,
             isLoading = dataPrefUiState.isLoading,
@@ -180,8 +176,7 @@ fun MainScreen(
         contentAlignment = Alignment.BottomCenter
     ) {
         TextFieldUpperButtons(
-            geminiViewModel::sendPrompt,
-            userData = userData,
+            onAddDataClicked = { showAddDataDialog = true },
             startListening = voiceToTextViewModel::startListening,
             stopListening = voiceToTextViewModel::stopListening,
             changeCanRunAgain = voiceToTextViewModel::changeCanRunAgain,
@@ -190,29 +185,32 @@ fun MainScreen(
             vibrate = dataPrefUiState.vibration,
             autoMic = dataPrefUiState.autoMic,
             isLoading = dataPrefUiState.isLoading,
-            prompt = {
-                (sttState.fullTranscripts + sttState.partialTranscripts)
-                    .joinToString(" ").drop(sttState.spokenPromptText.length)
-            },
-            changeSpokenPromptText = voiceToTextViewModel::changeSpokenPromptText,
             recordAudioPermissionLauncher = recordAudioPermissionLauncher
+        )
+    }
+    if (showAddDataDialog) {
+        AddPhraseDialog(
+            onDismiss = { showAddDataDialog = false },
+            onSave = { phrase ->
+                selectedUser?.let { user ->
+                    userDataViewModel.addOneUserData(user.userId, phrase)
+                }
+            }
         )
     }
 }
 
 @Composable
-fun ResultsLazyList(
-    uiState: ResponseState,
-    modifier: Modifier,
-    answersList: List<String>,
+fun DataLazyList(
     startListening: () -> Unit,
     stopListening: () -> Unit,
-    weightModifier: Modifier,
     isListening: Boolean,
     changeCanRunAgain: (Boolean) -> Unit,
     vibrate: Boolean,
     autoMic: Boolean,
     isLoading: Boolean,
+    userData: List<UserData>,
+    modifier: Modifier,
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -238,24 +236,30 @@ fun ResultsLazyList(
         null
     }
 
-    // Automatically scroll when the list updates
-    LaunchedEffect(answersList) {
-        if (answersList.isNotEmpty()) {
-            listState.animateScrollToItem(answersList.size - 3)
-        }
-    }
-
-    //here add the list of the results
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (uiState != ResponseState.Initial) {
-            items(answersList) { answer ->
-                ResultCard(
-                    result = answer,
+        if (userData.isEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.add_data),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth()
+                )
+            }
+        } else {
+            items(
+                items = userData,
+                key = { it.id }
+            ) { data ->
+                DataCard(
+                    data = data.value,
                     tts = tts,
                     stopListening = stopListening,
                     isListening = isListening,
@@ -263,42 +267,17 @@ fun ResultsLazyList(
                 ) { changeCanRunAgain(false) }
             }
         }
+
+        // Always add the Spacer unconditionally
         item {
-            when (uiState) {
-                is ResponseState.Error -> {
-                    ResultText(
-                        uiState.errorMessage,
-                        textColor = MaterialTheme.colorScheme.error,
-                        inputTextAlign = TextAlign.Center
-                    )
-                }
-
-                is ResponseState.Initial -> {
-                    ResultText(
-                        stringResource(R.string.results_placeholder),
-                        inputTextAlign = TextAlign.Center,
-                        textColor = Color.Gray
-                    )
-                }
-
-                is ResponseState.Loading -> {
-                    Spacer(modifier = Modifier.padding(15.dp))
-                    CircularProgressIndicator(modifier = modifier)
-                    Spacer(modifier = weightModifier)
-                }
-
-                is ResponseState.Success -> {} // no need
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.size(200.dp))
+            Spacer(modifier = Modifier.padding(100.dp))
         }
     }
 }
 
 @Composable
-fun ResultCard(
-    result: String,
+fun DataCard(
+    data: String,
     tts: MutableState<TextToSpeech?>?,
     stopListening: () -> Unit,
     isListening: Boolean,
@@ -326,24 +305,24 @@ fun ResultCard(
             }
             canRunAgainFalse()
             tts?.value?.speak(
-                result, TextToSpeech.QUEUE_FLUSH, null, ""
+                data, TextToSpeech.QUEUE_FLUSH, null, ""
             )
         }
     ) {
-        ResultText(result, inputTextAlign = TextAlign.Start)
+        DataText(data, inputTextAlign = TextAlign.Start)
     }
 }
 
 @Composable
-fun ResultText(
-    resultText: String,
+fun DataText(
+    dataText: String,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     inputTextAlign: TextAlign = TextAlign.Center,
     inputStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     Text(
-        text = resultText.trim(),
+        text = dataText.trim(),
         textAlign = inputTextAlign,
         color = textColor,
         style = inputStyle,
@@ -481,38 +460,45 @@ fun TopButtons(
 
 @Composable
 fun TextFieldUpperButtons(
-    sendPrompt: (String, List<UserData>) -> Unit,
     startListening: () -> Unit,
     stopListening: () -> Unit,
     isSpeaking: Boolean,
     isEnabled: Boolean,
-    prompt: () -> String,
-    changeSpokenPromptText: () -> Unit,
-    userData: List<UserData>,
     changeCanRunAgain: (Boolean) -> Unit,
     vibrate: Boolean,
     autoMic: Boolean,
     isLoading: Boolean,
     recordAudioPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
+    onAddDataClicked: () -> Unit,
 ) {
     Column {
         Row(
             modifier = Modifier.padding(end = 16.dp, start = 5.dp)
         ) {
             Spacer(modifier = Modifier.weight(1f))
+            OutlinedButton(
+                onClick = { onAddDataClicked() },
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.onBackground),
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape),
+                shape = CircleShape,
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    painter = painterResource(R.drawable.add_24px),
+                    contentDescription = stringResource(R.string.add_phr),
+                    tint = Color.Black
+                )
+            }
+            Spacer(modifier = Modifier.width(25.dp))
             OutlinedCustomIconButton(
                 startListening = startListening,
                 stopListening = stopListening,
                 isSpeaking = isSpeaking,
                 isEnabled = isEnabled,
                 recordAudioPermissionLauncher = recordAudioPermissionLauncher
-            )
-            Spacer(modifier = Modifier.padding(10.dp))
-            OutlinedCustomButton(
-                sendPrompt = sendPrompt,
-                userData = userData,
-                prompt = prompt,
-                changeSpokenPromptText = changeSpokenPromptText
             )
         }
         Row(
@@ -538,42 +524,42 @@ fun TextFieldUpperButtons(
 }
 
 @Composable
-fun OutlinedCustomButton(
-    sendPrompt: (String, List<UserData>) -> Unit,
-    userData: List<UserData>,
-    prompt: () -> String,
-    changeSpokenPromptText: () -> Unit
+fun AddPhraseDialog(
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
 ) {
-    val isEnabled = prompt().trim().isNotEmpty()
+    var phrase by rememberSaveable { mutableStateOf("") }
 
-    OutlinedButton(
-        onClick = {
-            Log.d("valuess2", prompt())
-            sendPrompt(prompt(), userData)
-            changeSpokenPromptText()
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(stringResource(R.string.phrase_text_holder)) },
+        text = {
+            OutlinedTextField(
+                value = phrase,
+                onValueChange = { phrase = it },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(50.dp),
+                maxLines = 3,
+                )
         },
-        enabled = isEnabled,
-        border = BorderStroke(
-            width = 1.5.dp,
-            color = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
-        ),
-        modifier = Modifier
-            .size(56.dp)
-            .clip(CircleShape), // Make it circular
-        shape = CircleShape, // Ensure the button's shape is circular
-        contentPadding = PaddingValues(0.dp) //remove extra padding
-    ) {
-        Icon(
-            modifier = Modifier
-                .size(30.dp),
-            painter = if (isEnabled) painterResource(R.drawable.lightbulb_filled_24px) else painterResource(
-                R.drawable.lightbulb_24px
-            ),
-            tint = if (isEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray,
-            contentDescription = stringResource(R.string.suggested_resp),
-        )
-    }
+        confirmButton = {
+            OutlinedButton(
+                onClick = {
+                    if (phrase.trim().isNotEmpty()) {
+                        onSave(phrase.trim())
+                        onDismiss()
+                    }
+                }
+            ) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = { onDismiss() }) { Text(stringResource(R.string.cancel)) }
+        }
+    )
 }
+
 
 @Composable
 fun OutlinedCustomIconButton(

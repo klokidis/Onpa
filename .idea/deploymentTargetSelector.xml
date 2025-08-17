@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="Ptyxiakh.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-27T14:31:37.839039Z">
+        <DropdownSelection timestamp="2025-08-17T17:33:12.741457Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/dimitrisklokidis/.android/avd/Pixel_9_API_35.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/dimitrisklokidis/.android/avd/7inch_tablet_API_34.avd" />
             </handle>
           </Target>
         </DropdownSelection>

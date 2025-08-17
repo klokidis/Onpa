@@ -19,6 +19,5 @@ import com.example.domain.models.users.User
 data class UserData(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val userId: Int,  // Foreign key linking to User table
-    val category: String,
     val value: String
 )

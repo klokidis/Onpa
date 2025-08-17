@@ -60,12 +60,11 @@ class UserDataViewModel @Inject constructor(
         }
     }
 
-    fun addOneUserData(userId: Int, category: String, value: String) {
+    fun addOneUserData(userId: Int, value: String) {
         viewModelScope.launch {
             userDataUseCases.insertUserData(
                 UserData(
                     userId = userId,
-                    category = category,
                     value = value
                 )
             )

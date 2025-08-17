@@ -56,7 +56,6 @@ import com.example.onpa.features.userdata.UserViewModel
 @Composable
 fun SettingsScreen(
     navigateMainScreen: () -> Unit,
-    navigateUserDetails: () -> Unit,
     dataStorePrefViewModel: DataStorePrefViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     navigateLicensesScreen: () -> Unit,
@@ -131,8 +130,6 @@ fun SettingsScreen(
                 titleText = stringResource(R.string.auto_mic),
                 bodyText = stringResource(R.string.auto_mic_meaning)
             )
-            Spacer(modifier = Modifier.padding(5.dp))
-            OneSettingSimple(stringResource(R.string.edit_user_data), navigateUserDetails)
             Spacer(modifier = Modifier.padding(5.dp))
             OneSettingSimpleDialog(
                 text = stringResource(R.string.tts_language_title),
@@ -405,7 +402,7 @@ fun SettingDropDownMenu(
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen({ }, navigateUserDetails = { }) {
+    SettingsScreen({ }) {
 
     }
 }

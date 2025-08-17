@@ -62,4 +62,16 @@
     <string name="close">Close</string>
     <string name="error_read_lincenses">Failed to load license</string>
     <string name="error_read_lincenses_files">Error: Failed to load license files</string>
+    <string name="warning">
+    This app is provided as an assistive tool only.\n
+    Sound detection results may be inaccurate, delayed, or incomplete.\n
+    The developers are not responsible for any harm, injury, or damages resulting from reliance on this app.\n
+    Always use your own judgment and remain alert to your environment.
+    </string>
+    <string name="add_phr">Add phrase</string>
+    <string name="phrase_text_holder">Enter a phrase you want to save.</string>
+    <string name="save">save</string>
+    <string name="cancel">cancel</string>
+    <string name="phrase_expml">for example you can save \"Hello\" since you wanna use it without typing it.</string>
+    <string name="add_data">press the + icon do add a saved phrase</string>
 </resources>

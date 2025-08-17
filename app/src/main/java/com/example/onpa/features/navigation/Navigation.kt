@@ -24,7 +24,6 @@ import com.example.onpa.features.main.MainScreen
 import com.example.onpa.features.settings.SettingsScreen
 import com.example.onpa.features.signup.SignUpScreen
 import com.example.onpa.features.sounddetection.SoundDetectionScreen
-import com.example.onpa.features.userdata.UserDetailsScreen
 import com.example.onpa.features.signup.WelcomeScreen
 import com.example.onpa.features.userdata.UserDataViewModel
 import com.example.onpa.features.userdata.UserViewModel
@@ -33,7 +32,6 @@ enum class AppScreens {
     Loading,
     Welcome,
     SignUp,
-    UserDetails,
     Main,
     SoundDetect,
     Settings,
@@ -65,7 +63,6 @@ fun Navigation(
             startDestination = when {
                 userUiState.isLoading || userDataUiState.isLoading -> AppScreens.Loading.name
                 userUiState.users.isEmpty() -> AppScreens.Welcome.name
-                userDataUiState.userData.isEmpty() -> AppScreens.UserDetails.name
                 else -> AppScreens.Main.name
             },
             modifier = Modifier.padding(paddingValues),
@@ -90,23 +87,6 @@ fun Navigation(
                 SignUpScreen()
             }
             composable(
-                route = AppScreens.UserDetails.name
-            ) {
-                UserDetailsScreen(
-                    user = userUiState.selectedUser,
-                    userData = userDataUiState.userData,
-                    navigate = {
-                        navController.navigate(AppScreens.Main.name) {
-                            popUpTo(AppScreens.Main.name) {
-                                inclusive = true
-                            } // Clear back stack
-                        }
-                    },
-                    addOneUserData = userDataViewModel::addOneUserData,
-                    deleteOneData = userDataViewModel::deleteOneData
-                )
-            }
-            composable(
                 route = AppScreens.Main.name,
                 enterTransition = {
                     when (initialState.destination.route) {
@@ -126,6 +106,7 @@ fun Navigation(
                 }
             ) {
                 MainScreen(
+                    userDataViewModel = userDataViewModel,
                     selectedUser = userUiState.selectedUser,
                     navigateSettings = { navController.navigate(AppScreens.Settings.name) },
                     navigateSoundDetect = { navController.navigate(AppScreens.SoundDetect.name) },
@@ -167,9 +148,6 @@ fun Navigation(
                                 inclusive = true
                             } // Clear back stack
                         }
-                    },
-                    navigateUserDetails = {
-                        navController.navigate(AppScreens.UserDetails.name)
                     },
                     navigateLicensesScreen = {
                         navController.navigate(AppScreens.Licenses.name)

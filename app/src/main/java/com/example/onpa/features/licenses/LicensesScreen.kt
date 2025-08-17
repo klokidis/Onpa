@@ -45,7 +45,6 @@ fun LicensesScreen(navigateBack: () -> Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
     ) {
         Row(
             modifier = Modifier

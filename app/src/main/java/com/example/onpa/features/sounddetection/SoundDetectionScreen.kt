@@ -265,6 +265,13 @@ fun SoundDetectionScreen(
             }
         }
 
-        Spacer(modifier = Modifier.padding(bottom = 40.dp))
+        Spacer(modifier = Modifier.padding(bottom = 30.dp))
+        Text(
+            text = stringResource(R.string.warning),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 11.sp),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(start = 15.dp,end = 15.dp)
+        )
+        Spacer(modifier = Modifier.padding(bottom = 5.dp))
     }
 }
