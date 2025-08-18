@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.domain"
+    namespace = "com.yukuro.domain"
     compileSdk = 36
 
     defaultConfig {

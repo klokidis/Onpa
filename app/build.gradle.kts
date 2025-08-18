@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.onpa"
+    namespace = "com.yukuro.onpa"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.onpa"
+        applicationId = "com.yukuro.onpa"
         minSdk = 27
         targetSdk = 36
         versionCode = 1

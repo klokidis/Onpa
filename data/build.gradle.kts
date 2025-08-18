@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.data"
+    namespace = "com.yukuro.data"
     compileSdk = 36
 
     defaultConfig {
