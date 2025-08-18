@@ -20,7 +20,7 @@ Contributions are welcome!
 
 ##  📜 License
 
-This project is licensed under the [MIT License](https://github.com/klokidis/Onpa/blob/published/LICENSE).
+This project is licensed under the [Apache-2.0 license](https://github.com/klokidis/Onpa/blob/published/LICENSE).
 
 ## 📸 Screenshots
 
