@@ -9,6 +9,18 @@ _Onpa is a free and open-source Android app built to help people with hearing ne
 - **Quick Phrases** – Save and reuse common responses for faster conversations.  
 - **Offline Friendly** – Core functionality works without internet.  
 
+## 🤝 Contributing  
+
+Contributions are welcome!  
+
+- Please check out our [CONTRIBUTING.md](https://github.com/klokidis/Onpa/blob/published/CONTRIBUTING.md) for setup instructions, coding style, and guidelines.  
+- To contribute, **fork the repository** and open a **pull request** with your changes.  
+- For major changes, please **open an issue first** to discuss what you would like to change.  
+
+
+##  📜 License
+
+This project is licensed under the [MIT License](https://github.com/klokidis/Onpa/blob/published/LICENSE).
 
 ## 📸 Screenshots
 
