@@ -71,7 +71,7 @@
     <string name="add_phr">Add phrase</string>
     <string name="phrase_text_holder">Enter a phrase you want to save.</string>
     <string name="save">save</string>
-    <string name="cancel">cancel</string>
-    <string name="phrase_expml">for example you can save \"Hello\" since you wanna use it without typing it.</string>
-    <string name="add_data">press the + icon do add a saved phrase</string>
+    <string name="cancel">Cancel</string>
+    <string name="phrase_expml">for example you can save \"Hello\" since you want to use it without typing it.</string>
+    <string name="add_data">press the + icon to add a saved phrase</string>
 </resources>

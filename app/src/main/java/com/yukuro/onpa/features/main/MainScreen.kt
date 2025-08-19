@@ -58,6 +58,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -220,7 +221,7 @@ fun DataLazyList(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val tts = if (!isLoading) { //initialize after loaded so the onFinished is with the right values
+    val (tts, ttsReady) = if (!isLoading) {
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
@@ -236,8 +237,8 @@ fun DataLazyList(
                 }
             }
         )
-    } else {
-        null
+    }else{
+        null to false
     }
 
     LazyColumn(
@@ -271,6 +272,7 @@ fun DataLazyList(
                     vibrate = vibrate,
                     onDelete = onDelete,
                     canRunAgainFalse = { changeCanRunAgain(false) },
+                    ttsReady = ttsReady
                 )
             }
         }
@@ -292,7 +294,8 @@ fun DataCard(
     vibrate: Boolean,
     canRunAgainFalse: () -> Unit,
     onDelete: (Int) -> Unit,
-    id: Int
+    id: Int,
+    ttsReady: Boolean
 ) {
     val context = LocalContext.current
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -313,35 +316,51 @@ fun DataCard(
             }
         )
     }
-
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
         ),
-        shape = RoundedCornerShape(16.dp), // Ensure the shape is consistent
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .padding(start = 18.dp, end = 18.dp, top = 10.dp)
             .fillMaxWidth()
             .border(
                 width = 1.5.dp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = if (ttsReady) {
+                    MaterialTheme.colorScheme.onBackground
+                } else {
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f) // lighter/disabled look
+                },
                 shape = RoundedCornerShape(16.dp)
             )
+            .clip(RoundedCornerShape(16.dp))
+            // reduce opacity if not ready
+            .alpha(if (ttsReady) 1f else 0.5f)
             .combinedClickable(
+                enabled = ttsReady,
                 onClick = {
-                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 10)
+                    HapticUtils.triggerVibration(
+                        canVibrate = vibrate,
+                        context = context,
+                        milliseconds = 10
+                    )
                     if (isListening) stopListening()
                     canRunAgainFalse()
                     tts?.value?.speak(data, TextToSpeech.QUEUE_FLUSH, null, "")
                 },
                 onLongClick = {
-                    HapticUtils.triggerVibration(canVibrate = vibrate, context = context, milliseconds = 30)
+                    HapticUtils.triggerVibration(
+                        canVibrate = vibrate,
+                        context = context,
+                        milliseconds = 30
+                    )
                     showDeleteDialog = true
                 }
             ),
     ) {
         DataText(data, inputTextAlign = TextAlign.Start)
     }
+
 }
 
 @Composable
@@ -657,7 +676,7 @@ fun TextFieldWithInsideIcon(
     var prompt by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    val tts = if (!isLoading) { //initialize after loaded so the onFinished is with the right values
+    val (tts, ttsReady) = if (!isLoading) {
         rememberTextToSpeech(
             onFinished = {
                 coroutineScope.launch {
@@ -673,8 +692,8 @@ fun TextFieldWithInsideIcon(
                 }
             }
         )
-    } else {
-        null
+    }else{
+        null to false
     }
 
     OutlinedTextField(
@@ -702,18 +721,20 @@ fun TextFieldWithInsideIcon(
                 )
                 OutlinedButton(
                     onClick = {
-                        if (isListening) {
-                            stopListening()
+                        if(ttsReady) {
+                            if (isListening) {
+                                stopListening()
+                            }
+                            HapticUtils.triggerVibration(
+                                canVibrate = vibrate,
+                                context = context,
+                                milliseconds = 10
+                            )
+                            changeCanRunAgain(false)
+                            tts?.value?.speak(
+                                prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
+                            )
                         }
-                        HapticUtils.triggerVibration(
-                            canVibrate = vibrate,
-                            context = context,
-                            milliseconds = 10
-                        )
-                        changeCanRunAgain(false)
-                        tts?.value?.speak(
-                            prompt.trim(), TextToSpeech.QUEUE_FLUSH, null, ""
-                        )
                     },
                     modifier = Modifier
                         .fillMaxHeight(),
@@ -723,7 +744,7 @@ fun TextFieldWithInsideIcon(
                         topEnd = 50.dp,
                         bottomEnd = 50.dp
                     ),
-                    enabled = prompt.trim().isNotEmpty(),
+                    enabled = prompt.trim().isNotEmpty() && ttsReady,
                     border = BorderStroke(
                         0.dp,
                         Color.Transparent
