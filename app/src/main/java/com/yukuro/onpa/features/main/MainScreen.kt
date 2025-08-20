@@ -67,9 +67,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -158,7 +156,6 @@ fun MainScreen(
         SpeechToTextUi(
             sttState.fullTranscripts,
             sttState.partialTranscripts,
-            sttState.spokenPromptText.length,
             clearText = voiceToTextViewModel::clearTexts,
         )
         DataLazyList(
@@ -386,7 +383,6 @@ fun DataText(
 fun SpeechToTextUi(
     listOfSpokenText: List<String>,
     listOfSpokenEarlyText: List<String>,
-    spokenTextUsed: Int,
     clearText: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -395,7 +391,7 @@ fun SpeechToTextUi(
         .removePrefix(" ")
         .replace(Regex(" +"), " ") // Replace multiple spaces with a single space
 
-    LaunchedEffect(combinedText.size) {
+    LaunchedEffect(fullText.length) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
@@ -416,30 +412,14 @@ fun SpeechToTextUi(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(scrollState) // apply scroll to container, not Text
                     .padding(10.dp)
             ) {
                 Text(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(scrollState),
-                    text = buildAnnotatedString {
-                        val grayText = fullText.take(spokenTextUsed)
-                        val defaultText = fullText.drop(spokenTextUsed)
-
-                        append(grayText)
-                        addStyle(
-                            style = SpanStyle(color = Color.Gray),
-                            start = 0,
-                            end = grayText.length
-                        )
-
-                        append(defaultText)
-                        addStyle(
-                            style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
-                            start = grayText.length,
-                            end = grayText.length + defaultText.length
-                        )
-                    },
+                    text = fullText,
                     style = TextStyle(
                         textAlign = TextAlign.Start,
                         fontSize = 26.sp,

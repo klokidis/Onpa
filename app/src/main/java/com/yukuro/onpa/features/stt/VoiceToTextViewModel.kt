@@ -29,7 +29,6 @@ data class VoiceToTextState(
     val availableSTT: Boolean = true,
     val aiClickedBeforeFinalResults: Boolean = false,
     val language: String = "en",
-    val spokenPromptText: String = "", // text that sends to ai (removes the already used text)
     val isSttInitialized: Boolean = false
 )
 
@@ -105,7 +104,6 @@ class VoiceToTextViewModel @Inject constructor(
             it.copy(
                 fullTranscripts = emptyList(),
                 partialTranscripts = emptyList(),
-                spokenPromptText = "",
             )
         }
     }
@@ -180,12 +178,6 @@ class VoiceToTextViewModel @Inject constructor(
         val spokenText =
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         spokenText?.let {
-            if (sttState.value.aiClickedBeforeFinalResults && sttState.value.spokenPromptText.length > (sttState.value.fullTranscripts + it).joinToString(
-                    " "
-                ).length
-            ) {
-                fixSpokenPromptText() //if the final result is smaller than the Partial Result
-            }
             Log.d(TAG, "Final result: $it")
             _sttState.update { state ->
                 state.copy(
@@ -205,21 +197,16 @@ class VoiceToTextViewModel @Inject constructor(
             partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
         partialText?.let { text ->
             val cleanedText = text.replace(",", "").trim()
-            val previousTranscript = _sttState.value.partialTranscripts.joinToString(" ")
+            Log.d(TAG, "Partial result: $cleanedText")
 
-            // Extract only new portion of the text
-            val newPortion = cleanedText.removePrefix(previousTranscript).trim()
-
-            if (newPortion.isNotEmpty()) {
-                Log.d(TAG, "Filtered partial result: $newPortion")
-                _sttState.update { state ->
-                    state.copy(
-                        partialTranscripts = state.partialTranscripts + newPortion
-                    )
-                }
+            _sttState.update { state ->
+                state.copy(
+                    partialTranscripts = listOf(cleanedText) // just replace with latest
+                )
             }
         }
     }
+
 
     private fun enableNoiseReduction() {
         val audioSessionId = 0 // Default session (let Android decide)
@@ -279,22 +266,6 @@ class VoiceToTextViewModel @Inject constructor(
                 canRunAgain = newValue,
             )
         }
-    }
-
-
-    fun fixSpokenPromptText() {
-        _sttState.update { state ->
-            state.copy(
-                aiClickedBeforeFinalResults = true,
-                spokenPromptText = (state.fullTranscripts)
-                    .joinToString(" ")
-                    .replaceFirst("\" ", "\"") // Converts list to a string with spaces
-                    .replace(",", "") // Removes commas
-                    .replace(Regex("\\s+"), " ") // Replaces multiple spaces with a single space
-                    .trim() // Ensures no leading/trailing spaces
-            )
-        }
-        Log.d(TAG, sttState.value.spokenPromptText)
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
