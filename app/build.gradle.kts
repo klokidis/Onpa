@@ -73,7 +73,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     //tensorflow
-    implementation(libs.tensorflow.lite)
+    implementation(libs.litert)
 
     //service
     implementation(libs.androidx.lifecycle.service)
