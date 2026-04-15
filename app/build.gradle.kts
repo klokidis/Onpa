@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.yukuro.onpa"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.yukuro.onpa"
         minSdk = 27
-        targetSdk = 36
-        versionCode = 5
-        versionName = "1.4"
+        targetSdk = 37
+        versionCode = 6
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
